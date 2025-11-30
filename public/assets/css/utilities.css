@@ -1,0 +1,29 @@
+@import "./variables.css";
+
+/* — Spacing Helpers — */
+.mt-xxs { margin-top:    var(--space-xxs); }
+.mt-xs  { margin-top:    var(--space-xs); }
+.mb-sm  { margin-bottom: var(--space-sm); }
+.mx-md  { margin-inline: var(--space-md); }
+.py-lg  { padding-block: var(--space-lg); }
+
+/* — Text Helpers — */
+.text-center { text-align: center; }
+.text-muted  { color: var(--color-muted); }
+.italic      { font-style: italic; }
+
+/* — Display & Visibility — */
+.d-block { display: block !important; }
+.d-flex  { display: flex !important; }
+.hidden  { display: none !important; }
+
+/* — Flex Helpers — */
+.flex      { display: flex; }
+.flex-col  { flex-direction: column; }
+.flex-center { justify-content: center; align-items: center; }
+.gap-sm    { gap: var(--space-sm); }
+
+/* — Grid Helpers — */
+.grid      { display: grid; }
+.grid-2    { grid-template-columns: repeat(2, 1fr); }
+.grid-gap  { gap: var(--space-md); }

@@ -1,0 +1,90 @@
+:root{
+  --bg: #ffffff;
+  --ink: #0f172a;          /* slate-900 */
+  --muted: #6b7280;        /* gray-500 */
+  --border: #e5e7eb;       /* gray-200 */
+  --border-strong: #111827;/* gray-900 */
+  --accent: #111827;       /* deep neutral */
+}
+
+body{ color: var(--ink); background: var(--bg); }
+
+.seccion-titulo{
+  font-weight: 600;
+  margin-bottom: .75rem;
+  color: var(--ink);
+}
+
+.vista-principal{
+  max-height: 320px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 26px rgba(0,0,0,.06);
+}
+
+.container-opciones{
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.06);
+}
+
+.btn-opcion{
+  display:inline-flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:.4rem;
+  border:1px solid var(--border);
+  background:#fff; color:var(--ink);
+  padding:.6rem .9rem; min-width: 118px;
+  border-radius:14px; cursor:pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .05s ease, background .2s ease;
+  font-weight:500;
+  text-align:center;
+}
+.btn-opcion img{ filter: saturate(.95); }
+.btn-opcion:hover{ border-color:#cbd5e1; box-shadow:0 6px 16px rgba(0,0,0,.06); background:#fafafa; }
+.btn-opcion:active{ transform: scale(.98); }
+
+.btn-opcion.active{
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px rgba(0,0,0,.08);
+  background: #fff;
+}
+
+.miniatura{
+  border:1px solid var(--border);
+  border-radius:12px; padding:6px;
+  transition: box-shadow .2s ease, border-color .2s ease, transform .05s ease;
+  cursor:pointer;
+}
+.miniatura:hover{ border-color:#cbd5e1; box-shadow:0 6px 16px rgba(0,0,0,.06); transform: translateY(-1px); }
+
+.form-select.select-minimal{
+  border-radius:14px;
+  border:1px solid var(--border);
+  padding:.6rem .9rem;
+  box-shadow:none;
+}
+.form-select.select-minimal:focus{
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+}
+
+.contenedor-boton .btn.btn-primary{
+  --bs-btn-bg: var(--ink);
+  --bs-btn-border-color: var(--ink);
+  --bs-btn-hover-bg: #1f2937;
+  --bs-btn-hover-border-color: #1f2937;
+  --bs-btn-active-bg: #111827;
+  --bs-btn-active-border-color: #111827;
+  border-radius:14px; padding:.7rem 1.2rem; font-weight:600;
+}
+
+/* Alerts más sutiles */
+.alert{ border-width:1px; border-radius:14px; }
+
+/* Espaciado general en móviles */
+@media (max-width: 576px){
+  .btn-opcion{ min-width: 104px; }
+  .vista-principal{ max-height: 260px; }
+}

@@ -1,0 +1,53 @@
+@import "./variables.css";
+
+:root {
+  scroll-behavior: smooth;
+}
+
+/* Tipografía base */
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+/* Headings */
+h1 { font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); line-height: 1.2; }
+h2 { font-size: var(--font-size-lg);  font-weight: var(--font-weight-medium); }
+h3 { font-size: var(--font-size-md);  font-weight: var(--font-weight-medium); }
+h5 {font-size: var(--font-size-xl); font-weight: var(--font-weight-medium) ;}
+
+/* Links */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+a:hover,
+a:focus {
+  text-decoration: none;
+}
+
+/* Listas */
+ul, ol {
+  margin-left: var(--space-md);
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+}
+
+/* Formularios */
+input, button, select, textarea {
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+}
