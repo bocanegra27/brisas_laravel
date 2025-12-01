@@ -30,20 +30,20 @@ Route::middleware('auth.custom')->group(function () {
 });
 
 
-// Dashboard unificado (redirige según rol)
-Route::middleware(['auth.custom'])->group(function () {
+// Dashboard unificado
+Route::middleware(['auth.custom', 'no.back'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
-// Rutas específicas por rol (opcional, para acceso directo)
-Route::middleware(['auth.custom', 'role:admin'])->group(function () {
+// Rutas específicas por rol
+Route::middleware(['auth.custom', 'role:admin', 'no.back'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
 });
 
-Route::middleware(['auth.custom', 'role:designer'])->group(function () {
+Route::middleware(['auth.custom', 'role:designer', 'no.back'])->group(function () {
     Route::get('/designer/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
 });
 
-Route::middleware(['auth.custom', 'role:user'])->group(function () {
+Route::middleware(['auth.custom', 'role:user', 'no.back'])->group(function () {
     Route::get('/user/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
 });
