@@ -10,12 +10,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
+    ->withMiddleware(function (Middleware $middleware) {
+        // ✅ Registrar middlewares personalizados con alias
         $middleware->alias([
             'auth.custom' => \App\Http\Middleware\Authenticate::class,
             'guest.custom' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+            'role' => \App\Http\Middleware\CheckRole::class,  // ← ESTO ES LO QUE FALTABA
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

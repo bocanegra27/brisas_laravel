@@ -26,10 +26,10 @@ class ApiService
      * @param string $method GET, POST, PUT, PATCH, DELETE
      * @param string $endpoint Ruta del endpoint ej: /auth/login
      * @param array|null $data Datos para enviar en el body
-     * @param string|null $token JWT token para autenticación
-     * @return array ['success' => bool, 'data' => array, 'code' => int]
+     * @param array $options Opciones adicionales (headers, etc)
+     * @return array|null Respuesta del API o null si falla
      */
-    public function request(string $method, string $endpoint, ?array $data = null, ?string $token = null): array
+    public function request(string $method, string $endpoint, ?array $data = null, array $options = []): ?array
     {
         try {
             $url = $this->baseUrl . $endpoint;
@@ -38,9 +38,11 @@ class ApiService
             $request = Http::timeout(30)
                 ->withHeaders(['Content-Type' => 'application/json']);
 
-            // Agregar Authorization header si hay token
-            if ($token) {
-                $request->withToken($token);
+            // Agregar Authorization header si está en las opciones
+            if (isset($options['headers']['Authorization'])) {
+                $request->withHeaders([
+                    'Authorization' => $options['headers']['Authorization']
+                ]);
             }
 
             // Ejecutar según método HTTP
@@ -62,11 +64,19 @@ class ApiService
                 ]);
             }
 
-            return [
-                'success' => $response->successful(),
-                'data' => $response->json() ?? [],
-                'code' => $response->status()
-            ];
+            // Si la respuesta fue exitosa, retornar los datos
+            if ($response->successful()) {
+                return $response->json() ?? [];
+            }
+
+            // Si hay error, loguearlo y retornar null
+            Log::warning("API Request Failed", [
+                'endpoint' => $endpoint,
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return null;
 
         } catch (\Exception $e) {
             Log::error("API Request Failed", [
@@ -74,27 +84,39 @@ class ApiService
                 'error' => $e->getMessage()
             ]);
 
-            return [
-                'success' => false,
-                'data' => ['message' => 'Error de conexión con el servidor'],
-                'code' => 500
-            ];
+            return null;
         }
     }
 
     /**
      * GET request simplificado
      */
-    public function get(string $endpoint, ?string $token = null): array
+    public function get(string $endpoint, array $options = []): ?array
     {
-        return $this->request('GET', $endpoint, null, $token);
+        return $this->request('GET', $endpoint, null, $options);
     }
 
     /**
      * POST request simplificado
      */
-    public function post(string $endpoint, array $data, ?string $token = null): array
+    public function post(string $endpoint, array $data, array $options = []): ?array
     {
-        return $this->request('POST', $endpoint, $data, $token);
+        return $this->request('POST', $endpoint, $data, $options);
+    }
+
+    /**
+     * PUT request simplificado
+     */
+    public function put(string $endpoint, array $data, array $options = []): ?array
+    {
+        return $this->request('PUT', $endpoint, $data, $options);
+    }
+
+    /**
+     * DELETE request simplificado
+     */
+    public function delete(string $endpoint, array $options = []): ?array
+    {
+        return $this->request('DELETE', $endpoint, null, $options);
     }
 }

@@ -9,10 +9,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        //
-    }
+    public function register()
+{
+    $this->app->singleton(\App\Services\Dashboard\DashboardService::class, function ($app) {
+        return new \App\Services\Dashboard\DashboardService($app->make(\App\Services\ApiService::class));
+    });
+}
 
     /**
      * Bootstrap any application services.
