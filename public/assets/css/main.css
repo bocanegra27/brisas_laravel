@@ -2,6 +2,12 @@
 @import "./reset.css";
 @import "./base.css";
 @import "./utilities.css";
+@import "./header-minimal.css";
+@import "./footer-minimal.css";
+@import "./dashboard.css";
+@import "./home-minimal.css";
+
+
 
 /* ================================= */
 /* ========== HEADER BASE ========== */
