@@ -87,11 +87,9 @@
                             </div>
                         </form>
 
-                        {{--     
                         <div class="text-center mt-3">
                             <a href="{{ route('register.show') }}">¿No tienes una cuenta? Regístrate aquí</a>
                         </div>
-                        --}}
                     </div>
                 </div>
             </div>
