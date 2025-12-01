@@ -26,12 +26,6 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
-        // Si ya está autenticado, redirigir a dashboard
-        if ($this->authService->check()) {
-            $user = $this->authService->user();
-            return redirect($user['dashboard_url']);
-        }
-
         return view('auth.login');
     }
 
