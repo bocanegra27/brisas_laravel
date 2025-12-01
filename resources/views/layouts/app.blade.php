@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @stack('styles')
     
     <meta name="description" content="@yield('description', 'Brisas Gems: personalización de joyas, inspiración y seguimiento de pedidos.')" />
