@@ -1,295 +1,37 @@
+/* ============================================
+   MAIN.CSS - BRISAS GEMS
+   Archivo principal que importa todos los estilos
+   ============================================ */
+
+/* ===== IMPORTS DE ESTILOS MODULARES ===== */
+
+/* Estilos base y utilidades */
 @import "./variables.css";
 @import "./reset.css";
 @import "./base.css";
 @import "./utilities.css";
 
-/* ================================= */
-/* ========== HEADER BASE ========== */
-/* ================================= */
+/* Componentes globales (header y footer) */
+@import "./header-minimal.css";
+@import "./footer-minimal.css";
 
-header.encabezado {
-  background: white;
-  border-bottom: 1px solid #ccc;
-  padding: 1rem 2rem;
-  position:sticky;
-  top: 0;
-  width: 100%;
-  z-index: 999;
-  font-family: 'Georgia', serif;
-}
+/* Estilos específicos por módulo */
+@import "./dashboard.css";
+@import "./home-minimal.css";
 
-/* FLEX GENERAL */
-.contenedor-header {
-  max-width: 1300px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+/* ===== FIN DE IMPORTS ===== */
 
-/* MENÚ IZQUIERDO */
-.nav-izquierda {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-izquierda a {
-  text-decoration: none;
-  color: #000;
-  font-size: 0.85rem;
-  letter-spacing: 0.05rem;
-  text-transform: uppercase;
-  position: relative;
-  transition: color 0.3s ease;
-}
-
-/* LÍNEAS ANIMADAS EN HOVER */
-.nav-izquierda a::before,
-.nav-izquierda a::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, #0b6b10, #15ad3b); /* verde degradado */
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-  left: 0;
-}
-
-/* Línea superior */
-.nav-izquierda a::before {
-  top: -6px;
-  transform-origin: left;
-}
-
-/* Línea inferior */
-.nav-izquierda a::after {
-  bottom: -6px;
-  transform-origin: right;
-}
-
-/* Hover: activa las líneas y cambia color */
-.nav-izquierda a:hover::before,
-.nav-izquierda a:hover::after {
-  transform: scaleX(1);
-}
-.nav-izquierda a:hover {
-  color: #0a6e22;
-}
-
-/* Estado activo permanente */
-.nav-izquierda a.activo {
-  color: #0a6e22;
-}
-.nav-izquierda a.activo::before,
-.nav-izquierda a.activo::after {
-  transform: scaleX(1);
-}
+/**
+ * NOTAS:
+ * 
+ * 1. Este archivo SOLO debe contener imports
+ * 2. Los estilos específicos van en sus respectivos archivos
+ * 3. Si necesitas agregar un nuevo módulo, agrégalo aquí como @import
+ * 
+ * Ejemplo para módulos futuros:
+ * @import "./usuarios.css";
+ * @import "./pedidos.css";
+ * @import "./inspiracion.css";
+ */
 
 
-/* LOGO CENTRADO */
-.logo-centro img {
-  height: 70px;
-  object-fit: contain;
-}
-
-/* MENÚ DERECHO */
-.menu-derecha {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-.icono {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  display: inline-block;
-  vertical-align: middle;
-  cursor: pointer;
-}
-
-/* MENÚ USUARIO DESPLEGABLE */
-.perfil-wrapper {
-  position: relative;
-}
-.menu-usuario {
-  display: none;
-  flex-direction: column;
-  position: absolute;
-  top: 140%;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  border-radius: 5px;
-  padding: 0.5rem 1rem;
-  z-index: 1000;
-}
-.menu-usuario a {
-  text-decoration: none;
-  color: #333;
-  padding: 0.4rem 0;
-  font-size: 0.9rem;
-}
-.menu-usuario a:hover {
-  color: #001e61;
-}
-.menu-usuario.activo {
-  display: flex;
-}
-
-
-
-
-/* ================================= */
-/* ========== FOOTER  ============== */
-/* ================================= */
-
-
-.footer-joyeria {
-  background: var(--color-footer-bg, var(--color-surface)); /* Fondo con fallback */
-  padding: var(--space-xl) var(--space-md) var(--space-sm); /* Rellenos: top, laterales, bottom */
-  margin-top: var(--space-xl);      /* Espacio superior grande */
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08); /* Sombra por encima */
-  border-top: 1px solid var(--color-primary); /* Borde superior muy sutil */
-}
-.contenedor-footer {
-  display: grid;                    /* Grid para columnas */
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Columnas adaptables */
-  max-width: 1200px;                /* Ancho máximo */
-  margin: 0 auto;                   /* Centrado horizontal */
-  gap: var(--space-xl);             /* Espacio entre columnas */
-}
-.columna-footer h4 {
-  color: var(--color-primary);      /* Título en color primario */
-  font-size: 1.1rem;                /* Tamaño ligeramente mayor */
-  font-weight: 600;                 /* Negrita media */
-  margin-bottom: var(--space-md);   /* Espacio inferior mediano */
-  padding-bottom: var(--space-sm);  /* Padding inferior pequeño */
-  position: relative;               /* Para la línea ::after */
-}
-.columna-footer h4::after {
-  content: '';                      /* Línea decorativa */
-  position: absolute;               /* Absoluta respecto al h4 */
-  bottom: 0; left: 0;               /* Pegada a la base y al lado izquierdo */
-  width: 50px; height: 2px;         /* Dimensiones de la línea */
-  background-color: var(--color-primary); /* Color primario */
-}
-.columna-footer p,
-.columna-footer a {
-  color: var(--color-text);         /* Texto en color global */
-  margin-bottom: var(--space-sm);   /* Espacio inferior pequeño */
-  text-decoration: none;            /* Sin subrayado */
-  font-size: 0.9rem;                /* Tamaño de fuente compacto */
-  transition: var(--transition-base); /* Transición global */
-}
-.columna-footer a:hover {
-  color: var(--color-primary);      /* Texto primario al pasar */
-  padding-left: var(--space-xs);    /* Pequeño desplazamiento al texto */
-}
-.redes-sociales {
-  display: flex;                    /* Flex para iconos */
-  gap: var(--space-md);             /* Espacio entre iconos */
-  margin-top: var(--space-md);      /* Espacio superior mediano */
-}
-.redes-sociales a {
-  display: inline-block;            /* Inline-block para control de tamaño */
-  transition: var(--transition-base); /* Transición global */
-}
-.redes-sociales a:hover {
-  transform: translateY(-3px);      /* Eleva el icono */
-}
-.redes-sociales img {
-  width: 24px; height: 24px;        /* Tamaño consistente */
-  opacity: 0.7;                     /* Opacidad inicial */
-  transition: var(--transition-base); /* Transición global */
-}
-.redes-sociales img:hover {
-  opacity: 1;                       /* Opacidad completa al pasar */
-}
-.derechos-footer {
-  text-align: center;               /* Centrado de texto */
-  color: var(--color-muted);        /* Texto en color atenuado */
-  font-size: 0.8rem;                /* Fuente pequeña */
-  max-width: 1200px;                /* Ancho máximo */
-  margin: var(--space-xl) auto 0;   /* Márgenes superior y centrado */
-  padding-top: var(--space-md);     /* Padding superior mediano */
-  border-top: 1px solid rgba(0, 0, 0, 0.05); /* Línea superior muy sutil */
-}
-.derechos-footer p:first-child {
-  margin-bottom: var(--space-xs);   /* Espacio inferior extra pequeño */
-}
-
-
-
-
-
-
-
-
-/* Asegura que el body y html llenen la pantalla */
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Envoltorio para todo el contenido de la página */
-body {
-  display: flex;
-  flex-direction: column;
-}
-
-/* El contenido principal crece y empuja el footer hacia abajo */
-main {
-  flex: 1;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-/* — Botones genéricos — */
-.btn {
-  display: inline-block;
-  padding: var(--space-sm) var(--space-md);
-  border: 2px solid var(--color-primary);
-  border-radius: var(--radius);
-  background-color: transparent;
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: var(--transition-base);
-}
-.btn:hover,
-.btn:focus {
-  background-color: var(--color-primary);
-  color: var(--color-surface);
-}
-
-/* — Tarjetas genéricas — */
-.card {
-  background-color: var(--color-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: var(--space-md);
-  transition: var(--transition-base);
-}
-.card:hover {
-  box-shadow: var(--shadow-lg);
-}
-
-/* — Media Queries — */
-@media (min-width: var(--bp-md)) {
-  .container {
-    width: 960px;
-    margin-inline: auto;
-  }
-}

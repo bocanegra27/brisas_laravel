@@ -1,0 +1,411 @@
+/* ============================================
+   HEADER ÚNICO ULTRAMINIMALISTA - BRISAS GEMS
+   Elegancia de joyería de lujo
+   ============================================ */
+
+/* ===== IMPORTAR FUENTES GOOGLE ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ===== VARIABLES CSS ===== */
+:root {
+  /* Colores minimalistas */
+  --header-primary: #009688;
+  --header-primary-dark: #00796b;
+  --header-neutral-50: #fafafa;
+  --header-neutral-100: #f5f5f5;
+  --header-neutral-800: #1e293b;
+  --header-neutral-600: #64748b;
+  --header-neutral-300: #d1d5db;
+  --header-neutral-200: #e5e7eb;
+  --header-white: #ffffff;
+  
+  /* Tipografías */
+  --header-font-logo: 'Cormorant Garamond', serif;
+  --header-font-nav: 'Inter', sans-serif;
+  
+  /* Espaciado generoso */
+  --header-height: 80px;
+  --header-padding-x: 2rem;
+  --header-nav-gap: 2.5rem;
+  
+  /* Transiciones suaves */
+  --header-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Sombras sutiles */
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --header-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== HEADER PRINCIPAL ===== */
+.header-minimal {
+  background: var(--header-white);
+  border-bottom: 1px solid var(--header-neutral-200);
+  box-shadow: var(--header-shadow);
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: var(--header-transition);
+}
+
+.header-minimal__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--header-padding-x);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== LOGO ===== */
+.header-minimal__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  transition: var(--header-transition);
+}
+
+.header-minimal__logo:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.header-minimal__logo-icon {
+  font-size: 1.75rem;
+  color: var(--header-primary);
+}
+
+.header-minimal__logo-text {
+  font-family: var(--header-font-logo);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--header-neutral-800);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* ===== NAVEGACIÓN PRINCIPAL ===== */
+.header-minimal__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--header-nav-gap);
+  flex: 1;
+  justify-content: center;
+}
+
+.header-minimal__nav-link {
+  font-family: var(--header-font-nav);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--header-neutral-600);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: var(--header-transition);
+  letter-spacing: 0.01em;
+}
+
+/* Hover sutil con underline minimalista */
+.header-minimal__nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--header-primary);
+  transition: width 0.3s ease;
+}
+
+.header-minimal__nav-link:hover {
+  color: var(--header-primary);
+}
+
+.header-minimal__nav-link:hover::after {
+  width: 100%;
+}
+
+/* Link activo */
+.header-minimal__nav-link--active {
+  color: var(--header-primary);
+}
+
+.header-minimal__nav-link--active::after {
+  width: 100%;
+}
+
+/* ===== ACCIONES (Derecha) ===== */
+.header-minimal__actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* ===== BOTÓN INICIAR SESIÓN ===== */
+.header-minimal__login-btn {
+  font-family: var(--header-font-nav);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--header-primary);
+  text-decoration: none;
+  padding: 0.625rem 1.5rem;
+  border: 1px solid var(--header-primary);
+  border-radius: 50px;
+  transition: var(--header-transition);
+  letter-spacing: 0.01em;
+}
+
+.header-minimal__login-btn:hover {
+  background: var(--header-primary);
+  color: var(--header-white);
+  box-shadow: var(--header-shadow-hover);
+}
+
+/* ===== DROPDOWN USUARIO ===== */
+.header-minimal__user-dropdown {
+  position: relative;
+}
+
+.header-minimal__user-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--header-font-nav);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--header-neutral-800);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  transition: var(--header-transition);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.header-minimal__user-toggle:hover {
+  background: var(--header-neutral-50);
+  border-color: var(--header-neutral-200);
+}
+
+.header-minimal__user-icon {
+  font-size: 1.25rem;
+  color: var(--header-primary);
+}
+
+.header-minimal__user-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-minimal__user-chevron {
+  font-size: 0.875rem;
+  color: var(--header-neutral-600);
+  transition: transform 0.3s ease;
+}
+
+/* Rotar chevron cuando está abierto */
+.header-minimal__user-dropdown.show .header-minimal__user-chevron {
+  transform: rotate(180deg);
+}
+
+/* ===== MENÚ DROPDOWN ===== */
+.header-minimal__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 220px;
+  background: var(--header-white);
+  border: 1px solid var(--header-neutral-200);
+  border-radius: 12px;
+  box-shadow: var(--header-shadow-hover);
+  padding: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: var(--header-transition);
+  z-index: 1001;
+}
+
+.header-minimal__user-dropdown.show .header-minimal__dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.header-minimal__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--header-font-nav);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--header-neutral-800);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: var(--header-transition);
+}
+
+.header-minimal__dropdown-item:hover {
+  background: var(--header-neutral-50);
+  color: var(--header-primary);
+}
+
+.header-minimal__dropdown-icon {
+  font-size: 1.125rem;
+  color: var(--header-neutral-600);
+  transition: var(--header-transition);
+}
+
+.header-minimal__dropdown-item:hover .header-minimal__dropdown-icon {
+  color: var(--header-primary);
+}
+
+.header-minimal__dropdown-divider {
+  height: 1px;
+  background: var(--header-neutral-200);
+  margin: 0.5rem 0;
+}
+
+/* ===== HAMBURGER MENU (Mobile) ===== */
+.header-minimal__hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: var(--header-transition);
+}
+
+.header-minimal__hamburger:hover {
+  opacity: 0.7;
+}
+
+.header-minimal__hamburger-line {
+  width: 24px;
+  height: 2px;
+  background: var(--header-neutral-800);
+  border-radius: 2px;
+  transition: var(--header-transition);
+}
+
+/* Animación hamburger a X */
+.header-minimal__hamburger.active .header-minimal__hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.header-minimal__hamburger.active .header-minimal__hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.header-minimal__hamburger.active .header-minimal__hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet y menores */
+@media (max-width: 992px) {
+  .header-minimal__container {
+    padding: 0 1.5rem;
+  }
+  
+  .header-minimal__nav {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    background: var(--header-white);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 1.5rem;
+    border-top: 1px solid var(--header-neutral-200);
+    box-shadow: var(--header-shadow-hover);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    max-height: calc(100vh - var(--header-height));
+    overflow-y: auto;
+  }
+  
+  .header-minimal__nav.active {
+    transform: translateX(0);
+  }
+  
+  .header-minimal__nav-link {
+    width: 100%;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--header-neutral-100);
+  }
+  
+  .header-minimal__nav-link:last-child {
+    border-bottom: none;
+  }
+  
+  .header-minimal__hamburger {
+    display: flex;
+  }
+  
+  .header-minimal__actions {
+    gap: 1rem;
+  }
+  
+  .header-minimal__user-name {
+    display: none;
+  }
+}
+
+/* Mobile pequeño */
+@media (max-width: 576px) {
+  .header-minimal__container {
+    padding: 0 1rem;
+  }
+  
+  .header-minimal__logo-text {
+    font-size: 1.25rem;
+  }
+  
+  .header-minimal__login-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* ===== ANIMACIONES SUAVES ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-minimal__nav-link,
+.header-minimal__login-btn,
+.header-minimal__user-toggle {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.header-minimal__nav-link:focus,
+.header-minimal__login-btn:focus,
+.header-minimal__user-toggle:focus,
+.header-minimal__dropdown-item:focus {
+  outline: 2px solid var(--header-primary);
+  outline-offset: 2px;
+}
+
+/* ===== MODO OSCURO (Opcional - Preparado para el futuro) ===== */
+@media (prefers-color-scheme: dark) {
+  /* Se puede agregar soporte para modo oscuro aquí */
+}

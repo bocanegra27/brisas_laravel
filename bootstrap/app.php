@@ -11,11 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // ✅ Registrar middlewares personalizados con alias
+        // Registrar middlewares personalizados con alias
         $middleware->alias([
             'auth.custom' => \App\Http\Middleware\Authenticate::class,
             'guest.custom' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            'role' => \App\Http\Middleware\CheckRole::class,  // ← ESTO ES LO QUE FALTABA
+            'role' => \App\Http\Middleware\CheckRole::class,
+            'no.back' => \App\Http\Middleware\PreventBackHistory::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
