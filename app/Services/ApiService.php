@@ -47,14 +47,13 @@ class ApiService
 
             // Ejecutar según método HTTP
             $response = match(strtoupper($method)) {
-                'GET' => $request->get($url, $data ?? []),
+                'GET' => $request->get($url), // ← SIN parámetros adicionales
                 'POST' => $request->post($url, $data ?? []),
                 'PUT' => $request->put($url, $data ?? []),
                 'PATCH' => $request->patch($url, $data ?? []),
                 'DELETE' => $request->delete($url, $data ?? []),
                 default => throw new \InvalidArgumentException("Método HTTP no soportado: {$method}")
             };
-
             // Log solo en desarrollo
             if (config('app.debug')) {
                 Log::info("API Request", [

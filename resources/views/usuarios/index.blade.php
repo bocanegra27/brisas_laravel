@@ -40,49 +40,6 @@
         </div>
         @endif
 
-        {{-- Estadísticas --}}
-        <div class="row g-4 mb-5">
-            <div class="col-md-4 animate-in animate-delay-1">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper bg-primary-gradient">
-                                <i class="bi bi-people text-white"></i>
-                            </div>
-                            <p class="card-text">Total Usuarios</p>
-                            <h2 class="display-4 text-primary">{{ $stats['total'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 animate-in animate-delay-2">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper bg-success-gradient">
-                                <i class="bi bi-check-circle text-white"></i>
-                            </div>
-                            <p class="card-text">Usuarios Activos</p>
-                            <h2 class="display-4 text-success">{{ $stats['activos'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 animate-in animate-delay-3">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper bg-secondary" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;">
-                                <i class="bi bi-x-circle text-white"></i>
-                            </div>
-                            <p class="card-text">Usuarios Inactivos</p>
-                            <h2 class="display-4" style="color: #6b7280;">{{ $stats['inactivos'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {{-- Tabla de usuarios --}}
         <div class="card usuarios-table-card animate-in animate-delay-4">
             <div class="card-header">
@@ -278,8 +235,51 @@
             </div>
             @endif
         </div>
-
     </div>
+
+    {{-- Estadísticas --}}
+        <div class="row g-4 mb-5">
+            <div class="col-md-4 animate-in animate-delay-1">
+                <div class="stat-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="icon-wrapper bg-primary-gradient">
+                                <i class="bi bi-people text-white"></i>
+                            </div>
+                            <p class="card-text">Total Usuarios</p>
+                            <h2 class="display-4 text-primary">{{ $stats['total'] ?? 0 }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 animate-in animate-delay-2">
+                <div class="stat-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="icon-wrapper bg-success-gradient">
+                                <i class="bi bi-check-circle text-white"></i>
+                            </div>
+                            <p class="card-text">Usuarios Activos</p>
+                            <h2 class="display-4 text-success">{{ $stats['activos'] ?? 0 }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 animate-in animate-delay-3">
+                <div class="stat-card">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="icon-wrapper bg-secondary" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;">
+                                <i class="bi bi-x-circle text-white"></i>
+                            </div>
+                            <p class="card-text">Usuarios Inactivos</p>
+                            <h2 class="display-4" style="color: #6b7280;">{{ $stats['inactivos'] ?? 0 }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 </div>
 @endsection
 
