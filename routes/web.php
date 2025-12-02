@@ -1,17 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Models\Pedido; // Importamos el modelo Pedido para poder usarlo en la prueba
-use App\Http\Controllers\Pedido\PedidoController;
-
-// --- RUTA ORIGINAL (Página de Bienvenida) ---
-Route::get('/', function () {
-    return view('welcome');
-});
-
-<?php
-
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
