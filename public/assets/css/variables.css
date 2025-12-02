@@ -1,0 +1,151 @@
+/* ============================================
+   VARIABLES.CSS - BRISAS GEMS
+   Variables globales del sistema de diseño minimalista
+   ============================================ */
+
+:root {
+  /* ===== COLORES MINIMALISTAS ===== */
+  
+  /* Primarios */
+  --color-primary: #009688;
+  --color-primary-dark: #00796b;
+  --color-primary-light: #b2dfdb;
+  
+  /* Neutros */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-600: #64748b;
+  --color-neutral-800: #1e293b;
+  
+  /* Superficie y fondo */
+  --color-surface: #ffffff;
+  --color-bg: #f8f9fa;
+  --color-border: #e5e7eb;
+  
+  /* Textos */
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-muted: #94a3b8;
+  
+  /* Estados */
+  --color-success: #4caf50;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  
+  /* ===== TIPOGRAFÍAS ===== */
+  
+  /* Familias */
+  --font-display: 'Cormorant Garamond', serif;  /* Títulos elegantes */
+  --font-body: 'Inter', sans-serif;              /* Cuerpo y UI */
+  
+  /* Tamaños (escala armónica) */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 0.9375rem;  /* 15px */
+  --font-size-md: 1rem;         /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.5rem;       /* 24px */
+  --font-size-2xl: 2rem;        /* 32px */
+  --font-size-3xl: 2.5rem;      /* 40px */
+  
+  /* Pesos */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-base: 1.6;
+  --line-height-relaxed: 1.7;
+  
+  /* Letter spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.01em;
+  
+  /* ===== ESPACIADO (Escala 8pt) ===== */
+  
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 0.75rem;   /* 12px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4rem;     /* 64px */
+  --space-4xl: 5rem;     /* 80px */
+  
+  /* ===== BORDES Y RADIOS ===== */
+  
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;  /* Pills */
+  
+  --border-width: 1px;
+  --border-width-thick: 2px;
+  
+  /* ===== SOMBRAS SUTILES ===== */
+  
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 20px 48px rgba(0, 0, 0, 0.16);
+  
+  /* ===== TRANSICIONES ===== */
+  
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* ===== BREAKPOINTS ===== */
+  
+  --bp-sm: 576px;
+  --bp-md: 768px;
+  --bp-lg: 992px;
+  --bp-xl: 1200px;
+  --bp-2xl: 1400px;
+  
+  /* ===== CONTENEDORES ===== */
+  
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1400px;
+  
+  /* ===== Z-INDEX ===== */
+  
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ===== VARIABLES ESPECÍFICAS POR MÓDULO ===== */
+
+/* Dashboard */
+:root {
+  --dash-primary: var(--color-primary);
+  --dash-surface: var(--color-surface);
+  --dash-text-primary: var(--color-text);
+}
+
+/* Header */
+:root {
+  --header-height: 80px;
+  --header-bg: var(--color-surface);
+}
+
+/* Footer */
+:root {
+  --footer-bg: var(--color-surface);
+}

@@ -1,0 +1,37 @@
+/* ============================================
+   MAIN.CSS - BRISAS GEMS
+   Archivo principal que importa todos los estilos
+   ============================================ */
+
+/* ===== IMPORTS DE ESTILOS MODULARES ===== */
+
+/* Estilos base y utilidades */
+@import "./variables.css";
+@import "./reset.css";
+@import "./base.css";
+@import "./utilities.css";
+
+/* Componentes globales (header y footer) */
+@import "./header-minimal.css";
+@import "./footer-minimal.css";
+
+/* Estilos específicos por módulo */
+@import "./dashboard.css";
+@import "./home-minimal.css";
+
+/* ===== FIN DE IMPORTS ===== */
+
+/**
+ * NOTAS:
+ * 
+ * 1. Este archivo SOLO debe contener imports
+ * 2. Los estilos específicos van en sus respectivos archivos
+ * 3. Si necesitas agregar un nuevo módulo, agrégalo aquí como @import
+ * 
+ * Ejemplo para módulos futuros:
+ * @import "./usuarios.css";
+ * @import "./pedidos.css";
+ * @import "./inspiracion.css";
+ */
+
+
