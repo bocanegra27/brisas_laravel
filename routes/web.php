@@ -1,16 +1,56 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Pedido; // Importamos el modelo Pedido para poder usarlo en la prueba
+use App\Http\Controllers\Pedido\PedidoController;
+
+// --- RUTA ORIGINAL (Página de Bienvenida) ---
+Route::get('/', function () {
+    return view('welcome');
+});
+
+<?php
+
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
+use App\Http\Controllers\Pedido\PedidoController; // ← NUEVO
+use App\Models\Pedido; // ← NUEVO (solo para ruta de prueba)
 
 // ============================================
 // RUTA PÚBLICA - HOME
 // ============================================
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// ============================================
+// RUTA DE PRUEBA DB (DESARROLLO)
+// ============================================
+Route::get('/prueba-db', function () {
+    try {
+        $pedido = Pedido::with('estado')->first();
+        
+        if (!$pedido) {
+            return "✅ CONEXIÓN EXITOSA: Laravel conectado a 'brisas_gems', tabla 'pedido' vacía.";
+        }
+        
+        return [
+            'status' => 'EXITO',
+            'mensaje' => 'Laravel leyó tu base de datos antigua correctamente',
+            'datos_pedido' => [
+                'id_interno' => $pedido->ped_id,
+                'codigo' => $pedido->ped_codigo,
+                'comentarios' => $pedido->ped_comentarios,
+                'fecha_creacion' => $pedido->ped_fecha_creacion,
+                'estado_actual' => $pedido->estado?->est_nombre ?? 'Sin estado asignado'
+            ]
+        ];
+    } catch (\Exception $e) {
+        return "❌ ERROR CRÍTICO DE CONEXIÓN: " . $e->getMessage();
+    }
+});
 
 // ============================================
 // RUTAS PÚBLICAS (solo para invitados/no logueados)
@@ -43,42 +83,24 @@ Route::middleware(['auth.custom', 'no.back'])->group(function () {
 
 // ADMINISTRADOR
 Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->group(function () {
-    // Dashboard de administrador
     Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
     
-    // ============================================
     // MÓDULO DE USUARIOS
-    // ============================================
-    // Listado de usuarios con paginación y filtros
     Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios.index');
-    
-    // Formulario de creación
     Route::get('/usuarios/crear', [UsuariosController::class, 'crear'])->name('usuarios.crear');
-    
-    // Guardar nuevo usuario
     Route::post('/usuarios', [UsuariosController::class, 'store'])->name('usuarios.store');
-    
-    // Formulario de edición
     Route::get('/usuarios/{id}/editar', [UsuariosController::class, 'editar'])->name('usuarios.editar');
-    
-    // Actualizar usuario
     Route::put('/usuarios/{id}', [UsuariosController::class, 'update'])->name('usuarios.update');
-    
-    // Toggle estado (activar/desactivar) - AJAX
     Route::patch('/usuarios/{id}/toggle-activo', [UsuariosController::class, 'toggleActivo'])->name('usuarios.toggle-activo');
-    
-    // Eliminar usuario - AJAX
     Route::delete('/usuarios/{id}', [UsuariosController::class, 'eliminar'])->name('usuarios.eliminar');
     
     // ============================================
-    // MÓDULO DE MENSAJES (Pendiente de implementar)
+    // MÓDULO DE PEDIDOS (DE TU COMPAÑERO)
     // ============================================
-    // Route::get('/mensajes', [MensajesController::class, 'index'])->name('mensajes.index');
-    
-    // ============================================
-    // MÓDULO DE PEDIDOS (Pendiente de implementar)
-    // ============================================
-    // Route::get('/pedidos', [PedidosController::class, 'index'])->name('pedidos.index');
+    Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
+    Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store');
+    Route::put('/pedidos/{id}', [PedidoController::class, 'update'])->name('pedidos.update');
+    Route::delete('/pedidos/{id}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
 });
 
 // DISEÑADOR
