@@ -409,7 +409,7 @@ class UsuariosController
     /**
      * Obtener estadísticas de usuarios
      */
-    private function getEstadisticas(): array
+    public function getEstadisticas(): array
     {
         try {
             $responseActivos = $this->apiService->get('/usuarios/count?activo=true', [

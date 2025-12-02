@@ -131,7 +131,7 @@ function toggleEstado(usuarioId, nuevoEstado) {
             });
             
             // Realizar petición AJAX
-            fetch(`/usuarios/${usuarioId}/toggle-activo`, {
+            fetch(`/admin/usuarios/${usuarioId}/toggle-activo`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ function eliminarUsuario(usuarioId, nombreUsuario) {
             });
             
             // Realizar petición AJAX
-            fetch(`/usuarios/${usuarioId}`, {
+            fetch(`/admin/usuarios/${usuarioId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
