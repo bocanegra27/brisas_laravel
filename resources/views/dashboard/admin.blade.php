@@ -115,17 +115,41 @@
         </div>
     </div>
 
-    {{-- Gestión General --}}
+    {{-- Gestión General - ACTUALIZADO --}}
     <h2 class="section-header animate-in animate-delay-2">Gestión General</h2>
     <div class="row g-3 g-md-4">
+        {{-- 1. GESTIÓN DE USUARIOS --}}
         <div class="col-lg-4 col-md-6 animate-in animate-delay-1">
-            <a href="{{ url('/admin/contactos') }}" class="stat-card">
+            <a href="{{ url('/admin/usuarios') }}" class="stat-card">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-success-soft mx-auto">
+                            <i class="bi bi-people text-success"></i>
+                        </div>
+                        <p class="card-text">Gestión de Usuarios</p>
+                        <h2 class="display-4 text-success">{{ ($data['totalUsuariosActivos'] ?? 0) + ($data['totalUsuariosInactivos'] ?? 0) }}</h2>
+                        <div class="d-flex justify-content-center gap-3 mt-2">
+                            <span class="badge badge-success">
+                                <i class="bi bi-check-circle"></i> {{ $data['totalUsuariosActivos'] ?? 0 }} Activos
+                            </span>
+                            <span class="badge badge-secondary">
+                                <i class="bi bi-dash-circle"></i> {{ $data['totalUsuariosInactivos'] ?? 0 }} Inactivos
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- 2. MENSAJES/CONTACTOS --}}
+        <div class="col-lg-4 col-md-6 animate-in animate-delay-2">
+            <a href="{{ url('/admin/mensajes') }}" class="stat-card">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon-wrapper bg-danger-soft mx-auto">
                             <i class="bi bi-envelope-exclamation text-danger"></i>
                         </div>
-                        <p class="card-text">Mensajes Pendientes</p>
+                        <p class="card-text">Mensajes</p>
                         <h2 class="display-4 text-danger">{{ $data['totalContactosPendientes'] ?? 0 }}</h2>
                         <span class="trend up">
                             <i class="bi bi-arrow-up"></i> +5 nuevos
@@ -135,35 +159,25 @@
             </a>
         </div>
 
-        <div class="col-lg-4 col-md-6 animate-in animate-delay-2">
-            <a href="{{ url('/usuarios') }}" class="stat-card">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper bg-success-soft mx-auto">
-                            <i class="bi bi-people text-success"></i>
-                        </div>
-                        <p class="card-text">Usuarios Activos</p>
-                        <h2 class="display-4 text-success">{{ $data['totalUsuariosActivos'] ?? 0 }}</h2>
-                        <span class="trend up">
-                            <i class="bi bi-arrow-up"></i> +8 este mes
-                        </span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
+        {{-- 3. PEDIDOS --}}
         <div class="col-lg-4 col-md-6 animate-in animate-delay-3">
-            {{-- Ruta pendiente: /usuarios/inactivos --}}
-            <a href="{{ url('/usuarios') }}" class="stat-card">
+            <a href="{{ url('/admin/pedidos') }}" class="stat-card">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon-wrapper bg-secondary-soft mx-auto">
-                            <i class="bi bi-person-slash text-secondary"></i>
+                            <i class="bi bi-box-seam text-secondary"></i>
                         </div>
-                        <p class="card-text">Usuarios Inactivos</p>
-                        <h2 class="display-4 text-secondary">{{ $data['totalUsuariosInactivos'] ?? 0 }}</h2>
-                        <span class="trend">
-                            <i class="bi bi-dash"></i> Sin cambios
+                        <p class="card-text">Pedidos</p>
+                        <h2 class="display-4 text-secondary">
+                            {{ 
+                                ($data['pedidosEnDiseño'] ?? 0) + 
+                                ($data['pedidosEnTallado'] ?? 0) + 
+                                ($data['pedidosEnEngaste'] ?? 0) + 
+                                ($data['pedidosEnPulido'] ?? 0) 
+                            }}
+                        </h2>
+                        <span class="trend up">
+                            <i class="bi bi-arrow-up"></i> +6 esta semana
                         </span>
                     </div>
                 </div>
