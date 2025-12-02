@@ -1,0 +1,54 @@
+:root {
+    --emerald-primary: #009b77;
+    --emerald-dark: #007a5f;
+    --emerald-light-bg: #f4f7f6;
+    --card-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    --border-radius: 0.75rem;
+    --font-family-sans-serif: 'Poppins', sans-serif;
+}
+
+body {
+    font-family: var(--font-family-sans-serif);
+    background-color: var(--emerald-light-bg);
+}
+
+.btn-emerald {
+    background-color: var(--emerald-primary);
+    border-color: var(--emerald-primary);
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-emerald:hover {
+    background-color: var(--emerald-dark);
+    border-color: var(--emerald-dark);
+    color: #fff;
+}
+
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--emerald-primary);
+    box-shadow: 0 0 0 0.25rem rgba(0, 155, 119, 0.25);
+}
+
+.card-header-custom {
+    background-color: var(--emerald-primary);
+    color: #fff;
+    font-weight: 600;
+    border-bottom: none;
+}
+
+.accordion-button {
+    font-weight: 600;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--emerald-light-bg);
+    color: var(--emerald-primary);
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+}
