@@ -181,17 +181,31 @@ class PersonalizarController extends Controller
     /**
      * Determina la clave de categoría desde el nombre
      */
-    private function obtenerClaveCategoria(string $nombre): string
+        private function obtenerClaveCategoria(string $nombre): string
     {
-        $nombreLower = strtolower($nombre);
+        $nombreLower = mb_strtolower($nombre, 'UTF-8');
 
+        // Mapeo exacto primero
+        $mapeoExacto = [
+            'forma de la gema' => 'forma',
+            'gema central' => 'gema',
+            'material' => 'material',
+            'tamaño de la gema' => 'tamano',
+            'talla del anillo' => 'talla',
+        ];
+
+        if (isset($mapeoExacto[$nombreLower])) {
+            return $mapeoExacto[$nombreLower];
+        }
+
+        // Fallback con contiene
         if (str_contains($nombreLower, 'forma')) {
             return 'forma';
-        } elseif (str_contains($nombreLower, 'gema')) {
+        } elseif (str_starts_with($nombreLower, 'gema')) {
             return 'gema';
         } elseif (str_contains($nombreLower, 'material')) {
             return 'material';
-        } elseif (str_contains($nombreLower, 'tamaño')) {
+        } elseif (str_contains($nombreLower, 'tamaño') || str_contains($nombreLower, 'tamano')) {
             return 'tamano';
         } elseif (str_contains($nombreLower, 'talla')) {
             return 'talla';

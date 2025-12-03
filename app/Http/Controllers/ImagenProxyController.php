@@ -18,11 +18,21 @@ class ImagenProxyController extends Controller
     private string $springBootUrl;
 
     public function __construct()
-    {
-        $this->springBootUrl = config('services.spring_api.url', 'http://localhost:8080/api');
-        // Remover /api del final si existe, ya que las imágenes están en /assets
-        $this->springBootUrl = str_replace('/api', '', $this->springBootUrl);
+{
+    // Obtener URL base sin /api
+    $apiUrl = config('services.spring_api.url', 'http://localhost:8080/api');
+    
+    // Extraer solo la parte base (protocolo + host + puerto)
+    if (preg_match('#^(https?://[^/]+)#', $apiUrl, $matches)) {
+        $this->springBootUrl = $matches[1];
+    } else {
+        $this->springBootUrl = 'http://localhost:8080';
     }
+    
+    Log::debug('ImagenProxyController: URL Base configurada', [
+        'spring_boot_url' => $this->springBootUrl
+    ]);
+}
 
     /**
      * Proxy para vistas de anillos
