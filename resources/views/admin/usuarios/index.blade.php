@@ -19,7 +19,7 @@
                     <h1><i class="bi bi-people-fill me-3"></i>Gestión de Usuarios</h1>
                     <p class="mb-0">Administra todos los usuarios del sistema</p>
                 </div>
-                <a href="{{ route('usuarios.crear') }}" class="btn btn-create">
+                <a href="{{ route('admin.usuarios.crear') }}" class="btn btn-create">
                     <i class="bi bi-plus-circle me-2"></i>Crear Usuario
                 </a>
             </div>
@@ -142,7 +142,7 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="{{ route('usuarios.editar', $usuario['id']) }}" 
+                                        <a href="{{ route('admin.usuarios.editar', $usuario['id']) }}" 
                                            class="btn-action btn-edit" 
                                            data-bs-toggle="tooltip" 
                                            title="Editar">
@@ -202,7 +202,7 @@
                             <ul class="pagination justify-content-end mb-0">
                                 {{-- Botón anterior --}}
                                 <li class="page-item {{ $currentPage == 0 ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ route('usuarios.index', array_merge(request()->query(), ['page' => $currentPage - 1])) }}">
+                                    <a class="page-link" href="{{ route('admin.usuarios.index', array_merge(request()->query(), ['page' => $currentPage - 1])) }}">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
@@ -211,7 +211,7 @@
                                 @for($i = 0; $i < $totalPages; $i++)
                                     @if($i == 0 || $i == $totalPages - 1 || abs($i - $currentPage) <= 2)
                                         <li class="page-item {{ $i == $currentPage ? 'active' : '' }}">
-                                            <a class="page-link" href="{{ route('usuarios.index', array_merge(request()->query(), ['page' => $i])) }}">
+                                            <a class="page-link" href="{{ route('admin.usuarios.index', array_merge(request()->query(), ['page' => $i])) }}">
                                                 {{ $i + 1 }}
                                             </a>
                                         </li>
@@ -224,7 +224,7 @@
 
                                 {{-- Botón siguiente --}}
                                 <li class="page-item {{ $currentPage >= $totalPages - 1 ? 'disabled' : '' }}">
-                                    <a class="page-link" href="{{ route('usuarios.index', array_merge(request()->query(), ['page' => $currentPage + 1])) }}">
+                                    <a class="page-link" href="{{ route('admin.usuarios.index', array_merge(request()->query(), ['page' => $currentPage + 1])) }}">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>

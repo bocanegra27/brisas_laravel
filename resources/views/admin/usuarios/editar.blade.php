@@ -18,7 +18,7 @@
                     <h1><i class="bi bi-pencil-square me-3"></i>Editar Usuario</h1>
                     <p class="mb-0">Actualiza la información del usuario</p>
                 </div>
-                <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.usuarios.index') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left me-2"></i>Volver al listado
                 </a>
             </div>
@@ -73,7 +73,7 @@
         {{-- Formulario --}}
         <div class="card form-card animate-in animate-delay-1">
             <div class="card-body p-5">
-                <form action="{{ route('usuarios.update', $usuario['id']) }}" method="POST" id="formEditarUsuario">
+                <form action="{{ route('admin.usuarios.update', $usuario['id']) }}" method="POST" id="formEditarUsuario">
                     @csrf
                     @method('PUT')
 
@@ -270,7 +270,7 @@
                         {{-- Botones --}}
                         <div class="col-12 mt-5">
                             <div class="d-flex gap-3 justify-content-end">
-                                <a href="{{ route('usuarios.index') }}" class="btn btn-secondary btn-lg">
+                                <a href="{{ route('admin.usuarios.index') }}" class="btn btn-secondary btn-lg">
                                     <i class="bi bi-x-circle me-2"></i>Cancelar
                                 </a>
                                 <button type="submit" class="btn btn-create btn-lg">

@@ -16,7 +16,7 @@ use App\Models\Pedido;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // ============================================
-// RUTA DE PRUEBA DB (DESARROLLO)
+// RUTA DE PRUEBA DB (DESARROLLO - ELIMINAR EN PRODUCCIÓN)
 // ============================================
 Route::get('/prueba-db', function () {
     try {
@@ -43,68 +43,88 @@ Route::get('/prueba-db', function () {
 });
 
 // ============================================
-// RUTAS PÚBLICAS (solo para invitados/no logueados)
+// AUTENTICACIÓN (INVITADOS SOLAMENTE)
 // ============================================
 Route::middleware('guest.custom')->group(function () {
+    // Login
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'handleLogin'])->name('login.handle');
     
+    // Registro
     Route::get('/registro', [RegisterController::class, 'showRegistrationForm'])->name('register.show');
     Route::post('/registro', [RegisterController::class, 'handleRegistration'])->name('register.handle');
 });
 
 // ============================================
-// RUTAS PROTEGIDAS (solo para usuarios autenticados)
+// LOGOUT (USUARIOS AUTENTICADOS)
 // ============================================
 Route::middleware('auth.custom')->group(function () {
     Route::get('/logout', [AuthController::class, 'handleLogout'])->name('logout');
 });
 
-// ============================================
-// DASHBOARD UNIFICADO
-// ============================================
+// DASHBOARD UNIFICADO (REDIRIGE SEGÚN ROL)
 Route::middleware(['auth.custom', 'no.back'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 // ============================================
-// RUTAS ESPECÍFICAS POR ROL
+// ROL: ADMINISTRADOR
 // ============================================
-
-// ADMINISTRADOR
 Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->group(function () {
+    
+    // Dashboard principal de admin
     Route::get('/dashboard', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
     
-    // MÓDULO DE USUARIOS
-    Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios.index');
-    Route::get('/usuarios/crear', [UsuariosController::class, 'crear'])->name('usuarios.crear');
-    Route::post('/usuarios', [UsuariosController::class, 'store'])->name('usuarios.store');
-    Route::get('/usuarios/{id}/editar', [UsuariosController::class, 'editar'])->name('usuarios.editar');
-    Route::put('/usuarios/{id}', [UsuariosController::class, 'update'])->name('usuarios.update');
-    Route::patch('/usuarios/{id}/toggle-activo', [UsuariosController::class, 'toggleActivo'])->name('usuarios.toggle-activo');
-    Route::delete('/usuarios/{id}', [UsuariosController::class, 'eliminar'])->name('usuarios.eliminar');
-
-    // MÓDULO DE MENSAJES/CONTACTOS
-    Route::get('/mensajes', [MensajesController::class, 'index'])->name('mensajes.index');
-    Route::get('/mensajes/{id}', [MensajesController::class, 'ver'])->name('mensajes.ver');
-    Route::put('/mensajes/{id}', [MensajesController::class, 'update'])->name('mensajes.update');
-    Route::patch('/mensajes/{id}/estado', [MensajesController::class, 'cambiarEstado'])->name('mensajes.cambiar-estado');
-    Route::delete('/mensajes/{id}', [MensajesController::class, 'eliminar'])->name('mensajes.eliminar');
-
-    // MÓDULO DE PEDIDOS 
-    Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
-    Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store');
-    Route::put('/pedidos/{id}', [PedidoController::class, 'update'])->name('pedidos.update');
-    Route::delete('/pedidos/{id}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
-
+    // MÓDULO: USUARIOS
+    Route::controller(UsuariosController::class)->prefix('usuarios')->group(function () {
+        Route::get('/', 'index')->name('admin.usuarios.index');
+        Route::get('/crear', 'crear')->name('admin.usuarios.crear');
+        Route::post('/', 'store')->name('admin.usuarios.store');
+        Route::get('/{id}/editar', 'editar')->name('admin.usuarios.editar');
+        Route::put('/{id}', 'update')->name('admin.usuarios.update');
+        Route::patch('/{id}/toggle-activo', 'toggleActivo')->name('admin.usuarios.toggle-activo');
+        Route::delete('/{id}', 'eliminar')->name('admin.usuarios.eliminar');
+    });
+    
+    // MÓDULO: MENSAJES/CONTACTOS
+    Route::controller(MensajesController::class)->prefix('mensajes')->group(function () {
+        Route::get('/', 'index')->name('admin.mensajes.index');
+        Route::get('/{id}', 'ver')->name('admin.mensajes.ver');
+        Route::put('/{id}', 'update')->name('admin.mensajes.update');
+        Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
+        Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
+    });
+    
+    // MÓDULO: PEDIDOS
+    Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
+        Route::get('/', 'index')->name('admin.pedidos.index');
+        Route::post('/', 'store')->name('admin.pedidos.store');
+        Route::put('/{id}', 'update')->name('admin.pedidos.update');
+        Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
+    });
+    
 });
 
-// DISEÑADOR
+// ============================================
+// ROL: DISEÑADOR
+// ============================================
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
+    
+    // Dashboard de diseñador
     Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
+    
+    // por hacer: Agregar módulos específicos del diseñador aquí
+    
 });
 
-// USUARIO
+// ============================================
+// ROL: USUARIO (CLIENTE)
+// ============================================
 Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
+    
+    // Dashboard de usuario
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
+    
+    // TODO: Agregar módulos específicos del usuario aquí
+    
 });
