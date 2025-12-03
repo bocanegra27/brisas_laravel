@@ -9,11 +9,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// --- RUTA NUEVA (Prueba de Base de Datos) ---
+// --- RUTA DE PRUEBA (Verificación de Base de Datos) ---
 Route::get('/prueba-db', function () {
     try {
         // Intentamos traer el primer pedido de la base de datos junto con su estado
-        // Usamos 'with' para probar también la relación que creamos en el modelo
         $pedido = Pedido::with('estado')->first();
 
         // Si la consulta funciona pero no hay pedidos, avisamos
@@ -30,18 +29,16 @@ Route::get('/prueba-db', function () {
                 'codigo' => $pedido->ped_codigo,
                 'comentarios' => $pedido->ped_comentarios,
                 'fecha_creacion' => $pedido->ped_fecha_creacion,
-                // Aquí probamos si la relación con EstadoPedido funciona
                 'estado_actual' => $pedido->estado ? $pedido->estado->est_nombre : 'Sin estado asignado (Null)'
             ]
         ];
 
     } catch (\Exception $e) {
-        // Si algo falla (contraseña mal, base de datos no existe, tabla mal nombrada), mostramos el error
         return "❌ ERROR CRÍTICO DE CONEXIÓN: " . $e->getMessage();
     }
 });
 
-// Grupo de rutas para Pedidos
+// --- GRUPO DE RUTAS PARA PEDIDOS ---
 Route::prefix('pedidos')->name('pedidos.')->group(function () {
     
     // URL: /pedidos  -> Muestra la lista
@@ -56,3 +53,12 @@ Route::prefix('pedidos')->name('pedidos.')->group(function () {
     // URL: /pedidos/delete/{id} -> Procesa la eliminación
     Route::delete('/delete/{id}', [PedidoController::class, 'destroy'])->name('destroy');
 });
+
+// ==========================================
+// 🟢 NUEVA RUTA AGREGADA (SOLUCIÓN ERROR 500)
+// ==========================================
+// Esta ruta permite que el botón "+ Nuevo Cliente" funcione sin romper la página.
+// Por ahora muestra un mensaje simple. Más adelante puedes conectarla a un controlador real.
+Route::get('/usuarios/crear', function () {
+    return "<h1>Crear Nuevo Cliente</h1><p>Aquí irá el formulario de registro de usuarios.</p>";
+})->name('usuarios.create');
