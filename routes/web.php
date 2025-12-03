@@ -6,7 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
-// use App\Http\Controllers\Admin\MensajesController; // COMENTADO TEMPORALMENTE: No existe el archivo aún
+use App\Http\Controllers\Admin\MensajesController;
 use App\Http\Controllers\Pedido\PedidoController; 
 use App\Models\Pedido; 
 
@@ -87,8 +87,6 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
     });
     
     // MÓDULO: MENSAJES/CONTACTOS
-    // SE COMENTA TEMPORALMENTE PARA SOLUCIONAR CONFLICTO DE GIT (FALTA EL CONTROLLER)
-    /*
     Route::controller(MensajesController::class)->prefix('mensajes')->group(function () {
         Route::get('/', 'index')->name('admin.mensajes.index');
         Route::get('/{id}', 'ver')->name('admin.mensajes.ver');
@@ -96,7 +94,6 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
     });
-    */
     
     // MÓDULO: PEDIDOS
     Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
