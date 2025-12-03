@@ -1,0 +1,317 @@
+/* ============================================
+   FOOTER MINIMALISTA - BRISAS GEMS
+   Diseño elegante que complementa el header
+   ============================================ */
+
+/* ===== FOOTER PRINCIPAL ===== */
+.footer-minimal {
+  background: var(--header-white, #ffffff);
+  border-top: 1px solid var(--header-neutral-200, #e5e7eb);
+  margin-top: 4rem;
+  padding: 3rem 0 1.5rem;
+  font-family: var(--header-font-nav, 'Inter', sans-serif);
+}
+
+.footer-minimal__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--header-padding-x, 2rem);
+}
+
+/* ===== GRID DE COLUMNAS ===== */
+.footer-minimal__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 3rem;
+  margin-bottom: 2.5rem;
+}
+
+/* ===== COLUMNAS ===== */
+.footer-minimal__column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer-minimal__title {
+  font-family: var(--header-font-logo, 'Cormorant Garamond', serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--header-neutral-800, #1e293b);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.footer-minimal__text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--header-neutral-600, #64748b);
+  margin: 0;
+}
+
+/* ===== ICONOS MINIMALISTAS ===== */
+.footer-minimal__icon {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--header-primary, #009688);
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+}
+
+/* ===== REDES SOCIALES ===== */
+.footer-minimal__social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.footer-minimal__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--header-neutral-50, #fafafa);
+  border: 1px solid var(--header-neutral-200, #e5e7eb);
+  transition: var(--header-transition, all 0.3s ease);
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-minimal__social-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--header-primary, #009688);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.footer-minimal__social-link:hover {
+  border-color: var(--header-primary, #009688);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 150, 136, 0.15);
+}
+
+.footer-minimal__social-link:hover::before {
+  opacity: 0.1;
+}
+
+.footer-minimal__social-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.footer-minimal__social-link:hover .footer-minimal__social-icon {
+  opacity: 1;
+}
+
+/* ===== ENLACES ===== */
+.footer-minimal__nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-minimal__nav-item {
+  margin: 0;
+}
+
+.footer-minimal__nav-link {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--header-neutral-600, #64748b);
+  text-decoration: none;
+  transition: var(--header-transition, all 0.3s ease);
+  display: inline-block;
+  position: relative;
+  padding-left: 0;
+}
+
+.footer-minimal__nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 1px;
+  background: var(--header-primary, #009688);
+  transition: width 0.3s ease;
+}
+
+.footer-minimal__nav-link:hover {
+  color: var(--header-primary, #009688);
+  padding-left: 0.5rem;
+}
+
+.footer-minimal__nav-link:hover::before {
+  width: calc(100% - 0.5rem);
+}
+
+/* ===== INFORMACIÓN DE CONTACTO ===== */
+.footer-minimal__contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--header-neutral-600, #64748b);
+  margin-bottom: 0.5rem;
+}
+
+.footer-minimal__contact-item:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== DIVIDER ===== */
+.footer-minimal__divider {
+  height: 1px;
+  background: var(--header-neutral-200, #e5e7eb);
+  margin: 2rem 0;
+}
+
+/* ===== DERECHOS / BOTTOM ===== */
+.footer-minimal__bottom {
+  text-align: center;
+  padding-top: 1.5rem;
+}
+
+.footer-minimal__copyright {
+  font-size: 0.875rem;
+  color: var(--header-neutral-600, #64748b);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.footer-minimal__credits {
+  font-size: 0.8125rem;
+  color: var(--header-neutral-600, #64748b);
+  opacity: 0.8;
+  margin: 0;
+}
+
+.footer-minimal__credits a {
+  color: var(--header-primary, #009688);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+}
+
+.footer-minimal__credits a:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+/* ===== LOGO EN FOOTER (Opcional) ===== */
+.footer-minimal__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  text-decoration: none;
+}
+
+.footer-minimal__logo-icon {
+  font-size: 1.5rem;
+  color: var(--header-primary, #009688);
+}
+
+.footer-minimal__logo-text {
+  font-family: var(--header-font-logo, 'Cormorant Garamond', serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--header-neutral-800, #1e293b);
+  letter-spacing: -0.02em;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet */
+@media (max-width: 992px) {
+  .footer-minimal__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .footer-minimal {
+    padding: 2.5rem 0 1.5rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .footer-minimal__container {
+    padding: 0 1rem;
+  }
+  
+  .footer-minimal__grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .footer-minimal {
+    margin-top: 3rem;
+    padding: 2rem 0 1rem;
+  }
+  
+  .footer-minimal__title {
+    font-size: 1.125rem;
+  }
+  
+  .footer-minimal__text,
+  .footer-minimal__nav-link,
+  .footer-minimal__contact-item {
+    font-size: 0.875rem;
+  }
+}
+
+/* ===== ANIMACIONES SUAVES ===== */
+@keyframes fadeInFooter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.footer-minimal__column {
+  animation: fadeInFooter 0.6s ease-out forwards;
+}
+
+.footer-minimal__column:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.footer-minimal__column:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.footer-minimal__column:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* ===== ACCESIBILIDAD ===== */
+.footer-minimal__nav-link:focus,
+.footer-minimal__social-link:focus {
+  outline: 2px solid var(--header-primary, #009688);
+  outline-offset: 2px;
+}
+
+/* ===== DARK MODE PREPARATION ===== */
+@media (prefers-color-scheme: dark) {
+  /* Preparado para implementación futura de modo oscuro */
+}

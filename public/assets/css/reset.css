@@ -1,0 +1,24 @@
+/* Box & Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html, body, h1,h2,h3,h4,h5,h6, p, figure, blockquote, dl, dd {
+  margin: 0;
+}
+ul[role="list"], ol[role="list"] {
+  list-style: none;
+}
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+body {
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}

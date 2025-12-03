@@ -1,52 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-    
-    {{-- 🟢 CRÍTICO: CSRF Token para peticiones AJAX --}}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    {{-- El título será dinámico según la página --}}
-    <title>@yield('title', 'Emerald System')</title>
-
-    {{-- Bootstrap CSS --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>@yield('title', 'Brisas Gems')</title>
+    <link rel="icon" href="{{ asset('assets/icons/icono.png') }}" />
+    <meta name="description" content="@yield('description', 'Brisas Gems: personalización de joyas, inspiración y seguimiento de pedidos.')" />
     
-    {{-- Bootstrap Icons --}}
+    <!-- CSS Base -->
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    {{-- Google Fonts --}}
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-    {{-- Vite: Compilación de assets --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/pedidos.css'])
     
-    {{-- Stack para CSS adicional --}}
+    <!-- Model Viewer (para 3D - solo si la página lo necesita) -->
+    @stack('head-scripts')
+    
     @stack('styles')
 </head>
 <body>
-
-    <header class="bg-white shadow-sm py-3 mb-4">
-        <div class="container">
-            <h1 class="h3 mb-0 fw-bold" style="color: #009b77;">
-                {{-- Aquí inyectaremos el título de cada módulo --}}
-                @yield('header')
-            </h1>
-        </div>
-    </header>
-
-    <main class="container">
-        {{-- Aquí se inyectará el contenido principal (formularios, tablas, etc.) --}}
+    @include('layouts.header')
+    
+    <main>
         @yield('content')
     </main>
-
-    {{-- Bootstrap JS (DEBE ir ANTES de scripts personalizados) --}}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    {{-- Stack para scripts adicionales --}}
+    @include('layouts.footer')
+    
+    <!-- Scripts Base -->
+    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+    
+    <script>
+        // Menú usuario
+        const iconoUsuario = document.getElementById('icono-usuario');
+        const menuUsuario = document.getElementById('menu-usuario');
+        if (iconoUsuario && menuUsuario) {
+            iconoUsuario.addEventListener('click', () => menuUsuario.classList.toggle('activo'));
+            document.addEventListener('click', e => {
+                if (!iconoUsuario.contains(e.target) && !menuUsuario.contains(e.target)) {
+                    menuUsuario.classList.remove('activo');
+                }
+            });
+        }
+    </script>
+    
     @stack('scripts')
-
 </body>
 </html>

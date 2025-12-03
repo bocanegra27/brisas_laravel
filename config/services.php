@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Spring Boot API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | URL base de la API REST desarrollada en Spring Boot
+    | Asegúrate de que el servidor esté corriendo en este puerto
+    |
+    */
+    'spring_api' => [
+        'url' => env('SPRING_API_URL', 'http://localhost:8080/api'),
+        'timeout' => env('SPRING_API_TIMEOUT', 30),
+    ],
+
+
+
 ];
