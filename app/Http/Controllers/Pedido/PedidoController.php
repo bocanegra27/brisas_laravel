@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Pedido;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePedidoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -15,81 +14,113 @@ class PedidoController extends Controller
     public function index()
     {
         try {
-            $response = Http::withHeaders([
+            // 1. Obtener la lista de pedidos existentes (Lógica original)
+            $responsePedidos = Http::withHeaders([
                 'Cache-Control' => 'no-cache, no-store, must-revalidate',
                 'Pragma' => 'no-cache',
                 'Expires' => '0'
             ])->get($this->apiUrl);
             
-            $pedidos = $response->successful() ? json_decode($response->body()) : [];
+            $pedidos = $responsePedidos->successful() ? json_decode($responsePedidos->body()) : [];
+
+            // 2. NUEVO: Obtener DATOS PARA EL FORMULARIO (Clientes y Opciones)
+            // Llama al nuevo endpoint Java que creamos
+            $responseForm = Http::get("{$this->apiUrl}/formulario-data");
+            
+            // Si falla, enviamos estructura vacía para evitar errores en la vista
+            $datosFormulario = $responseForm->successful() ? json_decode($responseForm->body()) : (object)['clientes' => [], 'opciones' => []];
+
         } catch (\Exception $e) {
             $pedidos = [];
-            \Log::error('Error al obtener pedidos: ' . $e->getMessage());
+            $datosFormulario = (object)['clientes' => [], 'opciones' => []];
+            \Log::error('Error al conectar con Java: ' . $e->getMessage());
         }
 
-        return view('pedidos.index', compact('pedidos'));
+        return view('pedidos.index', compact('pedidos', 'datosFormulario'));
     }
 
-    public function store(StorePedidoRequest $request)
+    public function store(Request $request)
     {
-        // Preparar datos básicos
+        // 1. Validación para el nuevo formulario inteligente
+        $request->validate([
+            'clienteId' => 'required|integer',
+            'render' => 'nullable|file|max:50000' // Soporte para imágenes o 3D
+        ]);
+
+        // 2. Preparar datos básicos para el DTO Java "PedidoCompletoRequestDTO"
         $data = [
             'pedComentarios' => $request->pedComentarios,
-            'estId'          => 1,
-            'perId'          => $request->perId,
-            'usuId'          => $request->usuId,
+            'clienteId'      => $request->clienteId,
         ];
 
+        // 3. Configurar petición Multipart
         $http = Http::asMultipart();
 
+        // Adjuntar archivo si existe
         if ($request->hasFile('render')) {
             $renderFile = $request->file('render');
-            $http->attach('render', file_get_contents($renderFile->getRealPath()), $renderFile->getClientOriginalName());
+            $http->attach(
+                'render', 
+                file_get_contents($renderFile->getRealPath()), 
+                $renderFile->getClientOriginalName()
+            );
         }
 
-        $response = $http->post($this->apiUrl, $data);
+        // Adjuntar campos de texto
+        foreach ($data as $key => $value) {
+            $http->attach($key, $value);
+        }
+
+        // CRÍTICO: Enviar array de opciones de personalización
+        // Java espera "valoresPersonalizacionIds" repetido para crear la lista
+        if ($request->has('valoresPersonalizacion') && is_array($request->valoresPersonalizacion)) {
+            foreach ($request->valoresPersonalizacion as $valId) {
+                $http->attach('valoresPersonalizacionIds', $valId);
+            }
+        }
+
+        // 4. Enviar al NUEVO ENDPOINT '/completo'
+        $response = $http->post("{$this->apiUrl}/completo");
 
         if ($response->successful()) {
             return redirect()->route('pedidos.index')
-                             ->with('success', 'Pedido creado exitosamente.');
+                             ->with('success', 'Pedido inteligente creado exitosamente.');
         } else {
-            return back()->with('error', 'Error al crear pedido. Código: ' . $response->status());
+            return back()->with('error', 'Error al crear pedido. Código Java: ' . $response->status());
         }
     }
 
     public function update(Request $request, $id)
     {
-        // 1. VALIDACIÓN (CRÍTICO: Evita el ERROR 422 en archivos GLB)
+        // 1. Validación (Evita error 422 con GLB)
         $request->validate([
             'estId' => 'required|integer',
-            'render' => 'nullable|file|max:50000' 
+            'render' => 'nullable|file|max:50000'
         ]);
 
-        // 2. Preparar datos básicos
+        // 2. Preparar datos
         $data = [
             'estId' => $request->estId,
         ];
 
         $targetUrl = "{$this->apiUrl}/{$id}";
 
-        // 3. LÓGICA DE ENVÍO CONDICIONAL (CRÍTICO para la comunicación con Java)
+        // 3. Lógica de envío condicional (Method Spoofing para Java)
         if ($request->hasFile('render')) {
-            // CASO 1: CON ARCHIVO (Multipart/POST)
+            // CASO 1: CON ARCHIVO (Multipart/POST + _method=PUT)
             $renderFile = $request->file('render');
             
             $http = Http::asMultipart();
             $http->attach('render', file_get_contents($renderFile->getRealPath()), $renderFile->getClientOriginalName());
             
-            // Engañamos a Laravel y a Java para que lo traten como PUT
             $data['_method'] = 'PUT'; 
             $response = $http->post($targetUrl, $data);
         } else {
-            // CASO 2: SIN ARCHIVO (Form Url Encoded/PUT)
-            // El Java Controller ahora acepta este Content-Type.
+            // CASO 2: SIN ARCHIVO (Form Url Encoded/PUT standard)
             $response = Http::asForm()->put($targetUrl, $data);
         }
 
-        // 4. Lógica AJAX para actualizar la barra y UI sin recargar
+        // 4. Lógica AJAX para actualización dinámica de UI
         if ($request->ajax() || $request->wantsJson()) {
             if ($response->successful()) {
                 $pedidoActualizado = json_decode($response->body());
@@ -97,7 +128,7 @@ class PedidoController extends Controller
                 $estado = $pedidoActualizado->estId ?? $request->estId;
                 $estadoInt = (int) $estado; 
                 
-                // Recalcular datos visuales
+                // Mapeo visual de estados
                 $nombreEstado = match($estadoInt) {
                     1 => 'Diseño', 2 => 'Tallado', 3 => 'Engaste',
                     4 => 'Pulido', 5 => 'Finalizado', 6 => 'Cancelado',
@@ -126,7 +157,6 @@ class PedidoController extends Controller
                     ]
                 ]);
             } else {
-                // Captura errores del backend Java (400, 500)
                 return response()->json([
                     'success' => false,
                     'message' => 'Error API: ' . $response->status()
