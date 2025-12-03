@@ -63,7 +63,7 @@ class UsuariosController
             // Verificar respuesta
             if ($response === null) {
                 Log::error('UsuariosController: Error al obtener usuarios del API');
-                return view('usuarios.index')->with([
+                return view('admin.usuarios.index')->with([
                     'usuarios' => [],
                     'totalElements' => 0,
                     'totalPages' => 0,
@@ -94,7 +94,7 @@ class UsuariosController
                 ]
             ];
 
-            return view('usuarios.index', $data);
+            return view('admin.usuarios.index', $data);
 
         } catch (\Exception $e) {
             Log::error('UsuariosController@index: Excepción', [
@@ -102,7 +102,7 @@ class UsuariosController
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return view('usuarios.index')->with([
+            return view('admin.usuarios.index')->with([
                 'usuarios' => [],
                 'totalElements' => 0,
                 'totalPages' => 0,
@@ -123,7 +123,7 @@ class UsuariosController
      */
     public function crear()
     {
-        return view('usuarios.crear');
+        return view('admin.usuarios.crear');
     }
 
     /**
@@ -177,7 +177,7 @@ class UsuariosController
             ]);
 
             return redirect()
-                ->route('usuarios.index')
+                ->route('admin.usuarios.index')
                 ->with('success', '¡Usuario creado exitosamente!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -211,11 +211,11 @@ class UsuariosController
 
             if ($response === null) {
                 return redirect()
-                    ->route('usuarios.index')
+                    ->route('admin.usuarios.index')
                     ->with('error', 'Usuario no encontrado.');
             }
 
-            return view('usuarios.editar', [
+            return view('admin.usuarios.editar', [
                 'usuario' => $response
             ]);
 
@@ -226,7 +226,7 @@ class UsuariosController
             ]);
 
             return redirect()
-                ->route('usuarios.index')
+                ->route('admin.usuarios.index')
                 ->with('error', 'Error al cargar el usuario.');
         }
     }
@@ -276,7 +276,7 @@ class UsuariosController
             Log::info('UsuariosController: Usuario actualizado', ['id' => $id]);
 
             return redirect()
-                ->route('usuarios.index')
+                ->route('admin.usuarios.index')
                 ->with('success', '¡Usuario actualizado exitosamente!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {

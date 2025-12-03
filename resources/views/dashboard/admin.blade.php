@@ -143,7 +143,7 @@
 
         {{-- 2. MENSAJES/CONTACTOS --}}
         <div class="col-lg-4 col-md-6 animate-in animate-delay-2">
-            <a href="{{ url('/admin/mensajes') }}" class="stat-card">
+            <a href="{{ route('mensajes.index') }}" class="stat-card">
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="icon-wrapper bg-danger-soft mx-auto">

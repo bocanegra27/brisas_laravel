@@ -6,8 +6,9 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
-use App\Http\Controllers\Pedido\PedidoController; // ← NUEVO
-use App\Models\Pedido; // ← NUEVO (solo para ruta de prueba)
+use App\Http\Controllers\Admin\MensajesController;
+use App\Http\Controllers\Pedido\PedidoController; 
+use App\Models\Pedido; 
 
 // ============================================
 // RUTA PÚBLICA - HOME
@@ -82,14 +83,20 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
     Route::put('/usuarios/{id}', [UsuariosController::class, 'update'])->name('usuarios.update');
     Route::patch('/usuarios/{id}/toggle-activo', [UsuariosController::class, 'toggleActivo'])->name('usuarios.toggle-activo');
     Route::delete('/usuarios/{id}', [UsuariosController::class, 'eliminar'])->name('usuarios.eliminar');
-    
-    // ============================================
-    // MÓDULO DE PEDIDOS (DE TU COMPAÑERO)
-    // ============================================
+
+    // MÓDULO DE MENSAJES/CONTACTOS
+    Route::get('/mensajes', [MensajesController::class, 'index'])->name('mensajes.index');
+    Route::get('/mensajes/{id}', [MensajesController::class, 'ver'])->name('mensajes.ver');
+    Route::put('/mensajes/{id}', [MensajesController::class, 'update'])->name('mensajes.update');
+    Route::patch('/mensajes/{id}/estado', [MensajesController::class, 'cambiarEstado'])->name('mensajes.cambiar-estado');
+    Route::delete('/mensajes/{id}', [MensajesController::class, 'eliminar'])->name('mensajes.eliminar');
+
+    // MÓDULO DE PEDIDOS 
     Route::get('/pedidos', [PedidoController::class, 'index'])->name('pedidos.index');
     Route::post('/pedidos', [PedidoController::class, 'store'])->name('pedidos.store');
     Route::put('/pedidos/{id}', [PedidoController::class, 'update'])->name('pedidos.update');
     Route::delete('/pedidos/{id}', [PedidoController::class, 'destroy'])->name('pedidos.destroy');
+
 });
 
 // DISEÑADOR
