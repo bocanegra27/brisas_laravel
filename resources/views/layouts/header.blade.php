@@ -55,6 +55,9 @@
                    class="header-minimal__nav-link {{ $currentRoute == '/' ? 'header-minimal__nav-link--active' : '' }}">
                     Inicio
                 </a>
+                <a href="{{ route('personalizar.index') }}"
+                   class="header-minimal__nav-link">Personalizar
+                </a>
                 <a href="{{ url('/inspiracion') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'inspiracion') ? 'header-minimal__nav-link--active' : '' }}">
                     Inspiración
