@@ -8,39 +8,25 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
 use App\Http\Controllers\Pedido\PedidoController; 
-use App\Models\Pedido; 
+use App\Http\Controllers\PersonalizarController;
+use App\Http\Controllers\ImagenProxyController;
 
 // ============================================
-// RUTA PÚBLICA - HOME
+// RUTAs PÚBLICAs
 // ============================================
+// Página de inicio
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// ============================================
-// RUTA DE PRUEBA DB (DESARROLLO - ELIMINAR EN PRODUCCIÓN)
-// ============================================
-Route::get('/prueba-db', function () {
-    try {
-        $pedido = Pedido::with('estado')->first();
-        
-        if (!$pedido) {
-            return "✅ CONEXIÓN EXITOSA: Laravel conectado a 'brisas_gems', tabla 'pedido' vacía.";
-        }
-        
-        return [
-            'status' => 'EXITO',
-            'mensaje' => 'Laravel leyó tu base de datos antigua correctamente',
-            'datos_pedido' => [
-                'id_interno' => $pedido->ped_id,
-                'codigo' => $pedido->ped_codigo,
-                'comentarios' => $pedido->ped_comentarios,
-                'fecha_creacion' => $pedido->ped_fecha_creacion,
-                'estado_actual' => $pedido->estado?->est_nombre ?? 'Sin estado asignado'
-            ]
-        ];
-    } catch (\Exception $e) {
-        return "❌ ERROR CRÍTICO DE CONEXIÓN: " . $e->getMessage();
-    }
-});
+// Personalización de joyas
+Route::get('/personalizar', [PersonalizarController::class, 'index'])->name('personalizar.index');
+Route::post('/personalizar/guardar', [PersonalizarController::class, 'guardar'])->name('personalizar.guardar');
+// proxi
+Route::get('/imagen/vista-anillo', [ImagenProxyController::class, 'vistaAnillo'])->name('imagen.vista-anillo');
+Route::get('/imagen/icono-opcion', [ImagenProxyController::class, 'iconoOpcion'])->name('imagen.icono-opcion');
+
+// OPCIONAL: Endpoint para limpiar caché (solo en desarrollo)
+Route::get('/imagen/limpiar-cache', [ImagenProxyController::class, 'limpiarCache'])->name('imagen.limpiar-cache');
+
 
 // ============================================
 // AUTENTICACIÓN (INVITADOS SOLAMENTE)
