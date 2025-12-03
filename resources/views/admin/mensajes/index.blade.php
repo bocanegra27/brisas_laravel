@@ -263,9 +263,6 @@
 {{-- Modal de Detalles --}}
 @include('admin.mensajes._modal_detalle')
 
-{{-- Modal de Edición --}}
-@include('admin.mensajes._modal_editar')
-
 @endsection
 
 @push('scripts')

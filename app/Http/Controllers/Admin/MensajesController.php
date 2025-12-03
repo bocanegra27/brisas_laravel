@@ -354,10 +354,10 @@ class MensajesController
                 ]
             ]);
 
-            // Los endpoints count retornan un número directamente
-            $pendientes = is_numeric($responsePendientes) ? $responsePendientes : 0;
-            $atendidos = is_numeric($responseAtendidos) ? $responseAtendidos : 0;
-            $archivados = is_numeric($responseArchivados) ? $responseArchivados : 0;
+            // ✅ Extraer del objeto JSON retornado por Spring Boot
+            $pendientes = $responsePendientes['count'] ?? 0;
+            $atendidos = $responseAtendidos['count'] ?? 0;
+            $archivados = $responseArchivados['count'] ?? 0;
 
             return [
                 'total' => $pendientes + $atendidos + $archivados,
