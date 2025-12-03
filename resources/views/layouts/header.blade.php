@@ -73,17 +73,17 @@
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
                     Dashboard
                 </a>
-                <a href="{{ url('/usuarios') }}" 
+                <a href="{{ route('admin.usuarios.index') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'usuarios') ? 'header-minimal__nav-link--active' : '' }}">
                     Usuarios
                 </a>
-                <a href="{{ url('/pedidos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
-                    Pedidos
-                </a>
-                <a href="{{ url('/admin/contactos') }}" 
+                <a href="{{ route('admin.mensajes.index') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/contactos') ? 'header-minimal__nav-link--active' : '' }}">
                     Contactos
+                </a>
+                <a href="{{ route('admin.pedidos.index') }}" 
+                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                    Pedidos
                 </a>
 
             @elseif($isDesigner)
