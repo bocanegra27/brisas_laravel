@@ -7,12 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
 
-/**
- * Controlador de Gestión de Mensajes/Contactos
- * 
- * Maneja todas las operaciones del módulo de contactos/mensajes
- * Comunicación con API Spring Boot mediante ApiService
- */
 class MensajesController
 {
     private ApiService $apiService;
@@ -23,8 +17,7 @@ class MensajesController
     }
 
     /**
-     * Mostrar listado de mensajes con filtros
-     * GET /admin/mensajes
+     * Mostrar listado de mensajes con filtros GET /admin/mensajes
      */
     public function index(Request $request)
     {
@@ -111,8 +104,7 @@ class MensajesController
     }
 
     /**
-     * Ver detalles de un mensaje específico
-     * GET /admin/mensajes/{id}
+     * Ver detalles de un mensaje específico GET /admin/mensajes/{id}
      */
     public function ver($id)
     {
@@ -150,8 +142,7 @@ class MensajesController
     }
 
     /**
-     * Actualizar mensaje (estado, vía, notas, etc.)
-     * PUT /admin/mensajes/{id}
+     * Actualizar mensaje (estado, vía, notas, etc.) PUT /admin/mensajes/{id}
      */
     public function update(Request $request, $id)
     {
@@ -216,8 +207,7 @@ class MensajesController
     }
 
     /**
-     * Cambiar estado rápidamente desde el listado
-     * PATCH /admin/mensajes/{id}/estado
+     * Cambiar estado rápidamente desde el listado PATCH /admin/mensajes/{id}/estado
      */
     public function cambiarEstado(Request $request, $id)
     {
@@ -226,7 +216,6 @@ class MensajesController
                 'estado' => 'required|in:pendiente,atendido,archivado'
             ]);
 
-            // Obtener mensaje actual
             $mensajeActual = $this->apiService->get("/contactos/{$id}", [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
@@ -240,16 +229,15 @@ class MensajesController
                 ], 404);
             }
 
-            // Actualizar solo el estado, manteniendo los demás datos
+            // Actualizar solo el estado,
             $data = [
                 'estado' => $validated['estado'],
                 'via' => $mensajeActual['via'],
                 'notas' => $mensajeActual['notas'],
                 'usuarioId' => $mensajeActual['usuarioId'],
-                'usuarioIdAdmin' => Session::get('user_id') // Auto-asignar admin que cambia el estado
+                'usuarioIdAdmin' => Session::get('user_id')
             ];
 
-            // Llamada al API
             $response = $this->apiService->put("/contactos/{$id}", $data, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
@@ -288,21 +276,17 @@ class MensajesController
     }
 
     /**
-     * Eliminar mensaje
-     * DELETE /admin/mensajes/{id}
+     * Eliminar mensaje DELETE /admin/mensajes/{id}
      */
     public function eliminar($id)
     {
         try {
-            // Llamada al API
             $response = $this->apiService->delete("/contactos/{$id}", [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
                 ]
             ]);
 
-            // DELETE retorna 204 No Content, entonces response será un array vacío
-            // Si es null, hubo un error
             if ($response === null) {
                 return response()->json([
                     'success' => false,

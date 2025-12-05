@@ -36,7 +36,9 @@
         
         {{-- ===== LOGO ===== --}}
         <a href="{{ url($logoUrl) }}" class="header-minimal__logo">
-            <i class="bi bi-gem header-minimal__logo-icon"></i>
+            <img src="{{ asset('assets/img/logo/logo_120.png') }}" 
+                alt="Brisas Gems Logo" 
+                class="header-minimal__logo-img">
             <span class="header-minimal__logo-text">Brisas Gems</span>
         </a>
 

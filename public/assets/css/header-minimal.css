@@ -65,6 +65,7 @@
   gap: 0.75rem;
   text-decoration: none;
   transition: var(--header-transition);
+  padding: 0.5rem 0;
 }
 
 .header-minimal__logo:hover {
@@ -72,9 +73,12 @@
   transform: translateY(-1px);
 }
 
-.header-minimal__logo-icon {
-  font-size: 1.75rem;
-  color: var(--header-primary);
+.header-minimal__logo-img {
+  height: 75px; /* ← Tu tamaño deseado */
+  width: auto;
+  max-width: 300px;
+  object-fit: contain;
+  transition: var(--header-transition);
 }
 
 .header-minimal__logo-text {
@@ -85,6 +89,21 @@
   letter-spacing: -0.02em;
   line-height: 1;
 }
+
+/* Responsive: más pequeño en móviles */
+@media (max-width: 768px) {
+  .header-minimal__logo-img {
+    height: 60px; /* ← Más pequeño en tablets */
+  }
+}
+
+@media (max-width: 576px) {
+  .header-minimal__logo-img {
+    height: 45px; /* ← Más pequeño en móviles */
+  }
+}
+
+
 
 /* ===== NAVEGACIÓN PRINCIPAL ===== */
 .header-minimal__nav {

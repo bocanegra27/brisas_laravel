@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <title>@yield('title', 'Brisas Gems')</title>
-    <link rel="icon" href="{{ asset('assets/icons/icono.png') }}" />
+    <link rel="icon" href="{{ asset('assets/img/icons/favicon.png') }}" type="image/png" />
     <meta name="description" content="@yield('description', 'Brisas Gems: personalización de joyas, inspiración y seguimiento de pedidos.')" />
     
     <!-- CSS Base -->
