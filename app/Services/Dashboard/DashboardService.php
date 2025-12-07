@@ -23,14 +23,14 @@ class DashboardService
     public function getAdminStats(): array
     {
         try {
-            // ✅ CORREGIDO: El endpoint NO debe incluir /api porque ApiService ya lo tiene
+            //   El endpoint NO debe incluir /api porque ApiService ya lo tiene
             $response = $this->apiService->get('/admin/dashboard/stats', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
                 ]
             ]);
 
-            // ✅ CORREGIDO: Manejar cuando ApiService retorna null
+            // C Manejar cuando ApiService retorna null
             if ($response === null) {
                 Log::warning('DashboardService: API retornó null para admin stats');
                 return $this->getDefaultAdminStats();
@@ -56,7 +56,7 @@ class DashboardService
     public function getDesignerStats(): array
     {
         try {
-            // ✅ CORREGIDO: Endpoint sin /api duplicado
+            
             $response = $this->apiService->get('/designer/dashboard/stats', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
@@ -87,7 +87,7 @@ class DashboardService
     public function getUserStats(): array
     {
         try {
-            // ✅ CORREGIDO: Endpoint sin /api duplicado
+            
             $response = $this->apiService->get('/user/dashboard/stats', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
