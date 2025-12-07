@@ -12,12 +12,28 @@
 <div class="usuarios-container">
     <div class="container-fluid py-5">
         
-        {{-- Header Section --}}
+        {{-- Header con Stats Pills --}}
         <div class="dashboard-header animate-in">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h1><i class="bi bi-people-fill me-3"></i>Gestión de Usuarios</h1>
-                    <p class="mb-0">Administra todos los usuarios del sistema</p>
+                    <div class="stats-pills mt-3">
+                        <div class="pill-stat">
+                            <i class="bi bi-people text-primary"></i>
+                            <span class="pill-label">Total:</span>
+                            <strong class="pill-value">{{ $stats['total'] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <span class="pill-label">Activos:</span>
+                            <strong class="pill-value">{{ $stats['activos'] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-x-circle" style="color: #6b7280;"></i>
+                            <span class="pill-label">Inactivos:</span>
+                            <strong class="pill-value">{{ $stats['inactivos'] ?? 0 }}</strong>
+                        </div>
+                    </div>
                 </div>
                 <a href="{{ route('admin.usuarios.crear') }}" class="btn btn-create">
                     <i class="bi bi-plus-circle me-2"></i>Crear Usuario
