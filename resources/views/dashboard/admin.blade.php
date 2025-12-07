@@ -26,94 +26,160 @@
         </div>
     </div>
 
-    {{-- Estado de la Producción --}}
-    <h2 class="section-header animate-in animate-delay-1">Estado de la Producción</h2>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3 g-md-4 mb-5">
-        <div class="col animate-in animate-delay-1">
-            <a href="{{ url('/pedidos?estado=diseño') }}" class="stat-card">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper bg-primary-soft mx-auto">
-                            <i class="bi bi-palette2 text-primary"></i>
-                        </div>
-                        <p class="card-text">En Diseño</p>
-                        <h2 class="display-4 text-primary">{{ $data['pedidosEnDiseño'] ?? 0 }}</h2>
-                        <span class="trend up">
-                            <i class="bi bi-arrow-up"></i> +2 hoy
-                        </span>
+{{-- Estado de la Producción --}}
+<h2 class="section-header animate-in animate-delay-1">Estado de la Producción</h2>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3 g-md-4 mb-5">
+    
+    {{-- Cotización Pendiente --}}
+    <div class="col animate-in animate-delay-1">
+        <a href="{{ url('/pedidos?estadoId=1') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-warning-soft mx-auto">
+                        <i class="bi bi-clipboard-check text-warning"></i>
                     </div>
+                    <p class="card-text">Cotización</p>
+                    <h2 class="display-4 text-warning">{{ $data['pedidosCotizacionPendiente'] ?? 0 }}</h2>
                 </div>
-            </a>
-        </div>
-
-        <div class="col animate-in animate-delay-2">
-            <a href="{{ url('/pedidos?estado=tallado') }}" class="stat-card">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper bg-info-soft mx-auto">
-                            <i class="bi bi-gem text-info"></i>
-                        </div>
-                        <p class="card-text">En Tallado</p>
-                        <h2 class="display-4 text-info">{{ $data['pedidosEnTallado'] ?? 0 }}</h2>
-                        <span class="trend up">
-                            <i class="bi bi-arrow-up"></i> +1 hoy
-                        </span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col animate-in animate-delay-3">
-            <a href="{{ url('/pedidos?estado=engaste') }}" class="stat-card">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper bg-secondary-soft mx-auto">
-                            <i class="bi bi-gear text-secondary"></i>
-                        </div>
-                        <p class="card-text">En Engaste</p>
-                        <h2 class="display-4 text-secondary">{{ $data['pedidosEnEngaste'] ?? 0 }}</h2>
-                        <span class="trend">
-                            <i class="bi bi-dash"></i> Sin cambios
-                        </span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col animate-in animate-delay-4">
-            <a href="{{ url('/pedidos?estado=pulido') }}" class="stat-card">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper bg-warning-soft mx-auto">
-                            <i class="bi bi-brightness-high text-warning"></i>
-                        </div>
-                        <p class="card-text">En Pulido</p>
-                        <h2 class="display-4 text-warning">{{ $data['pedidosEnPulido'] ?? 0 }}</h2>
-                        <span class="trend up">
-                            <i class="bi bi-arrow-up"></i> +3 hoy
-                        </span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col animate-in animate-delay-5">
-            <a href="{{ url('/pedidos?estado=cancelados') }}" class="stat-card">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <div class="icon-wrapper bg-danger-soft mx-auto">
-                            <i class="bi bi-x-circle text-danger"></i>
-                        </div>
-                        <p class="card-text">Cancelados</p>
-                        <h2 class="display-4 text-danger">{{ $data['pedidosCancelados'] ?? 0 }}</h2>
-                        <span class="trend down">
-                            <i class="bi bi-arrow-down"></i> -1 hoy
-                        </span>
-                    </div>
-                </div>
-            </a>
-        </div>
+            </div>
+        </a>
     </div>
+
+    {{-- Pago Pendiente --}}
+    <div class="col animate-in animate-delay-2">
+        <a href="{{ url('/pedidos?estadoId=2') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-danger-soft mx-auto">
+                        <i class="bi bi-cash-coin text-danger"></i>
+                    </div>
+                    <p class="card-text">Pago Pendiente</p>
+                    <h2 class="display-4 text-danger">{{ $data['pedidosPagoDisenoPendiente'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Diseño en Proceso --}}
+    <div class="col animate-in animate-delay-3">
+        <a href="{{ url('/pedidos?estadoId=3') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-primary-soft mx-auto">
+                        <i class="bi bi-palette2 text-primary"></i>
+                    </div>
+                    <p class="card-text">En Diseño</p>
+                    <h2 class="display-4 text-primary">{{ $data['pedidosDisenoEnProceso'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Diseño Aprobado --}}
+    <div class="col animate-in animate-delay-4">
+        <a href="{{ url('/pedidos?estadoId=4') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-success-soft mx-auto">
+                        <i class="bi bi-check-circle text-success"></i>
+                    </div>
+                    <p class="card-text">Diseño OK</p>
+                    <h2 class="display-4 text-success">{{ $data['pedidosDisenoAprobado'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Tallado --}}
+    <div class="col animate-in animate-delay-5">
+        <a href="{{ url('/pedidos?estadoId=5') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-info-soft mx-auto">
+                        <i class="bi bi-gem text-info"></i>
+                    </div>
+                    <p class="card-text">Tallado</p>
+                    <h2 class="display-4 text-info">{{ $data['pedidosEnTallado'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Engaste --}}
+    <div class="col animate-in animate-delay-6">
+        <a href="{{ url('/pedidos?estadoId=6') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-secondary-soft mx-auto">
+                        <i class="bi bi-gear text-secondary"></i>
+                    </div>
+                    <p class="card-text">Engaste</p>
+                    <h2 class="display-4 text-secondary">{{ $data['pedidosEnEngaste'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Pulido --}}
+    <div class="col animate-in animate-delay-7">
+        <a href="{{ url('/pedidos?estadoId=7') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-warning-soft mx-auto">
+                        <i class="bi bi-brightness-high text-warning"></i>
+                    </div>
+                    <p class="card-text">Pulido</p>
+                    <h2 class="display-4 text-warning">{{ $data['pedidosEnPulido'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Inspección --}}
+    <div class="col animate-in animate-delay-8">
+        <a href="{{ url('/pedidos?estadoId=8') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-info-soft mx-auto">
+                        <i class="bi bi-search text-info"></i>
+                    </div>
+                    <p class="card-text">Inspección</p>
+                    <h2 class="display-4 text-info">{{ $data['pedidosInspeccionCalidad'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Finalizado --}}
+    <div class="col animate-in animate-delay-9">
+        <a href="{{ url('/pedidos?estadoId=9') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-success-soft mx-auto">
+                        <i class="bi bi-check-all text-success"></i>
+                    </div>
+                    <p class="card-text">Finalizados</p>
+                    <h2 class="display-4 text-success">{{ $data['pedidosFinalizados'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {{-- Cancelados --}}
+    <div class="col animate-in animate-delay-10">
+        <a href="{{ url('/pedidos?estadoId=10') }}" class="stat-card">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="icon-wrapper bg-danger-soft mx-auto">
+                        <i class="bi bi-x-circle text-danger"></i>
+                    </div>
+                    <p class="card-text">Cancelados</p>
+                    <h2 class="display-4 text-danger">{{ $data['pedidosCancelados'] ?? 0 }}</h2>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
 
     {{-- Gestión General - ACTUALIZADO --}}
 <h2 class="section-header animate-in animate-delay-2">Gestión General</h2>
