@@ -23,31 +23,56 @@ class DashboardService
     public function getAdminStats(): array
     {
         try {
-            // ✅ Usar los mismos endpoints que funcionan en UsuariosController
+            // ✅ Usuarios
             $responseActivos = $this->apiService->get('/usuarios/count?activo=true', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
             $responseInactivos = $this->apiService->get('/usuarios/count?activo=false', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
-            // ✅ Extraer del objeto JSON retornado por Spring Boot
+            // ✅ Contactos/Mensajes
+            $responsePendientes = $this->apiService->get('/contactos/count?estado=pendiente', [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
+
+            $responseAtendidos = $this->apiService->get('/contactos/count?estado=atendido', [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
+
+            $responseArchivados = $this->apiService->get('/contactos/count?estado=archivado', [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
+
+            // TODO: Cuando tengas endpoints de pedidos, agregar aquí
+            // $responsePedidosDiseño = $this->apiService->get('/pedidos/count?estado=diseño', [...]);
+            // etc.
+
+            // ✅ Extraer datos
             $activos = $responseActivos['count'] ?? 0;
             $inactivos = $responseInactivos['count'] ?? 0;
+            $pendientes = $responsePendientes['count'] ?? 0;
+            $atendidos = $responseAtendidos['count'] ?? 0;
+            $archivados = $responseArchivados['count'] ?? 0;
 
             return [
+                // Usuarios
                 'totalUsuariosActivos' => $activos,
                 'totalUsuariosInactivos' => $inactivos,
                 'totalUsuarios' => $activos + $inactivos,
-                // TODO: Agregar otras estadísticas aquí cuando tengas los endpoints
-                // 'totalPedidos' => ...,
-                // 'pedidosPendientes' => ...,
-                // etc.
+                
+                // Mensajes/Contactos
+                'totalContactosPendientes' => $pendientes,
+                'totalContactosAtendidos' => $atendidos,
+                'totalContactosArchivados' => $archivados,
+                'totalContactos' => $pendientes + $atendidos + $archivados,
+                
+                // Pedidos (placeholder hasta que tengas los endpoints)
+                'pedidosEnDiseño' => 0,
+                'pedidosEnTallado' => 0,
+                'pedidosEnEngaste' => 0,
+                'pedidosEnPulido' => 0,
             ];
 
         } catch (\Exception $e) {
@@ -59,7 +84,6 @@ class DashboardService
         }
     }
 
-
     /**
      * Obtiene estadísticas del dashboard de diseñador
      * 
@@ -68,19 +92,11 @@ class DashboardService
     public function getDesignerStats(): array
     {
         try {
+            // TODO: Implementar cuando tengas los endpoints específicos del diseñador
+            // Por ahora retornar valores por defecto
             
-            $response = $this->apiService->get('/designer/dashboard/stats', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
-
-            if ($response === null) {
-                Log::warning('DashboardService: API retornó null para designer stats');
-                return $this->getDefaultDesignerStats();
-            }
-
-            return $response;
+            Log::warning('DashboardService: getDesignerStats no implementado aún');
+            return $this->getDefaultDesignerStats();
 
         } catch (\Exception $e) {
             Log::error('DashboardService: Error obteniendo designer stats', [
@@ -99,19 +115,11 @@ class DashboardService
     public function getUserStats(): array
     {
         try {
+            // TODO: Implementar cuando tengas los endpoints específicos del usuario
+            // Por ahora retornar valores por defecto
             
-            $response = $this->apiService->get('/user/dashboard/stats', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
-
-            if ($response === null) {
-                Log::warning('DashboardService: API retornó null para user stats');
-                return $this->getDefaultUserStats();
-            }
-
-            return $response;
+            Log::warning('DashboardService: getUserStats no implementado aún');
+            return $this->getDefaultUserStats();
 
         } catch (\Exception $e) {
             Log::error('DashboardService: Error obteniendo user stats', [
@@ -130,14 +138,22 @@ class DashboardService
     private function getDefaultAdminStats(): array
     {
         return [
+            // Usuarios
+            'totalUsuariosActivos' => 0,
+            'totalUsuariosInactivos' => 0,
+            'totalUsuarios' => 0,
+            
+            // Contactos
+            'totalContactosPendientes' => 0,
+            'totalContactosAtendidos' => 0,
+            'totalContactosArchivados' => 0,
+            'totalContactos' => 0,
+            
+            // Pedidos
             'pedidosEnDiseño' => 0,
             'pedidosEnTallado' => 0,
             'pedidosEnEngaste' => 0,
             'pedidosEnPulido' => 0,
-            'pedidosCancelados' => 0,
-            'totalContactosPendientes' => 0,
-            'totalUsuariosActivos' => 0,
-            'totalUsuariosInactivos' => 0
         ];
     }
 
