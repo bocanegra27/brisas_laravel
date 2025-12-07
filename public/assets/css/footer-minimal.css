@@ -220,11 +220,21 @@
   gap: 0.5rem;
   margin-bottom: 1rem;
   text-decoration: none;
+  padding: 0.5rem 0; /* ← Agregué padding para dar espacio */
 }
 
-.footer-minimal__logo-icon {
-  font-size: 1.5rem;
-  color: var(--header-primary, #009688);
+.footer-minimal__logo-img {
+  height: 50px; /* ← Ajusta este valor a tu gusto */
+  width: auto;
+  max-width: 250px;
+  object-fit: contain;
+  transition: var(--header-transition);
+  opacity: 0.9;
+}
+
+.footer-minimal__logo:hover .footer-minimal__logo-img {
+  opacity: 1;
+  transform: scale(1.02); /* ← Efecto sutil al hover */
 }
 
 .footer-minimal__logo-text {
@@ -233,6 +243,19 @@
   font-weight: 600;
   color: var(--header-neutral-800, #1e293b);
   letter-spacing: -0.02em;
+}
+
+/* Responsive: más pequeño en móviles */
+@media (max-width: 768px) {
+  .footer-minimal__logo-img {
+    height: 55px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-minimal__logo-img {
+    height: 45px;
+  }
 }
 
 /* ===== RESPONSIVE ===== */

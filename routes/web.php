@@ -111,6 +111,6 @@ Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->grou
     // Dashboard de usuario
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
     
-    // TODO: Agregar módulos específicos del usuario aquí
+    // por hacer: Agregar módulos específicos del usuario aquí
     
 });

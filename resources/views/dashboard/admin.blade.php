@@ -150,15 +150,22 @@
                         <i class="bi bi-envelope-exclamation text-danger"></i>
                     </div>
                     <p class="card-text">Mensajes</p>
-                    <h2 class="display-4 text-danger">{{ $data['totalContactosPendientes'] ?? 0 }}</h2>
-                    <span class="trend up">
-                        <i class="bi bi-arrow-up"></i> +5 nuevos
-                    </span>
+                    <h2 class="display-4 text-danger">{{ $data['totalContactos'] ?? 0 }}</h2>
+                    <div class="d-flex justify-content-center gap-2 mt-2 flex-wrap">
+                        <span class="badge badge-warning">
+                            <i class="bi bi-clock-fill"></i> {{ $data['totalContactosPendientes'] ?? 0 }}
+                        </span>
+                        <span class="badge badge-success">
+                            <i class="bi bi-check-circle-fill"></i> {{ $data['totalContactosAtendidos'] ?? 0 }}
+                        </span>
+                        <span class="badge badge-secondary">
+                            <i class="bi bi-archive-fill"></i> {{ $data['totalContactosArchivados'] ?? 0 }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </a>
     </div>
-
     {{-- 3. PEDIDOS --}}
     <div class="col-lg-4 col-md-6 animate-in animate-delay-3">
         <a href="{{ route('admin.pedidos.index') }}" class="stat-card">

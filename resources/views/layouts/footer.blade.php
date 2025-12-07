@@ -13,7 +13,9 @@
             <div class="footer-minimal__column">
                 {{-- Logo opcional --}}
                 <a href="{{ url('/') }}" class="footer-minimal__logo">
-                    <i class="bi bi-gem footer-minimal__logo-icon"></i>
+                    <img src="{{ asset('assets/img/logo/logo_120.png') }}" 
+                        alt="Brisas Gems Logo" 
+                        class="footer-minimal__logo-img">
                     <span class="footer-minimal__logo-text">Brisas Gems</span>
                 </a>
                 

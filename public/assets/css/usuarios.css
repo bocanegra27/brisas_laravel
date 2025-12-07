@@ -651,3 +651,43 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ===== STATS PILLS ===== */
+.stats-pills {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pill-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  background: white;
+  border: 2px solid #f1f5f9;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+}
+
+.pill-stat:hover {
+  border-color: var(--dash-primary);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.pill-stat i {
+  font-size: 1.125rem;
+}
+
+.pill-label {
+  color: var(--dash-text-secondary);
+  font-weight: 500;
+}
+
+.pill-value {
+  color: var(--dash-text-primary);
+  font-weight: 700;
+  font-size: 1rem;
+}

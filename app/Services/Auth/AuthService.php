@@ -35,7 +35,7 @@ class AuthService
                 'password' => $password
             ]);
 
-            // ✅ NUEVO: Verificar si la respuesta es null (ApiService retorna null cuando falla)
+            //  Verificar si la respuesta es null (ApiService retorna null cuando falla)
             if ($response === null) {
                 Log::warning('AuthService: Login falló - API retornó null', [
                     'email' => $email
@@ -43,7 +43,7 @@ class AuthService
                 return null;
             }
 
-            // ✅ NUEVO: Verificar que la respuesta tenga el token
+            //  Verificar que la respuesta tenga el token
             // Si el API retornó datos pero sin token, el login falló
             if (!isset($response['token']) || empty($response['token'])) {
                 Log::warning('AuthService: Login falló - Sin token en respuesta', [
@@ -53,7 +53,7 @@ class AuthService
                 return null;
             }
 
-            // ✅ Login exitoso - $response ya contiene los datos directamente
+        
             // Ya no hay $response['data'], los datos están en $response
             
             // Guardar en sesión de Laravel

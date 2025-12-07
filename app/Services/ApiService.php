@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Servicio centralizado para comunicación con la API de Spring Boot
  * 
- * Reemplaza el antiguo ApiClient.php usando Laravel HTTP Client (Guzzle)
+ * Client (Guzzle)
  * Maneja autenticación JWT y errores de forma consistente
  */
 class ApiService
@@ -54,7 +54,7 @@ class ApiService
                 'DELETE' => $request->delete($url, $data ?? []),
                 default => throw new \InvalidArgumentException("Método HTTP no soportado: {$method}")
             };
-            // Log solo en desarrollo
+            // Log para erroes
             if (config('app.debug')) {
                 Log::info("API Request", [
                     'method' => $method,

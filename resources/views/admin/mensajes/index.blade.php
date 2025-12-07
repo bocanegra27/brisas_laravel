@@ -11,13 +11,33 @@
 @section('content')
 <div class="mensajes-container">
     <div class="container-fluid py-5">
-        
-        {{-- Header Section --}}
+        {{-- Header con Stats Pills --}}
         <div class="dashboard-header animate-in">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h1><i class="bi bi-chat-dots-fill me-3"></i>Gestión de Mensajes</h1>
-                    <p class="mb-0">Administra todos los mensajes y formularios de contacto</p>
+                    <div class="stats-pills mt-3">
+                        <div class="pill-stat">
+                            <i class="bi bi-envelope-fill text-primary"></i>
+                            <span class="pill-label">Total:</span>
+                            <strong class="pill-value">{{ $stats['total'] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-clock-fill" style="color: #f59e0b;"></i>
+                            <span class="pill-label">Pendientes:</span>
+                            <strong class="pill-value">{{ $stats['pendientes'] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="pill-label">Atendidos:</span>
+                            <strong class="pill-value">{{ $stats['atendidos'] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-archive-fill" style="color: #6b7280;"></i>
+                            <span class="pill-label">Archivados:</span>
+                            <strong class="pill-value">{{ $stats['archivados'] ?? 0 }}</strong>
+                        </div>
+                    </div>
                 </div>
                 <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
                     <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
@@ -39,62 +59,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         @endif
-
-        {{-- Estadísticas --}}
-        <div class="row g-4 mb-5">
-            <div class="col-md-3 animate-in animate-delay-1">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper bg-primary-gradient">
-                                <i class="bi bi-envelope-fill text-white"></i>
-                            </div>
-                            <p class="card-text">Total Mensajes</p>
-                            <h2 class="display-4 text-primary">{{ $stats['total'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 animate-in animate-delay-2">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper bg-warning-gradient">
-                                <i class="bi bi-clock-fill text-white"></i>
-                            </div>
-                            <p class="card-text">Pendientes</p>
-                            <h2 class="display-4" style="color: #f59e0b;">{{ $stats['pendientes'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 animate-in animate-delay-3">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper bg-success-gradient">
-                                <i class="bi bi-check-circle-fill text-white"></i>
-                            </div>
-                            <p class="card-text">Atendidos</p>
-                            <h2 class="display-4 text-success">{{ $stats['atendidos'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 animate-in animate-delay-4">
-                <div class="stat-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="icon-wrapper" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
-                                <i class="bi bi-archive-fill text-white"></i>
-                            </div>
-                            <p class="card-text">Archivados</p>
-                            <h2 class="display-4" style="color: #6b7280;">{{ $stats['archivados'] ?? 0 }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         {{-- Tabla de mensajes --}}
         <div class="card mensajes-table-card animate-in animate-delay-5">
@@ -223,7 +187,7 @@
                                     <div class="action-buttons">
                                         <button onclick="verDetalle({{ $mensaje['id'] }})" 
                                                 class="btn-action btn-view" 
-                                                data-bs-toggle="tooltip" 
+                                   S             data-bs-toggle="tooltip" 
                                                 title="Ver detalles">
                                             <i class="bi bi-eye-fill"></i>
                                         </button>
@@ -238,7 +202,7 @@
                                         <button onclick="eliminarMensaje({{ $mensaje['id'] }}, '{{ addslashes($mensaje['nombre']) }}')" 
                                                 class="btn-action btn-delete" 
                                                 data-bs-toggle="tooltip" 
-                                                title="Eliminar">
+                                                title="Eliminar">S
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
                                     </div>
