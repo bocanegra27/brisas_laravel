@@ -23,21 +23,32 @@ class DashboardService
     public function getAdminStats(): array
     {
         try {
-            //   El endpoint NO debe incluir /api porque ApiService ya lo tiene
-            $response = $this->apiService->get('/admin/dashboard/stats', [
+            // ✅ Usar los mismos endpoints que funcionan en UsuariosController
+            $responseActivos = $this->apiService->get('/usuarios/count?activo=true', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
                 ]
             ]);
 
-            // C Manejar cuando ApiService retorna null
-            if ($response === null) {
-                Log::warning('DashboardService: API retornó null para admin stats');
-                return $this->getDefaultAdminStats();
-            }
+            $responseInactivos = $this->apiService->get('/usuarios/count?activo=false', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
+                ]
+            ]);
 
-            // Si el API retornó datos, usarlos
-            return $response;
+            // ✅ Extraer del objeto JSON retornado por Spring Boot
+            $activos = $responseActivos['count'] ?? 0;
+            $inactivos = $responseInactivos['count'] ?? 0;
+
+            return [
+                'totalUsuariosActivos' => $activos,
+                'totalUsuariosInactivos' => $inactivos,
+                'totalUsuarios' => $activos + $inactivos,
+                // TODO: Agregar otras estadísticas aquí cuando tengas los endpoints
+                // 'totalPedidos' => ...,
+                // 'pedidosPendientes' => ...,
+                // etc.
+            ];
 
         } catch (\Exception $e) {
             Log::error('DashboardService: Error obteniendo admin stats', [
@@ -47,6 +58,7 @@ class DashboardService
             return $this->getDefaultAdminStats();
         }
     }
+
 
     /**
      * Obtiene estadísticas del dashboard de diseñador
