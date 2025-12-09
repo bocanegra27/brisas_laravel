@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\MensajesController;
 use App\Http\Controllers\Pedido\PedidoController; 
 use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController;
+use App\Http\Controllers\ContactoController;
 
 // ============================================
 // RUTAs PÚBLICAs
@@ -20,9 +21,16 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Personalización de joyas
 Route::get('/personalizar', [PersonalizarController::class, 'index'])->name('personalizar.index');
 Route::post('/personalizar/guardar', [PersonalizarController::class, 'guardar'])->name('personalizar.guardar');
+Route::get('/personalizar/{id}/detalles', [PersonalizarController::class, 'obtenerDetalles'])->name('personalizar.detalles');
+
+// Formulario de contacto
+Route::get('/contacto', [ContactoController::class, 'create'])->name('contacto.create');
+Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.store');
 // proxi
 Route::get('/imagen/vista-anillo', [ImagenProxyController::class, 'vistaAnillo'])->name('imagen.vista-anillo');
 Route::get('/imagen/icono-opcion', [ImagenProxyController::class, 'iconoOpcion'])->name('imagen.icono-opcion');
+
+
 
 // OPCIONAL: Endpoint para limpiar caché (solo en desarrollo)
 Route::get('/imagen/limpiar-cache', [ImagenProxyController::class, 'limpiarCache'])->name('imagen.limpiar-cache');
