@@ -7,7 +7,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
-use App\Http\Controllers\Pedido\PedidoController; 
+use App\Http\Controllers\Admin\PedidoController; 
 use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
@@ -87,6 +87,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::put('/{id}', 'update')->name('admin.mensajes.update');
         Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
+        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion');
     });
     
     // MÓDULO: PEDIDOS
@@ -95,6 +96,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::post('/', 'store')->name('admin.pedidos.store');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje');
     });
     
 });

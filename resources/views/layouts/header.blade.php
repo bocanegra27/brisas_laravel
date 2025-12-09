@@ -60,10 +60,10 @@
                 <a href="{{ route('personalizar.index') }}"
                    class="header-minimal__nav-link">Personalizar
                 </a>
-                <a href="{{ url('/inspiracion') }}" 
+                {{--<a href="{{ url('/inspiracion') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'inspiracion') ? 'header-minimal__nav-link--active' : '' }}">
                     Inspiración
-                </a>
+                </a>--}}
                 <a href="{{ url('/contacto') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
                     Contacto
@@ -118,13 +118,13 @@
                    class="header-minimal__nav-link {{ $currentRoute == '/' ? 'header-minimal__nav-link--active' : '' }}">
                     Inicio
                 </a>
-                <a href="{{ url('/inspiracion') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'inspiracion') ? 'header-minimal__nav-link--active' : '' }}">
-                    Inspiración
-                </a>
                 <a href="{{ url('/personalizar') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'personalizar') ? 'header-minimal__nav-link--active' : '' }}">
                     Personalizar
+                </a>
+                <a href="{{ url('/contacto') }}" 
+                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
+                    Contacto
                 </a>
                 <a href="{{ url('/mis-pedidos') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'mis-pedidos') ? 'header-minimal__nav-link--active' : '' }}">
