@@ -252,5 +252,97 @@
 @endsection
 
 @push('scripts')
+<script>
+    // ============================================
+    // GESTOR DE SESIONES ANÓNIMAS
+    // Este código DEBE estar aquí para que Blade procese la URL de la API.
+    // ============================================
+    (function() {
+        'use strict';
+
+        const STORAGE_KEY = 'brisas_sesion_token';
+        const STORAGE_SESION_ID = 'brisas_sesion_id';
+
+        /**
+         * Obtiene o crea una sesión anónima
+         */
+        async function obtenerOCrearSesion() {
+            // Verificar si ya existe en localStorage
+            let token = localStorage.getItem(STORAGE_KEY);
+            let sesionId = localStorage.getItem(STORAGE_SESION_ID);
+
+            if (token && sesionId) {
+                console.log('✅ Sesión existente encontrada:', sesionId);
+                return { token, sesionId: parseInt(sesionId) };
+            }
+
+            // Si no existe, crear nueva sesión
+            console.log('🔄 Creando nueva sesión anónima...');
+
+            try {
+                // Aquí es donde Blade inserta la URL de la API:
+                const API_URL = '{{ config("services.spring_api.url") }}/sesiones-anonimas';
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al crear sesión');
+                }
+
+                const data = await response.json();
+
+                // Guardar en localStorage
+                localStorage.setItem(STORAGE_KEY, data.sesToken);
+                localStorage.setItem(STORAGE_SESION_ID, data.sesId);
+
+                console.log('✅ Nueva sesión creada:', data.sesId);
+
+                return {
+                    token: data.sesToken,
+                    sesionId: data.sesId
+                };
+
+            } catch (error) {
+                console.error('❌ Error al crear sesión:', error);
+                return null;
+            }
+        }
+
+        /**
+         * Inicializar sesión al cargar la página
+         */
+        async function inicializarSesion() {
+            const sesion = await obtenerOCrearSesion();
+
+            if (sesion) {
+                // Agregar campo oculto al formulario con el sesionId
+                const form = document.getElementById('form-personalizar');
+                if (form) {
+                    // Verificar si ya existe el input
+                    let inputSesion = form.querySelector('input[name="sesionId"]');
+                    if (!inputSesion) {
+                        inputSesion = document.createElement('input');
+                        inputSesion.type = 'hidden';
+                        inputSesion.name = 'sesionId';
+                        form.appendChild(inputSesion);
+                    }
+                    inputSesion.value = sesion.sesionId;
+
+                    console.log('✅ sesionId agregado al formulario:', sesion.sesionId);
+                }
+            }
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', inicializarSesion);
+    })();
+</script>
+
 <script src="{{ asset('assets/js/personalizar.js') }}"></script>
 @endpush

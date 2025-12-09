@@ -60,88 +60,99 @@ class PersonalizarController extends Controller
      * Guardar personalización
      * POST /personalizar/guardar
      */
-    public function guardar(Request $request)
-    {
-        try {
-            // Validación
-            $validator = Validator::make($request->all(), [
-                'forma' => 'required|string',
-                'gema' => 'required|string',
-                'material' => 'required|string',
-                'tamano' => 'required|string',
-                'talla' => 'required|string'
-            ], [
-                'forma.required' => 'Selecciona una forma',
-                'gema.required' => 'Selecciona una gema',
-                'material.required' => 'Selecciona un material',
-                'tamano.required' => 'Selecciona un tamaño',
-                'talla.required' => 'Selecciona una talla'
-            ]);
+public function guardar(Request $request)
+{
+    try {
+        // Validación
+        $validator = Validator::make($request->all(), [
+            'forma' => 'required|string',
+            'gema' => 'required|string',
+            'material' => 'required|string',
+            'tamano' => 'required|string',
+            'talla' => 'required|string',
+            'sesionId' => 'nullable|integer'
+        ], [
+            'forma.required' => 'Selecciona una forma',
+            'gema.required' => 'Selecciona una gema',
+            'material.required' => 'Selecciona un material',
+            'tamano.required' => 'Selecciona un tamaño',
+            'talla.required' => 'Selecciona una talla'
+        ]);
 
-            if ($validator->fails()) {
-                return back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-            // Obtener IDs de valores desde los slugs enviados
-            $valoresIds = $this->obtenerIdsDeValores([
-                $request->input('forma'),
-                $request->input('gema'),
-                $request->input('material'),
-                $request->input('tamano'),
-                $request->input('talla')
-            ]);
+        // Obtener IDs de valores
+        $valoresIds = $this->obtenerIdsDeValores([
+            $request->input('forma'),
+            $request->input('gema'),
+            $request->input('material'),
+            $request->input('tamano'),
+            $request->input('talla')
+        ]);
 
-            if (empty($valoresIds)) {
-                return back()
-                    ->withInput()
-                    ->with('error', 'Error al procesar las opciones seleccionadas.');
-            }
+        if (empty($valoresIds)) {
+            return back()
+                ->withInput()
+                ->with('error', 'Error al procesar las opciones seleccionadas.');
+        }
 
-            // Preparar datos para el API
-            $data = [
-                'usuarioClienteId' => Session::has('user_id') ? Session::get('user_id') : null,
-                'fecha' => date('Y-m-d'),
-                'valoresSeleccionados' => $valoresIds
-            ];
+        // Preparar datos
+        $data = [
+            'fecha' => now()->format('Y-m-d\TH:i:s'),
+            'valoresSeleccionados' => $valoresIds
+        ];
 
-            // Guardar personalización en el API
-            $response = $this->apiService->post('/personalizaciones', $data, [
-                'headers' => Session::has('jwt_token') 
-                    ? ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
-                    : []
-            ]);
+        // Agregar sesionId o usuarioClienteId
+        if ($request->has('sesionId') && $request->input('sesionId')) {
+            $data['sesionId'] = (int) $request->input('sesionId');
+        } elseif (Session::has('user_id')) {
+            $data['usuarioClienteId'] = Session::get('user_id');
+        }
 
-            if ($response === null) {
-                Log::warning('PersonalizarController@guardar: API retornó null');
-                return back()
-                    ->withInput()
-                    ->with('error', 'Error al guardar la personalización.');
-            }
+        // Guardar en API
+        $response = $this->apiService->post('/personalizaciones', $data);
 
-            // Guardar ID en sesión para uso futuro (cuando tengas el módulo de contacto)
-            Session::put('ultima_personalizacion_id', $response['id']);
-            Session::put('ultima_personalizacion_resumen', $this->generarResumen($request));
-
-            Log::info('PersonalizarController: Personalización guardada', [
-                'id' => $response['id']
-            ]);
-
-            // Por ahora, redirigir de vuelta con éxito
-            // Cuando tengas el módulo de contacto, cambia esto a: return redirect()->route('contacto.create')
-            return back()->with('success', '¡Personalización guardada! Pronto podrás continuar con un asesor.');
-
-        } catch (\Exception $e) {
-            Log::error('PersonalizarController@guardar: Excepción', [
-                'error' => $e->getMessage()
-            ]);
-
+        if ($response === null) {
             return back()
                 ->withInput()
                 ->with('error', 'Error al guardar la personalización.');
         }
+
+        // ✅ Obtener ID (el backend retorna 'id', no 'perId')
+        $personalizacionId = $response['id'] ?? null;
+
+        if (!$personalizacionId) {
+            Log::error('No se encontró ID en respuesta', ['response' => $response]);
+            return back()
+                ->withInput()
+                ->with('error', 'Error: No se pudo obtener el ID de la personalización.');
+        }
+
+        Log::info('Personalización guardada exitosamente', [
+            'id' => $personalizacionId,
+            'tipo' => $response['tipoCliente'] ?? 'desconocido',
+            'sesionId' => $response['sesionId'] ?? null
+        ]);
+
+        // ✅ Redirigir a formulario de contacto
+        return redirect()->route('contacto.create', ['personalizacionId' => $personalizacionId])
+            ->with('success', '¡Personalización guardada! Completa tus datos para continuar.');
+
+    } catch (\Exception $e) {
+        Log::error('Error al guardar personalización', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return back()
+            ->withInput()
+            ->with('error', 'Error al guardar la personalización.');
     }
+}
 
     /**
      * Obtiene las opciones (categorías) del API
@@ -269,4 +280,38 @@ class PersonalizarController extends Controller
             $request->input('talla')
         );
     }
+    /**
+     * Obtener detalles de una personalización (para prellenar contacto)
+     * GET /personalizar/{id}/detalles
+     */
+    public function obtenerDetalles($id)
+    {
+        try {
+            $response = $this->apiService->get("/personalizaciones/{$id}/detalles");
+
+            if ($response === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Personalización no encontrada'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'detalles' => $response
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PersonalizarController@obtenerDetalles: Error', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener detalles'
+            ], 500);
+        }
+    }
+    
 }
