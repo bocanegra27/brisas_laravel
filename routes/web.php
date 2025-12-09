@@ -7,8 +7,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
-use App\Http\Controllers\Pedido\PedidoController; 
-use App\Http\Controllers\PersonalizarController;
+use App\Http\Controllers\Admin\PedidoController; 
 use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
 
@@ -93,6 +92,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
     Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
         Route::get('/', 'index')->name('admin.pedidos.index');
         Route::post('/', 'store')->name('admin.pedidos.store');
+        Route::get('/{id}', 'show')->name('admin.pedidos.ver');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
     });
