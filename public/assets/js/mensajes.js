@@ -1,5 +1,5 @@
 /**
- * 🔥 MÓDULO DE MENSAJES MEJORADO - BRISAS GEMS
+ *  MÓDULO DE MENSAJES MEJORADO - BRISAS GEMS
  * JavaScript con nuevas funcionalidades:
  * - Ver personalización inline
  * - Crear pedido desde mensaje
@@ -7,7 +7,7 @@
  */
 
 // ============================================
-// 🔥 VER DETALLE MEJORADO (CON PERSONALIZACIÓN)
+//  VER DETALLE MEJORADO (CON PERSONALIZACIÓN)
 // ============================================
 async function verDetalleMejorado(mensajeId, tienePersonalizacion) {
     try {
@@ -61,12 +61,12 @@ async function verDetalleMejorado(mensajeId, tienePersonalizacion) {
  * Genera HTML para el detalle del mensaje
  */
 function generarHTMLDetalle(mensaje, personalizacion) {
+    // Nota: La variable 'html' es local a esta función.
     const tipoClienteBadge = obtenerBadgeTipoCliente(mensaje.tipoCliente);
     const estadoBadge = obtenerBadgeEstado(mensaje.estado);
     
     let html = `
         <div class="detalle-mensaje-mejorado">
-            <!-- Header con badges -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h6 class="text-muted mb-2">ID: #${mensaje.id}</h6>
@@ -81,7 +81,6 @@ function generarHTMLDetalle(mensaje, personalizacion) {
                 </div>
             </div>
             
-            <!-- Información del remitente -->
             <div class="info-section mb-4">
                 <h6 class="fw-bold mb-3">
                     <i class="bi bi-person-fill me-2 text-primary"></i>Remitente
@@ -110,7 +109,6 @@ function generarHTMLDetalle(mensaje, personalizacion) {
                 </div>
             </div>
             
-            <!-- Mensaje -->
             <div class="info-section mb-4">
                 <h6 class="fw-bold mb-3">
                     <i class="bi bi-chat-left-text-fill me-2 text-primary"></i>Mensaje
@@ -121,12 +119,15 @@ function generarHTMLDetalle(mensaje, personalizacion) {
             </div>
     `;
     
-    // 🔥 Si tiene personalización, mostrarla inline
+    // Si tiene personalización, mostrarla inline
     if (personalizacion) {
+        // La función generarHTMLPersonalizacion (que debe estar definida en tu código)
+        // ya tiene la lógica de corrección para los campos.
         html += generarHTMLPersonalizacion(personalizacion);
     }
     
-    // Notas internas
+    // Notas internas y Botones de acción
+    //  CORRECCIÓN DE SINTAXIS: Se utiliza 'html +=' para continuar el string literal.
     html += `
             <div class="info-section mb-4">
                 <h6 class="fw-bold mb-3">
@@ -137,7 +138,6 @@ function generarHTMLDetalle(mensaje, personalizacion) {
                 </div>
             </div>
             
-            <!-- Botones de acción -->
             <div class="d-flex justify-content-end gap-2">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Cerrar
@@ -145,12 +145,12 @@ function generarHTMLDetalle(mensaje, personalizacion) {
                 <button class="btn btn-primary" onclick="editarEstadoRapido(${mensaje.id})">
                     <i class="bi bi-pencil-fill me-2"></i>Editar Estado
                 </button>
-                <button class="btn btn-success" onclick="crearPedidoDesdeMensaje(${mensaje.id}, '${mensaje.nombre}', ${mensaje.tienePersonalizacion})">
+                <button class="btn btn-success" onclick="crearPedidoDesdeMensaje(${mensaje.id}, '${mensaje.nombre.replace(/'/g, "\\'")}', ${mensaje.tienePersonalizacion})">
                     <i class="bi bi-cart-plus-fill me-2"></i>Crear Pedido
                 </button>
             </div>
         </div>
-    `;
+    `; // Cierre de la plantilla literal final
     
     return html;
 }
@@ -185,18 +185,16 @@ function generarHTMLPersonalizacion(personalizacion) {
     // Mostrar cada detalle de la personalización
     if (personalizacion.detalles && personalizacion.detalles.length > 0) {
         personalizacion.detalles.forEach(detalle => {
-            // Validar que existan los campos necesarios
-            const nombreVariable = detalle.valNombre || detalle.nombreVariable || detalle.nombre || 'Campo';
-            const nombreOpcion = detalle.opcionNombre || detalle.valorSeleccionado || detalle.valor || 'Sin valor';
             
-            // Log para debug
-            console.log('Detalle personalización:', detalle);
+            const nombreVariable = detalle.opcionNombre || 'Campo Desconocido';  
+            const valorSeleccionado = detalle.valorNombre || 'Sin valor';        
+            
             
             html += `
                 <div class="col-md-6">
                     <div class="detalle-personalizacion p-2 bg-white rounded">
                         <small class="text-muted d-block">${nombreVariable}:</small>
-                        <strong>${nombreOpcion}</strong>
+                        <strong>${valorSeleccionado}</strong>
                     </div>
                 </div>
             `;
@@ -216,46 +214,7 @@ function generarHTMLPersonalizacion(personalizacion) {
 }
 
 // ============================================
-// 🔥 VER PERSONALIZACIÓN EN MODAL SEPARADO
-// ============================================
-async function verPersonalizacion(mensajeId) {
-    try {
-        const modal = new bootstrap.Modal(document.getElementById('modalPersonalizacion'));
-        const contenido = document.getElementById('modalPersonalizacionContenido');
-        
-        contenido.innerHTML = `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary"></div>
-                <p class="text-muted mt-3">Cargando personalización...</p>
-            </div>
-        `;
-        
-        modal.show();
-        
-        const response = await fetch(`/admin/mensajes/${mensajeId}/con-personalizacion`);
-        const data = await response.json();
-        
-        if (!data.success || !data.personalizacion) {
-            throw new Error('Personalización no encontrada');
-        }
-        
-        contenido.innerHTML = generarHTMLPersonalizacion(data.personalizacion);
-        
-    } catch (error) {
-        console.error('Error al ver personalización:', error);
-        
-        Swal.fire({
-            title: 'Error',
-            text: 'No se pudo cargar la personalización.',
-            icon: 'error',
-            iconColor: '#ef4444',
-            confirmButtonColor: '#009688'
-        });
-    }
-}
-
-// ============================================
-// 🔥 CREAR PEDIDO DESDE MENSAJE
+//  CREAR PEDIDO DESDE MENSAJE
 // ============================================
 async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonalizacion) {
     try {

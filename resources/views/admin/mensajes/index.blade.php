@@ -235,16 +235,6 @@
                                             <i class="bi bi-eye-fill"></i>
                                         </button>
                                         
-                                        {{-- Ver personalización (solo si tiene) --}}
-                                        @if($mensaje['tienePersonalizacion'])
-                                        <button onclick="verPersonalizacion({{ $mensaje['id'] }})" 
-                                                class="btn-action btn-design" 
-                                                data-bs-toggle="tooltip" 
-                                                title="Ver personalización">
-                                            <i class="bi bi-gem"></i>
-                                        </button>
-                                        @endif
-                                        
                                         {{-- Cambiar estado --}}
                                         <button onclick="cambiarEstadoRapido({{ $mensaje['id'] }}, '{{ $mensaje['estado'] }}')" 
                                                 class="btn-action btn-status" 
