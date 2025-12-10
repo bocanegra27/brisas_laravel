@@ -40,7 +40,7 @@ class PedidoController extends Controller
 
         } catch (\Exception $e) {
             Log::error('PedidoController@index: Excepción', ['error' => $e->getMessage()]);
-            return view('pedidos.index', ['pedidos' => []])
+            return view('admin.pedidos.index', ['pedidos' => []])
                 ->with('error', 'Error al cargar los pedidos. Por favor, revisa el log.');
         }
     }

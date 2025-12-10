@@ -214,7 +214,7 @@ function generarHTMLPersonalizacion(personalizacion) {
 }
 
 // ============================================
-// 🔥 CREAR PEDIDO DESDE MENSAJE (Versión Final)
+// 🔥 CREAR PEDIDO DESDE MENSAJE (Versión FINAL con ARCHIVO)
 // ============================================
 async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonalizacion) {
     try {
@@ -259,7 +259,7 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             didOpen: () => Swal.showLoading()
         });
         
-        // Llamar al endpoint de crear pedido
+        // --- 1. LLAMADA PARA CREAR EL PEDIDO ---
         const response = await fetch(`/admin/pedidos/desde-mensaje/${mensajeId}`, {
             method: 'POST',
             headers: {
@@ -268,8 +268,6 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             },
             body: JSON.stringify({
                 comentarios: comentarios || null,
-                // 🔥 LINEA ELIMINADA: usuarioIdAdmin ya no se envía desde el frontend. 
-                // Lo inyectará el PedidoController de Laravel de forma segura.
             })
         });
         
@@ -278,21 +276,45 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
         if (!data.success) {
             throw new Error(data.message || 'Error al crear el pedido');
         }
+
+        // --- 2. 🔥 LLAMADA PARA ARCHIVAR EL MENSAJE 🔥 ---
+        // Se ejecuta si el pedido fue creado con éxito
+        const estadoArchiveResponse = await fetch(`/admin/mensajes/${mensajeId}/estado`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ estado: 'archivado' }) // <-- Cambiar estado a 'archivado'
+        });
+
+        // No verificamos si el archivado falla, solo si la llamada al backend devuelve 2xx
+        if (!estadoArchiveResponse.ok) {
+            console.warn('Advertencia: El pedido fue creado, pero falló la solicitud de archivado del mensaje.');
+            // Continuamos, ya que el pedido es lo importante.
+        }
         
-        // Éxito
+        // --- 3. MOSTRAR ÉXITO Y REDIRIGIR/RECARGAR ---
+        
         Swal.fire({
             title: '¡Pedido Creado!',
             html: `
                 <p class="mb-3">Pedido <strong>${data.pedido.pedCodigo}</strong> creado exitosamente.</p>
                 <p class="text-muted">Estado inicial: ${data.pedido.estadoNombre}</p>
-            `,
+                <p class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Mensaje archivado.</p>
+            `, // ➡️ Mensaje actualizado para reflejar el archivado
             icon: 'success',
             iconColor: '#22c55e',
             confirmButtonColor: '#009688',
             confirmButtonText: 'Ver Pedidos'
         }).then((result) => {
             if (result.isConfirmed) {
+                // Si hace clic en "Ver Pedidos"
                 window.location.href = '/admin/pedidos';
+            } else {
+                // Si hace clic en otro lado o simplemente cierra el modal, 
+                // forzamos la recarga para que el mensaje archivado desaparezca de la lista.
+                window.location.reload(); 
             }
         });
         

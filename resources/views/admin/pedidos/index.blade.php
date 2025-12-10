@@ -70,8 +70,8 @@
                                 </select>
                             </div>
                             <div class="form-text text-end">
-                                {{-- 🟢 MEJORA: Enlace funcional a crear usuario --}}
-                                <a href="{{ route('usuarios.create') }}" class="text-decoration-none small text-success fw-bold">
+                                {{--  MEJORA: Enlace funcional a crear usuario --}}
+                                <a href="{{ route('admin.usuarios.crear') }}" class="text-decoration-none small text-success fw-bold">
                                     <i class="bi bi-plus-circle"></i> Nuevo Cliente
                                 </a>
                             </div>
@@ -126,7 +126,7 @@
                     $estado = $p->estId ?? 1;
                     $fecha = $p->pedFechaCreacion ?? date('Y-m-d');
                     $id = $p->pedId ?? $p->ped_id ?? null;
-                    // 🟢 Recuperamos el nombre del cliente (enviado desde el backend)
+                    //  Recuperamos el nombre del cliente (enviado desde el backend)
                     $cliente = $p->clienteNombre ?? 'Cliente Desconocido';
                     
                     $nombreEstado = match($estado) {
@@ -157,7 +157,7 @@
                                             <h5 class="fw-bold text-dark mb-0">{{ $codigo }}</h5>
                                             <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ date('d M Y', strtotime($fecha)) }}</small>
                                             
-                                            {{-- 🟢 MEJORA: Mostrar Nombre del Cliente --}}
+                                            {{--  MEJORA: Mostrar Nombre del Cliente --}}
                                             <div class="mt-2">
                                                 <span class="badge bg-light text-dark border px-2 py-1">
                                                     <i class="bi bi-person-circle text-secondary me-1"></i> {{ $cliente }}

@@ -127,7 +127,7 @@
                                 <th>Contacto</th>
                                 <th>Mensaje</th>
                                 <th>Fecha</th>
-                                <th> Tipo Cliente</th> {{-- Reemplaza "Vía" --}}
+                                <th> Tipo Cliente</th> 
                                 <th>Estado</th>
                                 <th>Usuario</th>
                                 <th class="text-center"> Acciones</th>
