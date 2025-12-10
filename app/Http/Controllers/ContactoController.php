@@ -95,29 +95,45 @@ class ContactoController extends Controller
                 'terminos' => true
             ];
 
-            // VERIFICAR SI HAY USUARIO AUTENTICADO
-            if (session()->has('user_id') && session()->get('user_id')) {
-                // Usuario registrado - enviar usuarioId
-                $data['usuarioId'] = (int) session()->get('user_id');
+            // Obtener los IDs y castear a INT, asegurando que sean 0 si son nulos o vacíos.
+            $usuarioId = (int) session()->get('user_id');
+            $sesionId = (int) $request->input('sesionId');
+
+            // 1. PRIORIZAR USUARIO REGISTRADO
+            if (session()->has('user_id') && $usuarioId > 0) { 
+                // Si hay sesión y el ID es válido (> 0)
+                $data['usuarioId'] = $usuarioId;
                 
-                Log::info('ContactoController: Usuario autenticado detectado', [
+                // CRÍTICO: Asegurarse de que el campo 'sesionId' NO se envíe si el usuario está logueado.
+                if (array_key_exists('sesionId', $data)) {
+                    unset($data['sesionId']); 
+                }
+
+                Log::info('ContactoController: Usuario REGISTRADO detectado', [
                     'usuarioId' => $data['usuarioId'],
                     'nombre' => $data['nombre']
                 ]);
-            } else {
-                // Usuario anónimo - enviar sesionId si existe
-                if ($request->has('sesionId') && $request->input('sesionId')) {
-                    $data['sesionId'] = (int) $request->input('sesionId');
-                    
-                    Log::info('ContactoController: Usuario anónimo detectado', [
-                        'sesionId' => $data['sesionId'],
-                        'nombre' => $data['nombre']
-                    ]);
-                } else {
-                    Log::warning('ContactoController: Contacto sin sesionId ni usuarioId (externo)', [
-                        'nombre' => $data['nombre']
-                    ]);
+            } 
+            // 2. SINO, USAR SESIÓN ANÓNIMA
+            elseif ($sesionId > 0) { 
+                // Si no está logueado, pero el sesionId es válido (> 0)
+                $data['sesionId'] = $sesionId;
+                
+                // Asegurarse de NO enviar usuarioId.
+                if (array_key_exists('usuarioId', $data)) {
+                    unset($data['usuarioId']); 
                 }
+
+                Log::info('ContactoController: Usuario ANÓNIMO detectado', [
+                    'sesionId' => $data['sesionId'],
+                    'nombre' => $data['nombre']
+                ]);
+            } 
+            // 3. FALLBACK: EXTERNO
+            else {
+                Log::warning('ContactoController: Contacto EXTERNO (sin ID válido)', [
+                    'nombre' => $data['nombre']
+                ]);
             }
 
             // Agregar personalizacionId si existe

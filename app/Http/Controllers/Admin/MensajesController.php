@@ -381,26 +381,32 @@ class MensajesController
      */
     private function enriquecerMensaje(array $mensaje): array
     {
-        // ✅ Si el backend YA calculó tipoCliente, respetarlo
-        if (!isset($mensaje['tipoCliente']) || empty($mensaje['tipoCliente'])) {
-            // Solo calcular si no viene del backend
-            if (!empty($mensaje['usuarioId']) && $mensaje['usuarioId'] !== 0) {
-                $mensaje['tipoCliente'] = 'registrado';
-            } elseif (!empty($mensaje['sesionId']) && $mensaje['sesionId'] !== 0) {
+        // 1. Verificación robusta de ID de usuario (contra null, 0, "0", "null")
+        $usuarioId_valido = !empty($mensaje['usuarioId']) && $mensaje['usuarioId'] != 0 && $mensaje['usuarioId'] != '0' && $mensaje['usuarioId'] != 'null';
+        $sesionId_valido  = !empty($mensaje['sesionId'])  && $mensaje['sesionId']  != 0 && $mensaje['sesionId']  != '0' && $mensaje['sesionId']  != 'null';
+        
+        // 2. Si el backend NO envió el tipoCliente o es incorrecto, lo recalculamos
+        $tipoClienteBackend = $mensaje['tipoCliente'] ?? null;
+
+        if (!$tipoClienteBackend || $tipoClienteBackend === 'anonimo') {
+            
+            if ($usuarioId_valido) {
+                $mensaje['tipoCliente'] = 'registrado'; // <-- ¡Prioriza esto si hay ID!
+            } elseif ($sesionId_valido) {
                 $mensaje['tipoCliente'] = 'anonimo';
             } else {
-                $mensaje['tipoCliente'] = 'externo';
+                // Como quitamos 'externo', el fallback es 'anonimo'
+                $mensaje['tipoCliente'] = 'anonimo';
             }
         }
-        
-        // ✅ Si el backend YA calculó tienePersonalizacion, respetarlo
+
+        // 3. Verifica si tiene personalización (para el filtro de la tabla)
         if (!isset($mensaje['tienePersonalizacion'])) {
-            $mensaje['tienePersonalizacion'] = !empty($mensaje['personalizacionId']) && $mensaje['personalizacionId'] !== 0;
+            $mensaje['tienePersonalizacion'] = !empty($mensaje['personalizacionId']) && $mensaje['personalizacionId'] != 0 && $mensaje['personalizacionId'] != '0' && $mensaje['personalizacionId'] != 'null';
         }
-        
+
         return $mensaje;
     }
-
     /**
      * Aplicar filtros locales (frontend)
      */
