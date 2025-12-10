@@ -60,99 +60,112 @@ class PersonalizarController extends Controller
      * Guardar personalización
      * POST /personalizar/guardar
      */
-public function guardar(Request $request)
-{
-    try {
-        // Validación
-        $validator = Validator::make($request->all(), [
-            'forma' => 'required|string',
-            'gema' => 'required|string',
-            'material' => 'required|string',
-            'tamano' => 'required|string',
-            'talla' => 'required|string',
-            'sesionId' => 'nullable|integer'
-        ], [
-            'forma.required' => 'Selecciona una forma',
-            'gema.required' => 'Selecciona una gema',
-            'material.required' => 'Selecciona un material',
-            'tamano.required' => 'Selecciona un tamaño',
-            'talla.required' => 'Selecciona una talla'
+    public function guardar(Request $request)
+    {
+        // 🔥 DEBUG TEMPORAL
+        Log::info('DEBUG Personalizar', [
+            'sesionId_request' => $request->input('sesionId'),
+            'user_id_session' => Session::get('user_id'),
+            'tiene_user_id' => Session::has('user_id'),
+            'user_autenticado' => Session::has('jwt_token')
         ]);
+        // FIN DEBUG
+        
+        try {
+            // Validación
+            $validator = Validator::make($request->all(), [
+                'forma' => 'required|string',
+                'gema' => 'required|string',
+                'material' => 'required|string',
+                'tamano' => 'required|string',
+                'talla' => 'required|string',
+                'sesionId' => 'nullable|integer'
+            ], [
+                'forma.required' => 'Selecciona una forma',
+                'gema.required' => 'Selecciona una gema',
+                'material.required' => 'Selecciona un material',
+                'tamano.required' => 'Selecciona un tamaño',
+                'talla.required' => 'Selecciona una talla'
+            ]);
 
-        if ($validator->fails()) {
-            return back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+            if ($validator->fails()) {
+                return back()
+                    ->withErrors($validator)
+                    ->withInput();
+            }
 
-        // Obtener IDs de valores
-        $valoresIds = $this->obtenerIdsDeValores([
-            $request->input('forma'),
-            $request->input('gema'),
-            $request->input('material'),
-            $request->input('tamano'),
-            $request->input('talla')
-        ]);
+            // Obtener IDs de valores
+            $valoresIds = $this->obtenerIdsDeValores([
+                $request->input('forma'),
+                $request->input('gema'),
+                $request->input('material'),
+                $request->input('tamano'),
+                $request->input('talla')
+            ]);
 
-        if (empty($valoresIds)) {
-            return back()
-                ->withInput()
-                ->with('error', 'Error al procesar las opciones seleccionadas.');
-        }
+            if (empty($valoresIds)) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'Error al procesar las opciones seleccionadas.');
+            }
 
-        // Preparar datos
-        $data = [
-            'fecha' => now()->format('Y-m-d\TH:i:s'),
-            'valoresSeleccionados' => $valoresIds
-        ];
+            // Preparar datos
+            $data = [
+                'fecha' => now()->format('Y-m-d\TH:i:s'),
+                'valoresSeleccionados' => $valoresIds
+            ];
 
-        // Agregar sesionId o usuarioClienteId
-        if ($request->has('sesionId') && $request->input('sesionId')) {
-            $data['sesionId'] = (int) $request->input('sesionId');
-        } elseif (Session::has('user_id')) {
-            $data['usuarioClienteId'] = Session::get('user_id');
-        }
+            // ✅ Priorizar usuario autenticado sobre sesión anónima
+            if (Session::has('user_id') && Session::get('user_id')) {
+                // Usuario registrado
+                $data['usuarioClienteId'] = (int) Session::get('user_id');
+                Log::info('Personalización con usuario registrado', ['usuarioId' => $data['usuarioClienteId']]);
+            } elseif ($request->has('sesionId') && $request->input('sesionId')) {
+                // Usuario anónimo
+                $data['sesionId'] = (int) $request->input('sesionId');
+                Log::info('Personalización con sesión anónima', ['sesionId' => $data['sesionId']]);
+            }
 
-        // Guardar en API
-        $response = $this->apiService->post('/personalizaciones', $data);
+            // Guardar en API
+            $response = $this->apiService->post('/personalizaciones', $data);
 
-        if ($response === null) {
+            if ($response === null) {
+                return back()
+                    ->withInput()
+                    ->with('error', 'Error al guardar la personalización.');
+            }
+
+            // Obtener ID
+            $personalizacionId = $response['id'] ?? null;
+
+            if (!$personalizacionId) {
+                Log::error('PersonalizarController: No se encontró ID en respuesta', [
+                    'response' => $response
+                ]);
+                return back()
+                    ->withInput()
+                    ->with('error', 'Error: No se pudo obtener el ID de la personalización.');
+            }
+
+            Log::info('Personalización guardada', [
+                'id' => $personalizacionId,
+                'tipo' => $response['tipoCliente'] ?? 'desconocido'
+            ]);
+
+            // Redirigir a formulario de contacto
+            return redirect()->route('contacto.create', ['personalizacionId' => $personalizacionId])
+                ->with('success', '¡Personalización guardada! Completa tus datos para continuar.');
+
+        } catch (\Exception $e) {
+            Log::error('Error al guardar personalización', [
+                'error' => $e->getMessage()
+            ]);
+
             return back()
                 ->withInput()
                 ->with('error', 'Error al guardar la personalización.');
         }
-
-        // ✅ Obtener ID (el backend retorna 'id', no 'perId')
-        $personalizacionId = $response['id'] ?? null;
-
-        if (!$personalizacionId) {
-            Log::error('No se encontró ID en respuesta', ['response' => $response]);
-            return back()
-                ->withInput()
-                ->with('error', 'Error: No se pudo obtener el ID de la personalización.');
-        }
-
-        Log::info('Personalización guardada exitosamente', [
-            'id' => $personalizacionId,
-            'tipo' => $response['tipoCliente'] ?? 'desconocido',
-            'sesionId' => $response['sesionId'] ?? null
-        ]);
-
-        // ✅ Redirigir a formulario de contacto
-        return redirect()->route('contacto.create', ['personalizacionId' => $personalizacionId])
-            ->with('success', '¡Personalización guardada! Completa tus datos para continuar.');
-
-    } catch (\Exception $e) {
-        Log::error('Error al guardar personalización', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return back()
-            ->withInput()
-            ->with('error', 'Error al guardar la personalización.');
     }
-}
 
     /**
      * Obtiene las opciones (categorías) del API

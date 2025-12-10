@@ -95,15 +95,56 @@ class ContactoController extends Controller
                 'terminos' => true
             ];
 
-            // Agregar sesionId si existe
-            if ($request->has('sesionId') && $request->input('sesionId')) {
-                $data['sesionId'] = (int) $request->input('sesionId');
+            // Obtener los IDs y castear a INT, asegurando que sean 0 si son nulos o vacíos.
+            $usuarioId = (int) session()->get('user_id');
+            $sesionId = (int) $request->input('sesionId');
+
+            // 1. PRIORIZAR USUARIO REGISTRADO
+            if (session()->has('user_id') && $usuarioId > 0) { 
+                // Si hay sesión y el ID es válido (> 0)
+                $data['usuarioId'] = $usuarioId;
+                
+                // CRÍTICO: Asegurarse de que el campo 'sesionId' NO se envíe si el usuario está logueado.
+                if (array_key_exists('sesionId', $data)) {
+                    unset($data['sesionId']); 
+                }
+
+                Log::info('ContactoController: Usuario REGISTRADO detectado', [
+                    'usuarioId' => $data['usuarioId'],
+                    'nombre' => $data['nombre']
+                ]);
+            } 
+            // 2. SINO, USAR SESIÓN ANÓNIMA
+            elseif ($sesionId > 0) { 
+                // Si no está logueado, pero el sesionId es válido (> 0)
+                $data['sesionId'] = $sesionId;
+                
+                // Asegurarse de NO enviar usuarioId.
+                if (array_key_exists('usuarioId', $data)) {
+                    unset($data['usuarioId']); 
+                }
+
+                Log::info('ContactoController: Usuario ANÓNIMO detectado', [
+                    'sesionId' => $data['sesionId'],
+                    'nombre' => $data['nombre']
+                ]);
+            } 
+            // 3. FALLBACK: EXTERNO
+            else {
+                Log::warning('ContactoController: Contacto EXTERNO (sin ID válido)', [
+                    'nombre' => $data['nombre']
+                ]);
             }
 
             // Agregar personalizacionId si existe
             if ($request->has('personalizacionId') && $request->input('personalizacionId')) {
                 $data['personalizacionId'] = (int) $request->input('personalizacionId');
             }
+
+            // Log de datos a enviar (para debug)
+            Log::debug('ContactoController: Datos a enviar al backend', [
+                'data' => $data
+            ]);
 
             // Enviar al API
             $response = $this->apiService->post('/contactos', $data);
@@ -114,9 +155,11 @@ class ContactoController extends Controller
                     ->with('error', 'Error al enviar el mensaje. Por favor, intenta nuevamente.');
             }
 
-            Log::info('ContactoController: Contacto creado', [
+            Log::info('ContactoController: Contacto creado exitosamente', [
                 'id' => $response['id'],
-                'tipoCliente' => $response['tipoCliente'] ?? 'desconocido'
+                'tipoCliente' => $response['tipoCliente'] ?? 'desconocido',
+                'usuarioId' => $response['usuarioId'] ?? null,
+                'sesionId' => $response['sesionId'] ?? null
             ]);
 
             return redirect()->route('home')
@@ -124,7 +167,8 @@ class ContactoController extends Controller
 
         } catch (\Exception $e) {
             Log::error('ContactoController@store: Excepción', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return back()
@@ -141,7 +185,7 @@ class ContactoController extends Controller
         $lineas = [];
         
         foreach ($detalles as $detalle) {
-            $lineas[] = "• {$detalle['opcionNombre']}: {$detalle['valNombre']}";
+            $lineas[] = "• {$detalle['valNombre']}: {$detalle['opcionNombre']}";
         }
         
         $intro = "Me interesa una joya con estas características:\n\n";

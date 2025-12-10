@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * ✨ CONTROLADOR MEJORADO: Gestión de Mensajes/Contactos
+ * 
+ * NUEVAS FUNCIONALIDADES:
+ * - Tipo de cliente (anónimo/registrado/externo)
+ * - Filtro por personalización vinculada
+ * - Ver personalización inline
+ * - Botón crear pedido para TODOS los mensajes
+ */
 class MensajesController
 {
     private ApiService $apiService;
@@ -17,69 +26,60 @@ class MensajesController
     }
 
     /**
-     * Mostrar listado de mensajes con filtros GET /admin/mensajes
+     * 🔥 MEJORADO: Mostrar listado con tipo de cliente y personalización
+     * GET /admin/mensajes
      */
     public function index(Request $request)
     {
         try {
             // Obtener parámetros de filtros
-            $via = $request->get('via');
+            $tipoCliente = $request->get('tipoCliente'); // anónimo, registrado, externo
             $estado = $request->get('estado');
+            $tienePersonalizacion = $request->get('tienePersonalizacion'); // true/false
 
-            // Construir query params
+            // Construir query params (solo estado va al backend)
             $params = [];
-
-            if ($via !== null && $via !== '') {
-                $params['via'] = $via;
-            }
-
             if ($estado !== null && $estado !== '') {
                 $params['estado'] = $estado;
             }
 
-            // Construir URL con query params
             $queryString = !empty($params) ? '?' . http_build_query($params) : '';
             $endpoint = '/contactos' . $queryString;
 
-            // Llamada al API con autenticación
+            // Llamada al API
             $response = $this->apiService->get($endpoint, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
-            // Verificar respuesta
             if ($response === null) {
                 Log::error('MensajesController: Error al obtener mensajes del API');
                 return view('admin.mensajes.index')->with([
                     'mensajes' => [],
-                    'stats' => [
-                        'total' => 0,
-                        'pendientes' => 0,
-                        'atendidos' => 0,
-                        'archivados' => 0
-                    ],
-                    'filtros' => [
-                        'via' => $via,
-                        'estado' => $estado
-                    ]
+                    'stats' => $this->getEstadisticasVacias(),
+                    'filtros' => $this->getFiltrosDefault($tipoCliente, $estado, $tienePersonalizacion)
                 ]);
             }
 
-            // Obtener estadísticas
+            // 🔥 Enriquecer mensajes con tipoCliente y personalización
+            $mensajesEnriquecidos = array_map(function($mensaje) {
+                return $this->enriquecerMensaje($mensaje);
+            }, $response);
+
+            // Aplicar filtros locales
+            $mensajesFiltrados = $this->aplicarFiltros(
+                $mensajesEnriquecidos, 
+                $tipoCliente, 
+                $tienePersonalizacion
+            );
+
+            // Estadísticas
             $stats = $this->getEstadisticas();
 
-            // Preparar datos para la vista
-            $data = [
-                'mensajes' => $response,
+            return view('admin.mensajes.index', [
+                'mensajes' => array_values($mensajesFiltrados),
                 'stats' => $stats,
-                'filtros' => [
-                    'via' => $via,
-                    'estado' => $estado
-                ]
-            ];
-
-            return view('admin.mensajes.index', $data);
+                'filtros' => $this->getFiltrosDefault($tipoCliente, $estado, $tienePersonalizacion)
+            ]);
 
         } catch (\Exception $e) {
             Log::error('MensajesController@index: Excepción', [
@@ -89,31 +89,21 @@ class MensajesController
 
             return view('admin.mensajes.index')->with([
                 'mensajes' => [],
-                'stats' => [
-                    'total' => 0,
-                    'pendientes' => 0,
-                    'atendidos' => 0,
-                    'archivados' => 0
-                ],
-                'filtros' => [
-                    'via' => null,
-                    'estado' => null
-                ]
+                'stats' => $this->getEstadisticasVacias(),
+                'filtros' => $this->getFiltrosDefault(null, null, null)
             ])->with('error', 'Error al cargar los mensajes. Por favor, intenta nuevamente.');
         }
     }
 
     /**
-     * Ver detalles de un mensaje específico GET /admin/mensajes/{id}
+     * 🔥 NUEVO: Ver mensaje CON personalización vinculada
+     * GET /admin/mensajes/{id}/con-personalizacion
      */
-    public function ver($id)
+    public function verConPersonalizacion($id)
     {
         try {
-            // Obtener mensaje del API
-            $response = $this->apiService->get("/contactos/{$id}", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+            $response = $this->apiService->get("/contactos/{$id}/con-personalizacion", [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
             if ($response === null) {
@@ -123,9 +113,52 @@ class MensajesController
                 ], 404);
             }
 
+            // Enriquecer contacto
+            $contactoEnriquecido = $this->enriquecerMensaje($response['contacto']);
+
             return response()->json([
                 'success' => true,
-                'mensaje' => $response
+                'contacto' => $contactoEnriquecido,
+                'personalizacion' => $response['personalizacion'] ?? null
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('MensajesController@verConPersonalizacion: Excepción', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar el mensaje.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Ver detalles básicos de un mensaje
+     * GET /admin/mensajes/{id}
+     */
+    public function ver($id)
+    {
+        try {
+            $response = $this->apiService->get("/contactos/{$id}", [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
+
+            if ($response === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mensaje no encontrado.'
+                ], 404);
+            }
+
+            // Enriquecer
+            $mensajeEnriquecido = $this->enriquecerMensaje($response);
+
+            return response()->json([
+                'success' => true,
+                'mensaje' => $mensajeEnriquecido
             ]);
 
         } catch (\Exception $e) {
@@ -142,12 +175,12 @@ class MensajesController
     }
 
     /**
-     * Actualizar mensaje (estado, vía, notas, etc.) PUT /admin/mensajes/{id}
+     * Actualizar mensaje (estado, vía, notas, etc.)
+     * PUT /admin/mensajes/{id}
      */
     public function update(Request $request, $id)
     {
         try {
-            // Validación
             $validated = $request->validate([
                 'estado' => 'required|in:pendiente,atendido,archivado',
                 'via' => 'required|in:formulario,whatsapp',
@@ -156,7 +189,6 @@ class MensajesController
                 'usuarioIdAdmin' => 'nullable|integer'
             ]);
 
-            // Preparar datos para el API
             $data = [
                 'estado' => $validated['estado'],
                 'via' => $validated['via'],
@@ -165,11 +197,8 @@ class MensajesController
                 'usuarioIdAdmin' => isset($validated['usuarioIdAdmin']) ? (int) $validated['usuarioIdAdmin'] : null
             ];
 
-            // Llamada al API
             $response = $this->apiService->put("/contactos/{$id}", $data, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
             if ($response === null) {
@@ -184,7 +213,7 @@ class MensajesController
             return response()->json([
                 'success' => true,
                 'message' => '¡Mensaje actualizado exitosamente!',
-                'mensaje' => $response
+                'mensaje' => $this->enriquecerMensaje($response)
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -207,7 +236,8 @@ class MensajesController
     }
 
     /**
-     * Cambiar estado rápidamente desde el listado PATCH /admin/mensajes/{id}/estado
+     * Cambiar estado rápidamente
+     * PATCH /admin/mensajes/{id}/estado
      */
     public function cambiarEstado(Request $request, $id)
     {
@@ -217,9 +247,7 @@ class MensajesController
             ]);
 
             $mensajeActual = $this->apiService->get("/contactos/{$id}", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
             if ($mensajeActual === null) {
@@ -229,7 +257,6 @@ class MensajesController
                 ], 404);
             }
 
-            // Actualizar solo el estado,
             $data = [
                 'estado' => $validated['estado'],
                 'via' => $mensajeActual['via'],
@@ -239,9 +266,7 @@ class MensajesController
             ];
 
             $response = $this->apiService->put("/contactos/{$id}", $data, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
             if ($response === null) {
@@ -276,15 +301,14 @@ class MensajesController
     }
 
     /**
-     * Eliminar mensaje DELETE /admin/mensajes/{id}
+     * Eliminar mensaje
+     * DELETE /admin/mensajes/{id}
      */
     public function eliminar($id)
     {
         try {
             $response = $this->apiService->delete("/contactos/{$id}", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
             if ($response === null) {
@@ -320,25 +344,13 @@ class MensajesController
     public function getEstadisticas(): array
     {
         try {
-            $responsePendientes = $this->apiService->get('/contactos/count?estado=pendiente', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
+            $token = Session::get('jwt_token');
+            $headers = ['headers' => ['Authorization' => 'Bearer ' . $token]];
 
-            $responseAtendidos = $this->apiService->get('/contactos/count?estado=atendido', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
+            $responsePendientes = $this->apiService->get('/contactos/count?estado=pendiente', $headers);
+            $responseAtendidos = $this->apiService->get('/contactos/count?estado=atendido', $headers);
+            $responseArchivados = $this->apiService->get('/contactos/count?estado=archivado', $headers);
 
-            $responseArchivados = $this->apiService->get('/contactos/count?estado=archivado', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
-
-            // ✅ Extraer del objeto JSON retornado por Spring Boot
             $pendientes = $responsePendientes['count'] ?? 0;
             $atendidos = $responseAtendidos['count'] ?? 0;
             $archivados = $responseArchivados['count'] ?? 0;
@@ -355,12 +367,84 @@ class MensajesController
                 'error' => $e->getMessage()
             ]);
 
-            return [
-                'total' => 0,
-                'pendientes' => 0,
-                'atendidos' => 0,
-                'archivados' => 0
-            ];
+            return $this->getEstadisticasVacias();
         }
+    }
+
+    // ============================================
+    // 🔥 MÉTODOS PRIVADOS AUXILIARES
+    // ============================================
+
+    /**
+     * Enriquece un mensaje con tipoCliente y personalización
+     * Versión Limpia: Confía en el Backend (Spring Boot) y solo añade el fallback
+     */
+    private function enriquecerMensaje(array $mensaje): array
+    {
+        // 1. Lógica de tipoCliente: Si el backend no lo envía o es 'externo', recalcular (solo por robustez).
+        // Si el backend envía 'registrado' o 'anonimo', se respeta (lo más común).
+        if (!isset($mensaje['tipoCliente']) || empty($mensaje['tipoCliente']) || $mensaje['tipoCliente'] === 'externo') {
+            
+            // Re-cálculo (solo si el backend falló o marcó como 'externo')
+            if (!empty($mensaje['usuarioId']) && $mensaje['usuarioId'] !== 0) {
+                $mensaje['tipoCliente'] = 'registrado';
+            } elseif (!empty($mensaje['sesionId']) && $mensaje['sesionId'] !== 0) {
+                $mensaje['tipoCliente'] = 'anonimo';
+            } else {
+                $mensaje['tipoCliente'] = 'externo';
+            }
+        }
+        
+        // 2. Lógica de tienePersonalizacion: Si el backend no la calculó, lo hacemos aquí.
+        if (!isset($mensaje['tienePersonalizacion'])) {
+            $mensaje['tienePersonalizacion'] = !empty($mensaje['personalizacionId']) && $mensaje['personalizacionId'] !== 0;
+        }
+        
+        return $mensaje;
+    }
+    /**
+     * Aplicar filtros locales (frontend)
+     */
+    private function aplicarFiltros(array $mensajes, $tipoCliente, $tienePersonalizacion): array
+    {
+        if ($tipoCliente !== null && $tipoCliente !== '') {
+            $mensajes = array_filter($mensajes, function($msg) use ($tipoCliente) {
+                return ($msg['tipoCliente'] ?? 'externo') === $tipoCliente;
+            });
+        }
+
+        if ($tienePersonalizacion !== null && $tienePersonalizacion !== '') {
+            $tienePers = $tienePersonalizacion === 'true';
+            $mensajes = array_filter($mensajes, function($msg) use ($tienePers) {
+                return ($msg['tienePersonalizacion'] ?? false) === $tienePers;
+            });
+        }
+
+        return $mensajes;
+    }
+
+    /**
+     * Obtener filtros por defecto
+     */
+    private function getFiltrosDefault($tipoCliente, $estado, $tienePersonalizacion): array
+    {
+        return [
+            'tipoCliente' => $tipoCliente,
+            'estado' => $estado,
+            'tienePersonalizacion' => $tienePersonalizacion
+        ];
+    }
+
+    /**
+     * Estadísticas vacías
+     */
+    private function getEstadisticasVacias(): array
+    {
+        return [
+            'total' => 0,
+            'pendientes' => 0,
+            'atendidos' => 0,
+            'archivados' => 0
+        ];
     }
 }

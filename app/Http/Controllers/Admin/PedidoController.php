@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Services\ApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -11,118 +12,134 @@ class PedidoController
 {
     private ApiService $apiService;
 
-    // Lista de estados para usar en la vista (match con Spring Boot)
-    private array $estadosPosibles = [
-        1 => 'Pendiente Confirmación', 2 => 'Confirmado', 3 => 'En Diseño',
-        4 => 'Aprobado por Cliente', 5 => 'En Producción', 6 => 'Control de Calidad',
-        7 => 'Listo para Entrega', 8 => 'En Camino', 9 => 'Entregado', 10 => 'Cancelado'
-    ];
-
     public function __construct(ApiService $apiService)
     {
         $this->apiService = $apiService;
     }
 
     /**
-     * 📋 Listado de pedidos
+     *  IMPLEMENTADO: Muestra el listado de pedidos.
+     * GET /admin/pedidos
      */
-public function index(Request $request)
+    public function index()
     {
         try {
-            // 1. Llamada a la API
-            $response = $this->apiService->get("/pedidos", [
-                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
-            ]);
+            // La llamada usa el JWT del ApiService
+            $pedidos = $this->apiService->get('/pedidos') ?? [];
 
-            // 2. CORRECCIÓN: La API devuelve un array directo, no un objeto paginado
-            // Si $response es null, usamos array vacío. Si es array, lo usamos directo.
-            $listaPedidos = is_array($response) ? $response : [];
-
-            return view('admin.pedidos.index', [
-                'pedidos' => $listaPedidos,
-                // Como la API actual no manda paginación, simulamos una sola página
-                'pagination' => [
-                    'totalElements' => count($listaPedidos),
-                    'totalPages' => 1,
-                    'number' => 0, 
-                ],
-                'estados' => $this->estadosPosibles,
-                'filtroEstado' => $request->query('estadoId')
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error listando pedidos: ' . $e->getMessage());
-            return back()->with('error', 'No se pudieron cargar los pedidos.');
-        }
-    }
-
-    /**
-     * 👁️ Vista Robusta: Ver detalle y gestionar pedido
-     */
-    public function show($id)
-    {
-        try {
-            // 1. Obtener datos del pedido
-            $pedido = $this->apiService->get("/pedidos/{$id}", [
-                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
-            ]);
-
-            if (!$pedido) {
-                return redirect()->route('admin.pedidos.index')->with('error', 'Pedido no encontrado.');
+            // Nota: Si el backend retorna una respuesta paginada, 
+            // necesitarías ajustar esta lógica para manejar 'content', 'totalPages', etc.
+            
+            // Si el API retorna null, mostramos la vista con un error.
+            if ($pedidos === null) {
+                return view('admin.pedidos.index', ['pedidos' => []])
+                    ->with('error', 'Error de conexión con el sistema de pedidos.');
             }
 
-            // 2. Intentar obtener detalles de personalización si existe referencia
-            // (Asumiendo que el pedido trae datos básicos, pero queremos el detalle completo visual)
-            $personalizacion = null;
-            
-            // Nota: Aquí dependemos de que tu backend envíe el ID de personalización dentro del pedido.
-            // Si viene en $pedido['detalles'], lo usamos directamente.
-            
-            return view('admin.pedidos.ver', [
-                'pedido' => $pedido,
-                'estados' => $this->estadosPosibles
-            ]);
+            return view('admin.pedidos.index', compact('pedidos'));
 
         } catch (\Exception $e) {
-            Log::error('Error viendo pedido: ' . $e->getMessage());
-            return back()->with('error', 'Error de conexión.');
+            Log::error('PedidoController@index: Excepción', ['error' => $e->getMessage()]);
+            return view('admin.pedidos.index', ['pedidos' => []])
+                ->with('error', 'Error al cargar los pedidos. Por favor, revisa el log.');
         }
     }
 
     /**
-     * ✏ Actualizar estado del pedido
+     *  IMPLEMENTADO: Crea un pedido a partir de un mensaje de contacto.
+     * POST admin/pedidos/desde-mensaje/{mensajeId}
+     */
+    public function crearDesdeMensaje(Request $request, $contactoId)
+    {
+        try {
+            $usuarioIdAdmin = Session::get('user_id');
+
+            if (!$usuarioIdAdmin) {
+                return response()->json(['success' => false, 'message' => 'Admin no autenticado'], 401);
+            }
+
+            // 1. Obtener los datos del Request (Usando valor por defecto en input() para seguridad)
+            $comentarios = $request->input('comentarios'); // Puede ser null
+            $personalizacionId = $request->input('personalizacionId'); // Puede ser null
+            
+            // El estado por defecto debe ser 1 (Cotización Pendiente) si no se especifica.
+            $estadoId = (int) $request->input('estadoId', 1); 
+            
+            $query = [
+                'estadoId' => $estadoId,
+                'comentarios' => $comentarios
+            ];
+
+            // 2. Añadir el personalizacionId solo si es un ID válido (> 0)
+            // Usamos is_numeric y la comprobación explícita para evitar errores con null.
+            if (is_numeric($personalizacionId) && (int)$personalizacionId > 0) {
+                $query['personalizacionId'] = (int)$personalizacionId;
+            }
+            
+            // 3. FIX SEGURO: Construir la URL con Query Params
+            $endpointConQuery = "/pedidos/desde-contacto/{$contactoId}?" . http_build_query($query);
+
+            // 4. Llamada POST (con body vacío, ya que los datos van en la query)
+            $response = $this->apiService->post($endpointConQuery, []);
+
+            if ($response === null || (isset($response['pedId']) === false)) {
+                // Si el API de Spring Boot falló (4xx/5xx) o devolvió null/vacío.
+                // Necesitas el log de Laravel para saber el error real del backend.
+                Log::error('PedidoController: Error al crear pedido en backend', ['response' => $response, 'url' => $endpointConQuery]);
+                return response()->json(['success' => false, 'message' => 'Error de conexión con el API de pedidos o respuesta inválida.'], 500);
+            }
+            
+            return response()->json(['success' => true, 'message' => 'Pedido creado exitosamente.', 'pedido' => $response], 201);
+
+        } catch (\Exception $e) {
+            // 🛑 ESTE CATCH ES EL QUE TE DA EL ERROR 500 AHORA
+            Log::error('PedidoController@crearDesdeMensaje: Excepción PHP', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Excepción interna en Laravel: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * 🚧 PENDIENTE: Crea un pedido manualmente (requiere lógica Multipart/Form-data).
+     * POST admin/pedidos
+     */
+    public function store(Request $request)
+    {
+        // Esta lógica es compleja debido a MultipartFile y debe ser refactorizada
+        // para asegurar que el ApiService maneje correctamente el token en requests Multipart.
+        Log::warning('PedidoController@store: Método pendiente de refactorizar para Multipart.');
+        return back()->with('error', 'La creación manual de pedidos (store) está pendiente de implementación Multipart segura.');
+    }
+
+    /**
+     * 🚧 PENDIENTE: Actualiza un pedido (requiere lógica Multipart/Form-data).
+     * PUT admin/pedidos/{id}
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'estadoId' => 'required|integer|min:1|max:10',
-            'comentarios' => 'nullable|string'
-        ]);
-
-        $response = $this->apiService->put("/pedidos/{$id}", $validated, [
-            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
-        ]);
-
-        if ($response) {
-            return back()->with('success', 'Estado del pedido actualizado correctamente.');
-        }
-
-        return back()->with('error', 'No se pudo actualizar el pedido.');
+        // Similar a store, requiere un manejo especializado de multipart y method spoofing.
+        Log::warning('PedidoController@update: Método pendiente de refactorizar para Multipart.');
+        return back()->with('error', 'La actualización de pedidos (update) está pendiente de implementación Multipart segura.');
     }
 
     /**
-     * 🔥 Crear pedido desde mensaje (Ya lo tenías, lo dejo igual)
+     * 🔥 IMPLEMENTADO: Elimina un pedido.
+     * DELETE admin/pedidos/{id}
      */
-    public function crearDesdeMensaje(Request $request, $mensajeId)
+    public function destroy($id)
     {
-        // ... (Mantén tu código existente aquí, es correcto)
-        return $this->originalCrearDesdeMensajeLogic($request, $mensajeId);
-    }
-    
-    // Helper para mantener tu lógica anterior sin repetir código en este chat
-    private function originalCrearDesdeMensajeLogic($request, $mensajeId) {
-        // Pega aquí la lógica del método crearDesdeMensaje que me mostraste al principio
-        // o simplemente mantén el método original en la clase.
+        try {
+            // ApiService maneja el JWT
+            $response = $this->apiService->delete("/pedidos/{$id}");
+            
+            if ($response !== null) {
+                return redirect()->route('admin.pedidos.index')->with('success', 'Pedido eliminado correctamente.');
+            } else {
+                return back()->with('error', 'Error al eliminar el pedido. Podría no existir o el backend falló.');
+            }
+        } catch (\Exception $e) {
+            Log::error('PedidoController@destroy: Excepción', ['id' => $id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Error interno al intentar eliminar el pedido.');
+        }
     }
     
     // Falta implementar destroy...
