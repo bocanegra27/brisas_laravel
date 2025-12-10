@@ -334,6 +334,16 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
+.btn-gestionar {
+  background: linear-gradient(135deg, #2935dbe0 0%, #463aed 100%);
+  box-shadow: 0 2px 6px rgba(92, 102, 246, 0.3);
+}
+
+.btn-gestionar:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(92, 95, 246, 0.4);
+}
+
 /* ===== PAGINACION ===== */
 .pedidos-table-card .card-footer {
   background: #f8fafc;

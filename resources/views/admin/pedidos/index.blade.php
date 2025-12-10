@@ -233,37 +233,21 @@
                                 
                                 <td>
                                     <div class="action-buttons">
-                                        {{-- Ver detalles --}}
-                                        <a href="{{ route('admin.pedidos.ver', $pedido['pedId']) }}" 
-                                           class="btn-action btn-view" 
-                                           data-bs-toggle="tooltip" 
-                                           title="Ver detalles">
-                                            <i class="bi bi-eye-fill"></i>
-                                        </a>
-                                        
-                                        {{-- Cambiar estado --}}
-                                        <button onclick="cambiarEstadoPedido({{ $pedido['pedId'] }}, {{ $estadoId }})" 
-                                                class="btn-action btn-status" 
-                                                data-bs-toggle="tooltip" 
-                                                title="Cambiar estado">
-                                            <i class="bi bi-arrow-left-right"></i>
-                                        </button>
-                                        
-                                        {{-- Editar --}}
-                                        <button onclick="editarPedido({{ $pedido['pedId'] }})" 
-                                                class="btn-action btn-edit" 
-                                                data-bs-toggle="tooltip" 
-                                                title="Editar">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </button>
-                                        
-                                        {{-- Eliminar --}}
-                                        <button onclick="eliminarPedido({{ $pedido['pedId'] }}, '{{ e($pedido['pedCodigo']) }}')" 
-                                                class="btn-action btn-delete" 
-                                                data-bs-toggle="tooltip" 
-                                                title="Eliminar">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </button>
+                                        {{-- Gestionar pedido --}}
+                                    <button onclick="gestionarPedido({{ $pedido['pedId'] }}, '{{ e($pedido['pedCodigo']) }}')" 
+                                            class="btn-action btn-gestionar" 
+                                            data-bs-toggle="tooltip" 
+                                            title="Gestionar pedido">
+                                        <i class="bi bi-gear-fill"></i>
+                                    </button>
+
+                                    {{-- Cambiar estado rapido --}}
+                                    <button onclick="cambiarEstadoPedido({{ $pedido['pedId'] }}, {{ $estadoId }})" 
+                                            class="btn-action btn-status" 
+                                            data-bs-toggle="tooltip" 
+                                            title="Cambiar estado">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </button>
                                     </div>
                                 </td>
                             </tr>
@@ -340,7 +324,7 @@
     </div>
 </div>
 
-{{-- Modal para cambiar estado --}}
+{{-- Modal para cambiar estado (Asegúrate de que este bloque NO esté dentro del @forelse) --}}
 <div class="modal fade" id="modalCambiarEstado" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -363,6 +347,12 @@
                         </select>
                     </div>
                     
+                    {{-- CAMBIO CRÍTICO: AGREGAR CAMPO DE COMENTARIOS PARA EL HISTORIAL --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Comentarios de Historial (Opcional)</label>
+                        <textarea class="form-control" id="comentariosEstado" name="comentarios" rows="3" placeholder="Ej: Pago de anticipo recibido, asignado a diseñador Miguel."></textarea>
+                    </div>
+
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle-fill me-2"></i>
                         Los cambios de estado se registraran automaticamente en el historial del pedido.

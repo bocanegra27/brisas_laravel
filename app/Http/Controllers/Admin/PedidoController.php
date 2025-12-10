@@ -143,44 +143,53 @@ class PedidoController extends Controller
             ])->with('error', 'Error al cargar los pedidos. Por favor, intenta nuevamente.');
         }
     }
+/**
+ * Vista de gestion del pedido (Fase 1 - temporal)
+ * En Fase 3 sera la vista robusta completa con timeline
+ * GET /admin/pedidos/{id}/gestionar
+ */
+public function gestionar($id)
+{
+    try {
+        $response = $this->apiService->get("/pedidos/{$id}", [
+            'headers' => [
+                'Authorization' => 'Bearer ' . Session::get('jwt_token')
+            ]
+        ]);
 
-    /**
-     * Ver detalles de un pedido especifico
-     * GET /admin/pedidos/{id}
-     */
-    public function ver($id)
-    {
-        try {
-            $response = $this->apiService->get("/pedidos/{$id}", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
-
-            if ($response === null) {
-                return redirect()
-                    ->route('admin.pedidos.index')
-                    ->with('error', 'Pedido no encontrado.');
-            }
-
-            // Enriquecer pedido
-            $pedido = $this->enriquecerPedido($response);
-
-            return view('admin.pedidos.ver', [
-                'pedido' => $pedido
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('PedidoController@ver: Excepcion', [
-                'id' => $id,
-                'error' => $e->getMessage()
-            ]);
-
+        if ($response === null) {
             return redirect()
                 ->route('admin.pedidos.index')
-                ->with('error', 'Error al cargar el pedido.');
+                ->with('error', 'Pedido no encontrado.');
         }
+
+        $pedido = $this->enriquecerPedido($response);
+        $estadosArray = $this->getEstadosDisponibles();
+
+        // Convertir array de objetos a array asociativo para la vista
+        $estados = [];
+        foreach ($estadosArray as $estado) {
+            $estados[$estado['id']] = $estado['nombre'];
+        }
+
+        return view('admin.pedidos.gestionar', [
+            'pedido' => $pedido,
+            'estados' => $estados
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('PedidoController@gestionar: Excepcion', [
+            'id' => $id,
+            'error' => $e->getMessage()
+        ]);
+
+        return redirect()
+            ->route('admin.pedidos.index')
+            ->with('error', 'Error al cargar el pedido.');
     }
+}
+
+
 
     /**
      * NUEVO: Crear pedido desde mensaje de contacto
@@ -318,75 +327,78 @@ class PedidoController extends Controller
                 ->with('error', 'Error al actualizar el pedido.');
         }
     }
-
     /**
-     * NUEVO: Cambiar estado rapidamente desde el listado
-     * PATCH /admin/pedidos/{id}/estado
+     * Llama al backend para actualizar el estado y registrar el evento en el historial.
+     * PATCH /admin/pedidos/{id}/estado-historial
      */
-    public function cambiarEstado(Request $request, $id)
+    public function actualizarEstadoConHistorial(Request $request, $pedidoId)
     {
         try {
-            $validated = $request->validate([
-                'estadoId' => 'required|integer|min:1|max:10'
-            ]);
-
-            // Obtener pedido actual
-            $pedidoActual = $this->apiService->get("/pedidos/{$id}", [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
-
-            if ($pedidoActual === null) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pedido no encontrado.'
-                ], 404);
-            }
-
-            // Actualizar solo el estado
+            // ... (resto de la lógica, que es correcta)
             $data = [
-                'estadoId' => (int) $validated['estadoId'],
-                'comentarios' => $pedidoActual['pedComentarios'] ?? null
+                'nuevoEstadoId' => (int) $request->input('estadoId'), 
+                'comentarios' => $request->input('comentarios') ?? 'Actualización rápida sin comentarios detallados.'
             ];
 
-            $response = $this->apiService->put("/pedidos/{$id}", $data, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
+            // 1. Llamada al nuevo endpoint de Spring Boot
+            $response = $this->apiService->patch("/pedidos/{$pedidoId}/estado", $data, [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
 
-            if ($response === null) {
+            if (isset($response['pedId'])) {
+                // 🔥 CORRECCIÓN: DEVOLVER RESPUESTA JSON DE ÉXITO
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Error al cambiar el estado del pedido.'
-                ], 500);
+                    'success' => true,
+                    'message' => 'El estado del pedido fue actualizado y el evento registrado en el historial.',
+                    'pedido' => $response
+                ]);
             }
 
-            Log::info('PedidoController: Estado cambiado', [
-                'id' => $id,
-                'estadoId' => $validated['estadoId']
-            ]);
+            // Manejo de error del API
+            $message = $response['message'] ?? 'Error desconocido al procesar el cambio de estado en el API.';
+            Log::error('PedidoController@actualizarEstadoConHistorial: API Fallo.', ['response' => $response, 'pedidoId' => $pedidoId]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Estado actualizado exitosamente.',
-                'estadoId' => $validated['estadoId']
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('PedidoController@cambiarEstado: Excepcion', [
-                'id' => $id,
-                'error' => $e->getMessage()
-            ]);
-
+            // 🔥 DEVOLVER RESPUESTA JSON DE ERROR
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cambiar el estado.'
+                'message' => $message
+            ], 500);
+
+        } catch (\Exception $e) {
+            // ... (manejo de excepción, que también debe ser JSON)
+            Log::error('PedidoController@actualizarEstadoConHistorial: Excepción.', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno: ' . $e->getMessage()
             ], 500);
         }
     }
 
+    /**
+     * Obtiene el historial de un pedido para la vista de gestión.
+     * GET /admin/pedidos/{id}/historial
+     */
+    public function obtenerHistorial($pedidoId)
+    {
+        try {
+            // Llamada al endpoint de Spring Boot para obtener el historial
+            $response = $this->apiService->get("/pedidos/{$pedidoId}/historial", [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
+
+            if ($response === null || !is_array($response)) {
+                return response()->json(['success' => false, 'message' => 'Error al obtener el historial.'], 500);
+            }
+            
+            // Spring Boot debe devolver una lista ordenada de DTOs del historial
+            return response()->json(['success' => true, 'historial' => $response]);
+
+        } catch (\Exception $e) {
+            Log::error('PedidoController@obtenerHistorial: Excepción.', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error interno al cargar el historial.'], 500);
+        }
+    }
+    
     /**
      * Eliminar pedido
      * DELETE /admin/pedidos/{id}
@@ -493,22 +505,22 @@ class PedidoController extends Controller
     }
 
     /**
-     * Obtener lista de estados disponibles
+     * Obtener lista de estados disponibles, usando nombres amigables.
      */
     private function getEstadosDisponibles(): array
     {
-        // Lista estatica de estados (del 1 al 10)
+        // Los IDs deben coincidir con la BD y el orden del array de la BD.
         return [
-            ['id' => 1, 'nombre' => 'Pendiente Confirmacion'],
-            ['id' => 2, 'nombre' => 'Confirmado'],
-            ['id' => 3, 'nombre' => 'En Diseno'],
-            ['id' => 4, 'nombre' => 'Aprobado por Cliente'],
-            ['id' => 5, 'nombre' => 'En Produccion'],
-            ['id' => 6, 'nombre' => 'Control de Calidad'],
-            ['id' => 7, 'nombre' => 'Listo para Entrega'],
-            ['id' => 8, 'nombre' => 'En Camino'],
-            ['id' => 9, 'nombre' => 'Entregado'],
-            ['id' => 10, 'nombre' => 'Cancelado']
+            ['id' => 1, 'nombre' => '1. Cotización Pendiente'],
+            ['id' => 2, 'nombre' => '2. Pago Diseño Pendiente'],
+            ['id' => 3, 'nombre' => '3. Diseño en Proceso'],
+            ['id' => 4, 'nombre' => '4. Diseño Aprobado'],
+            ['id' => 5, 'nombre' => '5. Tallado (Producción)'],
+            ['id' => 6, 'nombre' => '6. Engaste'],
+            ['id' => 7, 'nombre' => '7. Pulido'],
+            ['id' => 8, 'nombre' => '8. Inspección de Calidad'],
+            ['id' => 9, 'nombre' => '9. Finalizado (Listo para Entrega)'],
+            ['id' => 10, 'nombre' => '10. Cancelado']
         ];
     }
 
