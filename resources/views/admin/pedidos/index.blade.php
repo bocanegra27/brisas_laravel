@@ -38,7 +38,7 @@
                 </div>
                 <div class="card-body p-4 bg-light">
                     
-                    <form method="POST" action="{{ route('pedidos.store') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('admin.pedidos.store') }}" enctype="multipart/form-data">
                         @csrf
                         
                         {{-- Aviso de automatización --}}
