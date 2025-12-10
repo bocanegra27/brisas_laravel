@@ -214,13 +214,23 @@ function generarHTMLPersonalizacion(personalizacion) {
 }
 
 // ============================================
-// 🔥 CREAR PEDIDO DESDE MENSAJE (Versión Final con Archivo)
+// 🔥 CREAR PEDIDO DESDE MENSAJE (Versión Final)
 // ============================================
 async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonalizacion) {
     try {
         const resultado = await Swal.fire({
             title: '🎁 Crear Pedido',
-            // ... (Resto del HTML de confirmación) ...
+            html: `
+                <p class="mb-3">¿Deseas crear un pedido para <strong>${nombreCliente}</strong>?</p>
+                ${tienePersonalizacion 
+                    ? '<div class="alert alert-info"><i class="bi bi-gem me-2"></i>Este mensaje tiene una personalización vinculada que se asociará al pedido.</div>' 
+                    : '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>Este mensaje NO tiene personalización vinculada. El pedido se creará sin diseño previo.</div>'
+                }
+                <div class="mt-3">
+                    <label class="form-label">Comentarios iniciales (opcional):</label>
+                    <textarea id="pedidoComentarios" class="form-control" rows="3" placeholder="Ej: Cliente solicitó entrega urgente..."></textarea>
+                </div>
+            `,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: '<i class="bi bi-check-circle me-2"></i>Crear Pedido',
@@ -249,7 +259,7 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             didOpen: () => Swal.showLoading()
         });
         
-        // --- 1. LLAMADA PARA CREAR EL PEDIDO ---
+        // Llamar al endpoint de crear pedido
         const response = await fetch(`/admin/pedidos/desde-mensaje/${mensajeId}`, {
             method: 'POST',
             headers: {
@@ -258,6 +268,8 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             },
             body: JSON.stringify({
                 comentarios: comentarios || null,
+                // 🔥 LINEA ELIMINADA: usuarioIdAdmin ya no se envía desde el frontend. 
+                // Lo inyectará el PedidoController de Laravel de forma segura.
             })
         });
         
@@ -267,31 +279,12 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             throw new Error(data.message || 'Error al crear el pedido');
         }
         
-        // --- 2. ARCHIVAR MENSAJE DESPUÉS DEL ÉXITO ---
-        
-        const estadoArchiveResponse = await fetch(`/admin/mensajes/${mensajeId}/estado`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-            },
-            body: JSON.stringify({ estado: 'archivado' }) // <-- Cambiar estado a 'archivado'
-        });
-        
-        const estadoArchiveData = await estadoArchiveResponse.json();
-
-        if (!estadoArchiveData.success) {
-            console.warn('Advertencia: El pedido fue creado, pero falló el archivado del mensaje.');
-            // No detenemos el flujo aquí, solo registramos la advertencia.
-        }
-        
-        // --- 3. MOSTRAR ÉXITO Y REDIRIGIR ---
-        
+        // Éxito
         Swal.fire({
             title: '¡Pedido Creado!',
             html: `
                 <p class="mb-3">Pedido <strong>${data.pedido.pedCodigo}</strong> creado exitosamente.</p>
-                <p class="text-muted">Mensaje #${mensajeId} ha sido archivado.</p>
+                <p class="text-muted">Estado inicial: ${data.pedido.estadoNombre}</p>
             `,
             icon: 'success',
             iconColor: '#22c55e',
@@ -300,8 +293,6 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = '/admin/pedidos';
-            } else {
-                window.location.reload(); // Recargar si no va a pedidos para ver el estado archivado
             }
         });
         
