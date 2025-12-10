@@ -318,13 +318,20 @@
          * Inicializar sesión al cargar la página
          */
         async function inicializarSesion() {
+            // ✅ Verificar PRIMERO si hay usuario autenticado
+            const isAuthenticated = @json(session()->has('user_id'));
+            
+            if (isAuthenticated) {
+                console.log('✅ Usuario autenticado detectado - NO se usará sesionId');
+                return; // Salir sin agregar sesionId
+            }
+            
+            // Solo crear sesión si NO está autenticado
             const sesion = await obtenerOCrearSesion();
 
             if (sesion) {
-                // Agregar campo oculto al formulario con el sesionId
                 const form = document.getElementById('form-personalizar');
                 if (form) {
-                    // Verificar si ya existe el input
                     let inputSesion = form.querySelector('input[name="sesionId"]');
                     if (!inputSesion) {
                         inputSesion = document.createElement('input');

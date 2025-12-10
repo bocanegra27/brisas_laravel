@@ -419,7 +419,13 @@ textarea.form-control {
     const STORAGE_SESION_ID = 'brisas_sesion_id';
     
     document.addEventListener('DOMContentLoaded', function() {
-        // Obtener sesionId del localStorage
+        // ✅ Verificar PRIMERO si hay usuario autenticado
+        @if(session()->has('user_id'))
+            console.log('✅ Usuario autenticado - NO se cargará sesionId en contacto');
+            return; // Salir sin cargar sesionId
+        @endif
+        
+        // Solo cargar sesionId si NO está autenticado
         const sesionId = localStorage.getItem(STORAGE_SESION_ID);
         
         if (sesionId) {

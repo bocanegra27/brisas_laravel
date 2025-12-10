@@ -95,15 +95,40 @@ class ContactoController extends Controller
                 'terminos' => true
             ];
 
-            // Agregar sesionId si existe
-            if ($request->has('sesionId') && $request->input('sesionId')) {
-                $data['sesionId'] = (int) $request->input('sesionId');
+            // VERIFICAR SI HAY USUARIO AUTENTICADO
+            if (session()->has('user_id') && session()->get('user_id')) {
+                // Usuario registrado - enviar usuarioId
+                $data['usuarioId'] = (int) session()->get('user_id');
+                
+                Log::info('ContactoController: Usuario autenticado detectado', [
+                    'usuarioId' => $data['usuarioId'],
+                    'nombre' => $data['nombre']
+                ]);
+            } else {
+                // Usuario anónimo - enviar sesionId si existe
+                if ($request->has('sesionId') && $request->input('sesionId')) {
+                    $data['sesionId'] = (int) $request->input('sesionId');
+                    
+                    Log::info('ContactoController: Usuario anónimo detectado', [
+                        'sesionId' => $data['sesionId'],
+                        'nombre' => $data['nombre']
+                    ]);
+                } else {
+                    Log::warning('ContactoController: Contacto sin sesionId ni usuarioId (externo)', [
+                        'nombre' => $data['nombre']
+                    ]);
+                }
             }
 
             // Agregar personalizacionId si existe
             if ($request->has('personalizacionId') && $request->input('personalizacionId')) {
                 $data['personalizacionId'] = (int) $request->input('personalizacionId');
             }
+
+            // Log de datos a enviar (para debug)
+            Log::debug('ContactoController: Datos a enviar al backend', [
+                'data' => $data
+            ]);
 
             // Enviar al API
             $response = $this->apiService->post('/contactos', $data);
@@ -114,9 +139,11 @@ class ContactoController extends Controller
                     ->with('error', 'Error al enviar el mensaje. Por favor, intenta nuevamente.');
             }
 
-            Log::info('ContactoController: Contacto creado', [
+            Log::info('ContactoController: Contacto creado exitosamente', [
                 'id' => $response['id'],
-                'tipoCliente' => $response['tipoCliente'] ?? 'desconocido'
+                'tipoCliente' => $response['tipoCliente'] ?? 'desconocido',
+                'usuarioId' => $response['usuarioId'] ?? null,
+                'sesionId' => $response['sesionId'] ?? null
             ]);
 
             return redirect()->route('home')
@@ -124,7 +151,8 @@ class ContactoController extends Controller
 
         } catch (\Exception $e) {
             Log::error('ContactoController@store: Excepción', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return back()
@@ -141,7 +169,7 @@ class ContactoController extends Controller
         $lineas = [];
         
         foreach ($detalles as $detalle) {
-            $lineas[] = "• {$detalle['opcionNombre']}: {$detalle['valNombre']}";
+            $lineas[] = "• {$detalle['valNombre']}: {$detalle['opcionNombre']}";
         }
         
         $intro = "Me interesa una joya con estas características:\n\n";

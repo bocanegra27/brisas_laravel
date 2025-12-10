@@ -7,13 +7,13 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
-use App\Http\Controllers\Admin\PedidoController; 
+use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
 
 // ============================================
-// RUTAs PÚBLICAs
+// RUTAS PÚBLICAS
 // ============================================
 // Página de inicio
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -26,25 +26,18 @@ Route::get('/personalizar/{id}/detalles', [PersonalizarController::class, 'obten
 // Formulario de contacto
 Route::get('/contacto', [ContactoController::class, 'create'])->name('contacto.create');
 Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.store');
-// proxi
+
+// Proxy de imágenes
 Route::get('/imagen/vista-anillo', [ImagenProxyController::class, 'vistaAnillo'])->name('imagen.vista-anillo');
 Route::get('/imagen/icono-opcion', [ImagenProxyController::class, 'iconoOpcion'])->name('imagen.icono-opcion');
-
-
-
-// OPCIONAL: Endpoint para limpiar caché (solo en desarrollo)
 Route::get('/imagen/limpiar-cache', [ImagenProxyController::class, 'limpiarCache'])->name('imagen.limpiar-cache');
-
 
 // ============================================
 // AUTENTICACIÓN (INVITADOS SOLAMENTE)
 // ============================================
 Route::middleware('guest.custom')->group(function () {
-    // Login
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'handleLogin'])->name('login.handle');
-    
-    // Registro
     Route::get('/registro', [RegisterController::class, 'showRegistrationForm'])->name('register.show');
     Route::post('/registro', [RegisterController::class, 'handleRegistration'])->name('register.handle');
 });
@@ -80,23 +73,23 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::delete('/{id}', 'eliminar')->name('admin.usuarios.eliminar');
     });
     
-    // MÓDULO: MENSAJES/CONTACTOS
+    // MÓDULO: MENSAJES/CONTACTOS (MEJORADO)
     Route::controller(MensajesController::class)->prefix('mensajes')->group(function () {
         Route::get('/', 'index')->name('admin.mensajes.index');
         Route::get('/{id}', 'ver')->name('admin.mensajes.ver');
+        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion'); // FIX: Mover antes del wildcard
         Route::put('/{id}', 'update')->name('admin.mensajes.update');
         Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
-        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion');
     });
     
     // MÓDULO: PEDIDOS
     Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
         Route::get('/', 'index')->name('admin.pedidos.index');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); // FIX: Mover antes del wildcard
         Route::post('/', 'store')->name('admin.pedidos.store');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
-        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje');
     });
     
 });
@@ -105,22 +98,12 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
 // ROL: DISEÑADOR
 // ============================================
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
-    
-    // Dashboard de diseñador
     Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
-    
-    // por hacer: Agregar módulos específicos del diseñador aquí
-    
 });
 
 // ============================================
 // ROL: USUARIO (CLIENTE)
 // ============================================
 Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
-    
-    // Dashboard de usuario
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
-    
-    // por hacer: Agregar módulos específicos del usuario aquí
-    
 });

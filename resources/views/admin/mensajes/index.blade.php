@@ -64,28 +64,34 @@
         <div class="card mensajes-table-card animate-in animate-delay-5">
             <div class="card-header">
                 <div class="row align-items-center">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <h5 class="mb-0"><i class="bi bi-table me-2"></i>Lista de Mensajes</h5>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-md-9">
                         <div class="row g-3">
                             {{-- Búsqueda --}}
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="search-box">
                                     <i class="bi bi-search"></i>
                                     <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, correo o mensaje...">
                                 </div>
                             </div>
-                            {{-- Filtro por vía --}}
+                            
+                            {{-- Filtro por Tipo de Cliente --}}
                             <div class="col-md-3">
-                                <select id="filterVia" class="form-select">
-                                    <option value="">Todas las vías</option>
-                                    <option value="formulario" {{ (isset($filtros['via']) && $filtros['via'] == 'formulario') ? 'selected' : '' }}>Formulario</option>
-                                    <option value="whatsapp" {{ (isset($filtros['via']) && $filtros['via'] == 'whatsapp') ? 'selected' : '' }}>WhatsApp</option>
+                                <select id="filterTipoCliente" class="form-select">
+                                    <option value="">Todos los clientes</option>
+                                    <option value="registrado" {{ (isset($filtros['tipoCliente']) && $filtros['tipoCliente'] == 'registrado') ? 'selected' : '' }}>
+                                        Registrados
+                                    </option>
+                                    <option value="anonimo" {{ (isset($filtros['tipoCliente']) && $filtros['tipoCliente'] == 'anonimo') ? 'selected' : '' }}>
+                                        Anónimos
+                                    </option>
                                 </select>
                             </div>
+                            
                             {{-- Filtro por estado --}}
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select id="filterEstado" class="form-select">
                                     <option value="">Todos los estados</option>
                                     <option value="pendiente" {{ (isset($filtros['estado']) && $filtros['estado'] === 'pendiente') ? 'selected' : '' }}>Pendientes</option>
@@ -93,10 +99,24 @@
                                     <option value="archivado" {{ (isset($filtros['estado']) && $filtros['estado'] === 'archivado') ? 'selected' : '' }}>Archivados</option>
                                 </select>
                             </div>
+                            
+                            {{-- 🔥 NUEVO: Filtro por Personalización --}}
+                            <div class="col-md-3">
+                                <select id="filterPersonalizacion" class="form-select">
+                                    <option value="">Con/Sin personalización</option>
+                                    <option value="true" {{ (isset($filtros['tienePersonalizacion']) && $filtros['tienePersonalizacion'] === 'true') ? 'selected' : '' }}>
+                                        Con personalización
+                                    </option>
+                                    <option value="false" {{ (isset($filtros['tienePersonalizacion']) && $filtros['tienePersonalizacion'] === 'false') ? 'selected' : '' }}>
+                                        Sin personalización
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table mensajes-table">
@@ -107,10 +127,10 @@
                                 <th>Contacto</th>
                                 <th>Mensaje</th>
                                 <th>Fecha</th>
-                                <th>Vía</th>
+                                <th>🔥 Tipo Cliente</th> {{-- Reemplaza "Vía" --}}
                                 <th>Estado</th>
                                 <th>Usuario</th>
-                                <th class="text-center">Acciones</th>
+                                <th class="text-center">🔥 Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="mensajesTableBody">
@@ -119,7 +139,9 @@
                                 data-nombre="{{ strtolower($mensaje['nombre']) }}" 
                                 data-correo="{{ strtolower($mensaje['correo']) }}"
                                 data-mensaje="{{ strtolower($mensaje['mensaje']) }}">
+                                
                                 <td class="fw-bold">#{{ $mensaje['id'] }}</td>
+                                
                                 <td>
                                     <div class="user-info">
                                         <div class="user-avatar-small">
@@ -128,6 +150,7 @@
                                         <span>{{ $mensaje['nombre'] }}</span>
                                     </div>
                                 </td>
+                                
                                 <td>
                                     <small class="text-muted d-block">
                                         <i class="bi bi-envelope-fill me-1"></i>{{ $mensaje['correo'] }}
@@ -136,26 +159,42 @@
                                         <i class="bi bi-telephone-fill me-1"></i>{{ $mensaje['telefono'] }}
                                     </span>
                                 </td>
+                                
                                 <td>
                                     <div class="mensaje-preview" data-bs-toggle="tooltip" title="{{ $mensaje['mensaje'] }}">
                                         {{ Str::limit($mensaje['mensaje'], 60) }}
                                     </div>
                                 </td>
+                                
                                 <td>
-                                    <small class="text-muted d-block">{{ \Carbon\Carbon::parse($mensaje['fechaEnvio'])->format('d/m/Y') }}</small>
-                                    <span class="fw-medium">{{ \Carbon\Carbon::parse($mensaje['fechaEnvio'])->format('H:i') }}</span>
+                                    <small class="text-muted d-block">
+                                        {{ \Carbon\Carbon::parse($mensaje['fechaEnvio'])->format('d/m/Y') }}
+                                    </small>
+                                    <span class="fw-medium">
+                                        {{ \Carbon\Carbon::parse($mensaje['fechaEnvio'])->format('H:i') }}
+                                    </span>
                                 </td>
+                                
+                                {{-- Columna Tipo de Cliente --}}
                                 <td>
-                                    @if($mensaje['via'] == 'formulario')
-                                        <span class="badge-via badge-via-formulario">
-                                            <i class="bi bi-envelope-fill"></i> Formulario
+                                    @if($mensaje['tipoCliente'] == 'registrado')
+                                        <span class="badge-tipo-cliente badge-registrado">
+                                            <i class="bi bi-person-check-fill"></i> Registrado
                                         </span>
                                     @else
-                                        <span class="badge-via badge-via-whatsapp">
-                                            <i class="bi bi-whatsapp"></i> WhatsApp
+                                        <span class="badge-tipo-cliente badge-anonimo">
+                                            <i class="bi bi-incognito"></i> Anónimo
+                                        </span>
+                                    @endif
+                                    
+                                    {{-- Badge de personalización --}}
+                                    @if($mensaje['tienePersonalizacion'])
+                                        <span class="badge-personalizacion mt-1">
+                                            <i class="bi bi-gem"></i> Con diseño
                                         </span>
                                     @endif
                                 </td>
+                                
                                 <td>
                                     @if($mensaje['estado'] == 'pendiente')
                                         <span class="badge-estado badge-pendiente">
@@ -171,6 +210,7 @@
                                         </span>
                                     @endif
                                 </td>
+                                
                                 <td>
                                     @if($mensaje['usuarioNombre'])
                                         <small class="text-muted d-block">Asociado:</small>
@@ -183,15 +223,29 @@
                                         <span class="fw-medium">{{ $mensaje['usuarioAdminNombre'] }}</span>
                                     @endif
                                 </td>
+                                
+                                {{-- 🔥 NUEVO: Acciones mejoradas --}}
                                 <td>
                                     <div class="action-buttons">
-                                        <button onclick="verDetalle({{ $mensaje['id'] }})" 
+                                        {{-- Ver detalles --}}
+                                        <button onclick="verDetalleMejorado({{ $mensaje['id'] }}, {{ $mensaje['tienePersonalizacion'] ? 'true' : 'false' }})" 
                                                 class="btn-action btn-view" 
-                                   S             data-bs-toggle="tooltip" 
+                                                data-bs-toggle="tooltip" 
                                                 title="Ver detalles">
                                             <i class="bi bi-eye-fill"></i>
                                         </button>
                                         
+                                        {{-- Ver personalización (solo si tiene) --}}
+                                        @if($mensaje['tienePersonalizacion'])
+                                        <button onclick="verPersonalizacion({{ $mensaje['id'] }})" 
+                                                class="btn-action btn-design" 
+                                                data-bs-toggle="tooltip" 
+                                                title="Ver personalización">
+                                            <i class="bi bi-gem"></i>
+                                        </button>
+                                        @endif
+                                        
+                                        {{-- Cambiar estado --}}
                                         <button onclick="cambiarEstadoRapido({{ $mensaje['id'] }}, '{{ $mensaje['estado'] }}')" 
                                                 class="btn-action btn-status" 
                                                 data-bs-toggle="tooltip" 
@@ -199,10 +253,19 @@
                                             <i class="bi bi-arrow-left-right"></i>
                                         </button>
                                         
-                                        <button onclick="eliminarMensaje({{ $mensaje['id'] }}, '{{ addslashes($mensaje['nombre']) }}')" 
+                                        {{-- Crear pedido (SIEMPRE disponible) --}}
+                                        <button onclick="crearPedidoDesdeMensaje({{ $mensaje['id'] }}, '{{ e($mensaje['nombre']) }}', {{ $mensaje['tienePersonalizacion'] ? 'true' : 'false' }})" 
+                                                class="btn-action btn-pedido" 
+                                                data-bs-toggle="tooltip" 
+                                                title="Crear pedido">
+                                            <i class="bi bi-cart-plus-fill"></i>
+                                        </button>
+                                        
+                                        {{-- Eliminar --}}
+                                        <button onclick="eliminarMensaje({{ $mensaje['id'] }}, '{{ e($mensaje['nombre']) }}')" 
                                                 class="btn-action btn-delete" 
                                                 data-bs-toggle="tooltip" 
-                                                title="Eliminar">S
+                                                title="Eliminar">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
                                     </div>
@@ -212,7 +275,7 @@
                             <tr>
                                 <td colspan="9" class="text-center py-5">
                                     <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
-                                    <p class="text-muted">No hay mensajes registrados</p>
+                                    <p class="text-muted mb-0">No hay mensajes registrados</p>
                                 </td>
                             </tr>
                             @endforelse
@@ -224,8 +287,39 @@
     </div>
 </div>
 
-{{-- Modal de Detalles --}}
-@include('admin.mensajes._modal_detalle')
+{{-- 🔥 Modal simplificado de detalles --}}
+<div class="modal fade" id="modalDetalleMejorado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-envelope-open-fill me-2"></i>Detalles del Mensaje
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalDetalleContenido">
+                {{-- Contenido dinámico cargado por JS --}}
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- 🔥 Modal de personalización --}}
+<div class="modal fade" id="modalPersonalizacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-gem me-2"></i>Personalización Vinculada
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalPersonalizacionContenido">
+                {{-- Contenido dinámico --}}
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -235,6 +329,24 @@
 <script>
     // Inicializar tooltips
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+    
+    // 🔥 Aplicar filtros con recarga
+    document.getElementById('filterTipoCliente')?.addEventListener('change', aplicarFiltros);
+    document.getElementById('filterEstado')?.addEventListener('change', aplicarFiltros);
+    document.getElementById('filterPersonalizacion')?.addEventListener('change', aplicarFiltros);
+    
+    function aplicarFiltros() {
+        const tipoCliente = document.getElementById('filterTipoCliente')?.value || '';
+        const estado = document.getElementById('filterEstado')?.value || '';
+        const tienePersonalizacion = document.getElementById('filterPersonalizacion')?.value || '';
+        
+        const url = new URL(window.location.href);
+        url.searchParams.set('tipoCliente', tipoCliente);
+        url.searchParams.set('estado', estado);
+        url.searchParams.set('tienePersonalizacion', tienePersonalizacion);
+        
+        window.location.href = url.toString();
+    }
 </script>
 @endpush

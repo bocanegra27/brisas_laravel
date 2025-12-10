@@ -62,6 +62,15 @@ class PersonalizarController extends Controller
      */
     public function guardar(Request $request)
     {
+        // 🔥 DEBUG TEMPORAL
+        Log::info('DEBUG Personalizar', [
+            'sesionId_request' => $request->input('sesionId'),
+            'user_id_session' => Session::get('user_id'),
+            'tiene_user_id' => Session::has('user_id'),
+            'user_autenticado' => Session::has('jwt_token')
+        ]);
+        // FIN DEBUG
+        
         try {
             // Validación
             $validator = Validator::make($request->all(), [
@@ -106,11 +115,15 @@ class PersonalizarController extends Controller
                 'valoresSeleccionados' => $valoresIds
             ];
 
-            // Agregar sesionId o usuarioClienteId
-            if ($request->has('sesionId') && $request->input('sesionId')) {
-                $data['sesionId'] = (int) $request->input('sesionId');
-            } elseif (Session::has('user_id')) {
+            // ✅ Priorizar usuario autenticado sobre sesión anónima
+            if (Session::has('user_id') && Session::get('user_id')) {
+                // Usuario registrado
                 $data['usuarioClienteId'] = (int) Session::get('user_id');
+                Log::info('Personalización con usuario registrado', ['usuarioId' => $data['usuarioClienteId']]);
+            } elseif ($request->has('sesionId') && $request->input('sesionId')) {
+                // Usuario anónimo
+                $data['sesionId'] = (int) $request->input('sesionId');
+                Log::info('Personalización con sesión anónima', ['sesionId' => $data['sesionId']]);
             }
 
             // Guardar en API
