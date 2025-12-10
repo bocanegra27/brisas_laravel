@@ -216,7 +216,7 @@ function generarHTMLPersonalizacion(personalizacion) {
 // ============================================
 // 🔥 CREAR PEDIDO DESDE MENSAJE (Versión FINAL con ARCHIVO)
 // ============================================
-async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonalizacion) {
+async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonalizacion, personalizacionId) {
     try {
         const resultado = await Swal.fire({
             title: '🎁 Crear Pedido',
@@ -268,6 +268,7 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             },
             body: JSON.stringify({
                 comentarios: comentarios || null,
+                personalizacionId: personalizacionId || null
             })
         });
         
@@ -277,7 +278,7 @@ async function crearPedidoDesdeMensaje(mensajeId, nombreCliente, tienePersonaliz
             throw new Error(data.message || 'Error al crear el pedido');
         }
 
-        // --- 2. 🔥 LLAMADA PARA ARCHIVAR EL MENSAJE 🔥 ---
+        // --- 2. LLAMADA PARA ARCHIVAR EL MENSAJE  ---
         // Se ejecuta si el pedido fue creado con éxito
         const estadoArchiveResponse = await fetch(`/admin/mensajes/${mensajeId}/estado`, {
             method: 'PATCH',

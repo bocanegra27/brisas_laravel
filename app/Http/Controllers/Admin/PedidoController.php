@@ -61,11 +61,16 @@ class PedidoController extends Controller
             // Parámetros que Spring Boot espera en la Query del POST /desde-contacto/{contactoId}
             $comentarios = $request->input('comentarios');
             $estadoId = $request->input('estadoId') ?? 1; // Estado 1 por defecto (Cotización Pendiente)
+            $personalizacionId = $request->input('personalizacionId');
             
             $query = [
-                'estadoId' => (int) $estadoId,
-                'comentarios' => $comentarios
+            'estadoId' => (int) $request->input('estadoId', 1),
+            'comentarios' => $request->input('comentarios')
             ];
+
+            if ($personalizacionId) {
+            $query['personalizacionId'] = (int)$personalizacionId;
+            }
             
             // FIX SEGURO: Construir la URL con Query Params para este endpoint especial
             $endpointConQuery = "/pedidos/desde-contacto/{$contactoId}?" . http_build_query($query);

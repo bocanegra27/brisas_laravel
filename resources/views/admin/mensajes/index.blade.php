@@ -244,10 +244,15 @@
                                         </button>
                                         
                                         {{-- Crear pedido (SIEMPRE disponible) --}}
-                                        <button onclick="crearPedidoDesdeMensaje({{ $mensaje['id'] }}, '{{ e($mensaje['nombre']) }}', {{ $mensaje['tienePersonalizacion'] ? 'true' : 'false' }})" 
-                                                class="btn-action btn-pedido" 
-                                                data-bs-toggle="tooltip" 
-                                                title="Crear pedido">
+                                        <button onclick="crearPedidoDesdeMensaje(
+                                            {{ $mensaje['id'] }}, 
+                                            '{{ e($mensaje['nombre']) }}', 
+                                            {{ $mensaje['tienePersonalizacion'] ? 'true' : 'false' }},
+                                            {{ $mensaje['personalizacionId'] ?? 'null' }} // <--- ¡CAMBIO CRÍTICO AQUI!
+                                        )" 
+                                            class="btn-action btn-pedido" 
+                                            data-bs-toggle="tooltip" 
+                                            title="Crear pedido">
                                             <i class="bi bi-cart-plus-fill"></i>
                                         </button>
                                         
