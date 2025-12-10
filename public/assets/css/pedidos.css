@@ -1,0 +1,520 @@
+/* ============================================
+   MODULO DE PEDIDOS - BRISAS GEMS
+   Estilos minimalistas y elegantes
+   ============================================ */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.pedidos-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+/* ===== STATS PILLS ===== */
+.stats-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.pill-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 50px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+}
+
+.pill-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.pill-stat i {
+  font-size: 1.125rem;
+}
+
+.pill-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pill-value {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+/* ===== TARJETA DE TABLA ===== */
+.pedidos-table-card {
+  background: white;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden;
+}
+
+.pedidos-table-card .card-header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 2px solid #f1f5f9;
+  padding: 2rem;
+}
+
+.pedidos-table-card .card-header h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* ===== BUSQUEDA ===== */
+.search-box {
+  position: relative;
+}
+
+.search-box i {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 1rem;
+  z-index: 2;
+}
+
+.search-box .form-control {
+  padding-left: 3rem;
+  border-radius: 50px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.search-box .form-control:focus {
+  border-color: #009688;
+  box-shadow: 0 0 0 4px rgba(0, 150, 136, 0.1);
+}
+
+/* ===== TABLA ===== */
+.pedidos-table {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.pedidos-table thead {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.pedidos-table thead th {
+  padding: 1.25rem 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  color: #64748b;
+  border: none;
+}
+
+.pedidos-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.pedidos-table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(0, 150, 136, 0.03) 0%, transparent 100%);
+  transform: translateX(5px);
+}
+
+.pedidos-table tbody td {
+  padding: 1.5rem 1.5rem;
+  vertical-align: middle;
+  border: none;
+}
+
+/* ===== CODIGO DE PEDIDO ===== */
+.codigo-pedido {
+  display: inline-block;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Courier New', monospace;
+  border: 2px solid #cbd5e1;
+}
+
+/* ===== USER INFO ===== */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 150, 136, 0.3);
+}
+
+/* ===== BADGES DE ESTADO ===== */
+.badge-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Estados especificos */
+.badge-pendiente {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-confirmado {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-diseno {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.badge-aprobado {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.badge-produccion {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0891b2;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.badge-calidad {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-listo {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-camino {
+  background: rgba(251, 146, 60, 0.1);
+  color: #ea580c;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.badge-entregado {
+  background: rgba(34, 197, 94, 0.2);
+  color: #14532d;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.badge-cancelado {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ===== BOTON DE PERSONALIZACION ===== */
+.badge-personalizacion-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 150, 136, 0.3);
+}
+
+.badge-personalizacion-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 150, 136, 0.4);
+}
+
+/* ===== COMENTARIO PREVIEW ===== */
+.comentario-preview {
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  cursor: help;
+}
+
+/* ===== BOTONES DE ACCION ===== */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.btn-action {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  color: white;
+}
+
+.btn-view {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.btn-view:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.btn-status {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+}
+
+.btn-status:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.btn-edit {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  box-shadow: 0 2px 6px rgba(6, 182, 212, 0.3);
+}
+
+.btn-edit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+}
+
+.btn-delete:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* ===== PAGINACION ===== */
+.pedidos-table-card .card-footer {
+  background: #f8fafc;
+  border-top: 2px solid #f1f5f9;
+  padding: 1.5rem 2rem;
+}
+
+.pagination-info {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.pagination {
+  margin: 0;
+}
+
+.page-link {
+  border: none;
+  color: #64748b;
+  font-weight: 600;
+  border-radius: 10px;
+  margin: 0 0.25rem;
+  padding: 0.5rem 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.page-link:hover {
+  background: rgba(0, 150, 136, 0.1);
+  color: #009688;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 150, 136, 0.3);
+}
+
+.page-item.disabled .page-link {
+  background: transparent;
+  color: #cbd5e1;
+}
+
+/* ===== MODALES ===== */
+.modal-content {
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 2px solid #f1f5f9;
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 2rem;
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.modal-body {
+  padding: 2rem;
+}
+
+.modal-footer {
+  background: #f8fafc;
+  border-top: 2px solid #f1f5f9;
+  padding: 1.5rem 2rem;
+}
+
+/* ===== FORMULARIOS EN MODALES ===== */
+.form-label {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-select {
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-select:focus {
+  border-color: #009688;
+  box-shadow: 0 0 0 4px rgba(0, 150, 136, 0.1);
+}
+
+/* ===== ALERTS EN MODALES ===== */
+.alert {
+  border-radius: 12px;
+  border: none;
+  padding: 1rem 1.25rem;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #2563eb;
+  border-left: 4px solid #3b82f6;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .pedidos-table {
+    font-size: 0.85rem;
+  }
+  
+  .pedidos-table tbody td {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .stats-pills {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .pill-stat {
+    justify-content: space-between;
+  }
+  
+  .pedidos-table-card .card-header {
+    padding: 1.5rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 576px) {
+  .pedidos-container {
+    padding: 1rem 0;
+  }
+  
+  .pedidos-table-card .card-body {
+    padding: 0;
+  }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-delay-5 {
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+/* ===== LOADING STATE ===== */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 150, 136, 0.2);
+  border-top-color: #009688;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
