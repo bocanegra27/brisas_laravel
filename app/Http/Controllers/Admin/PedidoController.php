@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
 
-class PedidoController extends Controller
+class PedidoController
 {
     private ApiService $apiService;
 
@@ -141,4 +141,7 @@ class PedidoController extends Controller
             return back()->with('error', 'Error interno al intentar eliminar el pedido.');
         }
     }
+    
+    // Falta implementar destroy...
+    public function destroy($id) { /* Pendiente */ }
 }

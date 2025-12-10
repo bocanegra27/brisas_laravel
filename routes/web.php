@@ -88,6 +88,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::get('/', 'index')->name('admin.pedidos.index');
         Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); // FIX: Mover antes del wildcard
         Route::post('/', 'store')->name('admin.pedidos.store');
+        Route::get('/{id}', 'show')->name('admin.pedidos.ver');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
     });
