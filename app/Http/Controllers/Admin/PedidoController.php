@@ -18,7 +18,7 @@ class PedidoController extends Controller
     }
 
     /**
-     * 🔥 IMPLEMENTADO: Muestra el listado de pedidos.
+     *  IMPLEMENTADO: Muestra el listado de pedidos.
      * GET /admin/pedidos
      */
     public function index()
@@ -46,7 +46,7 @@ class PedidoController extends Controller
     }
 
     /**
-     * 🔥 IMPLEMENTADO: Crea un pedido a partir de un mensaje de contacto.
+     *  IMPLEMENTADO: Crea un pedido a partir de un mensaje de contacto.
      * POST admin/pedidos/desde-mensaje/{mensajeId}
      */
     public function crearDesdeMensaje(Request $request, $contactoId)
@@ -58,36 +58,43 @@ class PedidoController extends Controller
                 return response()->json(['success' => false, 'message' => 'Admin no autenticado'], 401);
             }
 
-            // Parámetros que Spring Boot espera en la Query del POST /desde-contacto/{contactoId}
-            $comentarios = $request->input('comentarios');
-            $estadoId = $request->input('estadoId') ?? 1; // Estado 1 por defecto (Cotización Pendiente)
-            $personalizacionId = $request->input('personalizacionId');
+            // 1. Obtener los datos del Request (Usando valor por defecto en input() para seguridad)
+            $comentarios = $request->input('comentarios'); // Puede ser null
+            $personalizacionId = $request->input('personalizacionId'); // Puede ser null
+            
+            // El estado por defecto debe ser 1 (Cotización Pendiente) si no se especifica.
+            $estadoId = (int) $request->input('estadoId', 1); 
             
             $query = [
-            'estadoId' => (int) $request->input('estadoId', 1),
-            'comentarios' => $request->input('comentarios')
+                'estadoId' => $estadoId,
+                'comentarios' => $comentarios
             ];
 
-            if ($personalizacionId) {
-            $query['personalizacionId'] = (int)$personalizacionId;
+            // 2. Añadir el personalizacionId solo si es un ID válido (> 0)
+            // Usamos is_numeric y la comprobación explícita para evitar errores con null.
+            if (is_numeric($personalizacionId) && (int)$personalizacionId > 0) {
+                $query['personalizacionId'] = (int)$personalizacionId;
             }
             
-            // FIX SEGURO: Construir la URL con Query Params para este endpoint especial
+            // 3. FIX SEGURO: Construir la URL con Query Params
             $endpointConQuery = "/pedidos/desde-contacto/{$contactoId}?" . http_build_query($query);
 
-            // Llamada POST (con body vacío, ya que los datos van en la query)
+            // 4. Llamada POST (con body vacío, ya que los datos van en la query)
             $response = $this->apiService->post($endpointConQuery, []);
 
             if ($response === null || (isset($response['pedId']) === false)) {
-                Log::error('PedidoController: Error al crear pedido en backend', ['response' => $response]);
+                // Si el API de Spring Boot falló (4xx/5xx) o devolvió null/vacío.
+                // Necesitas el log de Laravel para saber el error real del backend.
+                Log::error('PedidoController: Error al crear pedido en backend', ['response' => $response, 'url' => $endpointConQuery]);
                 return response()->json(['success' => false, 'message' => 'Error de conexión con el API de pedidos o respuesta inválida.'], 500);
             }
             
             return response()->json(['success' => true, 'message' => 'Pedido creado exitosamente.', 'pedido' => $response], 201);
 
         } catch (\Exception $e) {
-            Log::error('PedidoController@crearDesdeMensaje: Excepción', ['error' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            // 🛑 ESTE CATCH ES EL QUE TE DA EL ERROR 500 AHORA
+            Log::error('PedidoController@crearDesdeMensaje: Excepción PHP', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Excepción interna en Laravel: ' . $e->getMessage()], 500);
         }
     }
 
