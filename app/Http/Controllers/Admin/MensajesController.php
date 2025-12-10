@@ -377,34 +377,29 @@ class MensajesController
 
     /**
      * Enriquece un mensaje con tipoCliente y personalización
-     * RESPETA lo que el backend ya calculó
+     * Versión Limpia: Confía en el Backend (Spring Boot) y solo añade el fallback
      */
     private function enriquecerMensaje(array $mensaje): array
     {
-        // 1. Verificación robusta de ID de usuario (contra null, 0, "0", "null")
-        $usuarioId_valido = !empty($mensaje['usuarioId']) && $mensaje['usuarioId'] != 0 && $mensaje['usuarioId'] != '0' && $mensaje['usuarioId'] != 'null';
-        $sesionId_valido  = !empty($mensaje['sesionId'])  && $mensaje['sesionId']  != 0 && $mensaje['sesionId']  != '0' && $mensaje['sesionId']  != 'null';
-        
-        // 2. Si el backend NO envió el tipoCliente o es incorrecto, lo recalculamos
-        $tipoClienteBackend = $mensaje['tipoCliente'] ?? null;
-
-        if (!$tipoClienteBackend || $tipoClienteBackend === 'anonimo') {
+        // 1. Lógica de tipoCliente: Si el backend no lo envía o es 'externo', recalcular (solo por robustez).
+        // Si el backend envía 'registrado' o 'anonimo', se respeta (lo más común).
+        if (!isset($mensaje['tipoCliente']) || empty($mensaje['tipoCliente']) || $mensaje['tipoCliente'] === 'externo') {
             
-            if ($usuarioId_valido) {
-                $mensaje['tipoCliente'] = 'registrado'; // <-- ¡Prioriza esto si hay ID!
-            } elseif ($sesionId_valido) {
+            // Re-cálculo (solo si el backend falló o marcó como 'externo')
+            if (!empty($mensaje['usuarioId']) && $mensaje['usuarioId'] !== 0) {
+                $mensaje['tipoCliente'] = 'registrado';
+            } elseif (!empty($mensaje['sesionId']) && $mensaje['sesionId'] !== 0) {
                 $mensaje['tipoCliente'] = 'anonimo';
             } else {
-                // Como quitamos 'externo', el fallback es 'anonimo'
-                $mensaje['tipoCliente'] = 'anonimo';
+                $mensaje['tipoCliente'] = 'externo';
             }
         }
-
-        // 3. Verifica si tiene personalización (para el filtro de la tabla)
+        
+        // 2. Lógica de tienePersonalizacion: Si el backend no la calculó, lo hacemos aquí.
         if (!isset($mensaje['tienePersonalizacion'])) {
-            $mensaje['tienePersonalizacion'] = !empty($mensaje['personalizacionId']) && $mensaje['personalizacionId'] != 0 && $mensaje['personalizacionId'] != '0' && $mensaje['personalizacionId'] != 'null';
+            $mensaje['tienePersonalizacion'] = !empty($mensaje['personalizacionId']) && $mensaje['personalizacionId'] !== 0;
         }
-
+        
         return $mensaje;
     }
     /**

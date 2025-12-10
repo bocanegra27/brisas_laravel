@@ -100,7 +100,7 @@
                                 </select>
                             </div>
                             
-                            {{-- 🔥 NUEVO: Filtro por Personalización --}}
+                            {{-- NUEVO: Filtro por Personalización --}}
                             <div class="col-md-3">
                                 <select id="filterPersonalizacion" class="form-select">
                                     <option value="">Con/Sin personalización</option>
@@ -127,10 +127,10 @@
                                 <th>Contacto</th>
                                 <th>Mensaje</th>
                                 <th>Fecha</th>
-                                <th>🔥 Tipo Cliente</th> {{-- Reemplaza "Vía" --}}
+                                <th> Tipo Cliente</th> {{-- Reemplaza "Vía" --}}
                                 <th>Estado</th>
                                 <th>Usuario</th>
-                                <th class="text-center">🔥 Acciones</th>
+                                <th class="text-center"> Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="mensajesTableBody">
@@ -224,7 +224,7 @@
                                     @endif
                                 </td>
                                 
-                                {{-- 🔥 NUEVO: Acciones mejoradas --}}
+                                {{-- NUEVO: Acciones mejoradas --}}
                                 <td>
                                     <div class="action-buttons">
                                         {{-- Ver detalles --}}
@@ -287,7 +287,7 @@
     </div>
 </div>
 
-{{-- 🔥 Modal simplificado de detalles --}}
+{{-- Modal simplificado de detalles --}}
 <div class="modal fade" id="modalDetalleMejorado" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -304,7 +304,7 @@
     </div>
 </div>
 
-{{-- 🔥 Modal de personalización --}}
+{{-- Modal de personalización --}}
 <div class="modal fade" id="modalPersonalizacion" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -331,7 +331,7 @@
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
     
-    // 🔥 Aplicar filtros con recarga
+    //  Aplicar filtros con recarga
     document.getElementById('filterTipoCliente')?.addEventListener('change', aplicarFiltros);
     document.getElementById('filterEstado')?.addEventListener('change', aplicarFiltros);
     document.getElementById('filterPersonalizacion')?.addEventListener('change', aplicarFiltros);
