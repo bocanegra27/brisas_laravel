@@ -112,6 +112,14 @@ class ApiService
     }
 
     /**
+     * PATCH request simplificado
+     */
+    public function patch(string $endpoint, array $data, array $options = []): ?array
+    {
+        return $this->request('PATCH', $endpoint, $data, $options);
+    }
+
+    /**
      * DELETE request simplificado
      */
     public function delete(string $endpoint, array $options = []): ?array
