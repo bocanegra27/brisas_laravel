@@ -23,132 +23,140 @@ class PedidoController extends Controller
         $this->apiService = $apiService;
     }
 
-    /**
-     * Mostrar listado de pedidos con paginacion y filtros
-     * GET /admin/pedidos
-     */
-    public function index(Request $request)
-    {
-        try {
-            // Obtener parametros de busqueda y filtros
-            $page = $request->get('page', 0);
-            $size = $request->get('size', 10);
-            $estadoId = $request->get('estadoId');
-            $codigo = $request->get('codigo');
-
-            // Construir query params
-            $params = [
-                'page' => $page,
-                'size' => $size
-            ];
-
-            if ($estadoId !== null && $estadoId !== '') {
-                $params['estadoId'] = $estadoId;
-            }
-
-            if ($codigo !== null && $codigo !== '') {
-                $params['codigo'] = $codigo;
-            }
-
-            // Construir URL con query params
-            $queryString = http_build_query($params);
-            $endpoint = '/pedidos?' . $queryString;
-
-            // Llamada al API con autenticacion
-            $response = $this->apiService->get($endpoint, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
-
-            // Verificar respuesta
-            if ($response === null) {
-                Log::error('PedidoController: Error al obtener pedidos del API');
-                return view('admin.pedidos.index')->with([
-                    'pedidos' => [],
-                    'totalElements' => 0,
-                    'totalPages' => 0,
-                    'currentPage' => 0,
-                    'pageSize' => $size,
-                    'stats' => $this->getEstadisticasVacias(),
-                    'estados' => $this->getEstadosDisponibles()
-                ]);
-            }
-
-            // CORRECCION: Detectar si es array simple o objeto paginado
-            $pedidos = [];
-            $totalElements = 0;
-            $totalPages = 0;
-            $currentPage = 0;
-            $pageSize = $size;
-
-            if (isset($response['content']) && is_array($response['content'])) {
-                // Respuesta paginada de Spring Boot
-                $pedidos = $response['content'];
-                $totalElements = $response['totalElements'] ?? count($pedidos);
-                $totalPages = $response['totalPages'] ?? 1;
-                $currentPage = $response['pageable']['pageNumber'] ?? 0;
-                $pageSize = $response['pageable']['pageSize'] ?? $size;
-            } elseif (is_array($response)) {
-                // Array simple de pedidos
-                $pedidos = $response;
-                $totalElements = count($pedidos);
-                $totalPages = (int) ceil($totalElements / $size);
-                $currentPage = $page;
-                $pageSize = $size;
-            }
-
-            // Enriquecer pedidos con informacion procesada
-            $pedidos = array_map(function($pedido) {
-                return $this->enriquecerPedido($pedido);
-            }, $pedidos);
-
-            // Obtener estadisticas
-            $stats = $this->getEstadisticas();
-            
-            // Obtener lista de estados disponibles
-            $estados = $this->getEstadosDisponibles();
-
-            // Preparar datos para la vista
-            $data = [
-                'pedidos' => $pedidos,
-                'totalElements' => $totalElements,
-                'totalPages' => $totalPages,
-                'currentPage' => $currentPage,
-                'pageSize' => $pageSize,
-                'stats' => $stats,
-                'estados' => $estados,
-                'filtros' => [
-                    'estadoId' => $estadoId,
-                    'codigo' => $codigo
-                ]
-            ];
-
-            return view('admin.pedidos.index', $data);
-
-        } catch (\Exception $e) {
-            Log::error('PedidoController@index: Excepcion', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return view('admin.pedidos.index')->with([
-                'pedidos' => [],
-                'totalElements' => 0,
-                'totalPages' => 0,
-                'currentPage' => 0,
-                'pageSize' => 10,
-                'stats' => $this->getEstadisticasVacias(),
-                'estados' => $this->getEstadosDisponibles()
-            ])->with('error', 'Error al cargar los pedidos. Por favor, intenta nuevamente.');
-        }
-    }
 /**
- * Vista de gestion del pedido (Fase 1 - temporal)
- * En Fase 3 sera la vista robusta completa con timeline
- * GET /admin/pedidos/{id}/gestionar
+ * Mostrar listado de pedidos con paginacion y filtros
+ * GET /admin/pedidos
  */
-// En app/Http/Controllers/Admin/PedidoController.php
+public function index(Request $request)
+{
+    try {
+        // Obtener parametros de busqueda y filtros
+        $page = $request->get('page', 0);
+        $size = $request->get('size', 10);
+        $estadoId = $request->get('estadoId');
+        $codigo = $request->get('codigo');
+
+        // Construir query params
+        $params = [
+            'page' => $page,
+            'size' => $size
+        ];
+
+        if ($estadoId !== null && $estadoId !== '') {
+            $params['estadoId'] = $estadoId;
+        }
+
+        if ($codigo !== null && $codigo !== '') {
+            $params['codigo'] = $codigo;
+        }
+
+        // Construir URL con query params
+        $queryString = http_build_query($params);
+        $endpoint = '/pedidos?' . $queryString;
+
+        // Llamada al API con autenticacion (Paso 1: Obtener Pedidos)
+        $response = $this->apiService->get($endpoint, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . Session::get('jwt_token')
+            ]
+        ]);
+
+        // Verificar respuesta (Lógica de manejo de errores si la API falla)
+        if ($response === null) {
+            Log::error('PedidoController: Error al obtener pedidos del API');
+            // ... (Devuelve la vista con arrays vacíos si hay error) ...
+            return view('admin.pedidos.index')->with([
+                 'pedidos' => [],
+                 'totalElements' => 0,
+                 'totalPages' => 0,
+                 'currentPage' => 0,
+                 'pageSize' => $size,
+                 'stats' => $this->getEstadisticasVacias(),
+                 'estados' => $this->getEstadosDisponibles()
+             ])->with('error', 'Error al cargar los pedidos.');
+        }
+
+        // CORRECCION: Detectar si es array simple o objeto paginado
+        $pedidos = [];
+        $totalElements = 0;
+        $totalPages = 0;
+        $currentPage = 0;
+        $pageSize = $size;
+
+        if (isset($response['content']) && is_array($response['content'])) {
+            // Respuesta paginada de Spring Boot
+            $pedidos = $response['content'];
+            $totalElements = $response['totalElements'] ?? count($pedidos);
+            $totalPages = $response['totalPages'] ?? 1;
+            $currentPage = $response['pageable']['pageNumber'] ?? 0;
+            $pageSize = $response['pageable']['pageSize'] ?? $size;
+        } elseif (is_array($response)) {
+            // Array simple de pedidos (Si no hay paginación)
+            $pedidos = $response;
+            $totalElements = count($pedidos);
+            $totalPages = (int) ceil($totalElements / $size);
+            $currentPage = $page;
+            $pageSize = $size;
+        }
+
+        // Enriquecer pedidos con informacion procesada
+        $pedidos = array_map(function($pedido) {
+            return $this->enriquecerPedido($pedido);
+        }, $pedidos);
+        
+        // ----------------------------------------------------
+        // 🔥 INSERCIÓN: OBTENER LISTA DE DISEÑADORES/EMPLEADOS
+        // ----------------------------------------------------
+        $disenadoresResponse = $this->apiService->get('/usuarios/empleados', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . Session::get('jwt_token')
+            ]
+        ]);
+        
+        $disenadores = is_array($disenadoresResponse) ? $disenadoresResponse : [];
+        // ----------------------------------------------------
+        
+        // Obtener estadisticas
+        $stats = $this->getEstadisticas();
+        
+        // Obtener lista de estados disponibles
+        $estados = $this->getEstadosDisponibles();
+
+        // Preparar datos para la vista
+        $data = [
+            'pedidos' => $pedidos,
+            'totalElements' => $totalElements,
+            'totalPages' => $totalPages,
+            'currentPage' => $currentPage,
+            'pageSize' => $pageSize,
+            'stats' => $stats,
+            'estados' => $estados,
+            'disenadores' => $disenadores, // 🔥 VARIABLE LISTA PARA LA VISTA
+            'filtros' => [
+                'estadoId' => $estadoId,
+                'codigo' => $codigo
+            ]
+        ];
+
+        return view('admin.pedidos.index', $data);
+
+    } catch (\Exception $e) {
+        Log::error('PedidoController@index: Excepcion', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return view('admin.pedidos.index')->with([
+            'pedidos' => [],
+            'totalElements' => 0,
+            'totalPages' => 0,
+            'currentPage' => 0,
+            'pageSize' => 10,
+            'stats' => $this->getEstadisticasVacias(),
+            'estados' => $this->getEstadosDisponibles()
+        ])->with('error', 'Error al cargar los pedidos. Por favor, intenta nuevamente.');
+    }
+}
 
 /**
  * Vista de gestion del pedido con Timeline.
@@ -533,6 +541,43 @@ public function gestionar($id)
             return $this->getEstadisticasVacias();
         }
     }
+    
+/**
+ * PATCH /admin/pedidos/{id}/asignar-empleado
+ */
+public function asignarEmpleado(Request $request, $pedidoId)
+{
+    $request->validate([
+        'usuIdEmpleado' => 'required|integer' // Validamos el ID del empleado
+    ]);
+
+    try {
+        $data = [
+            'usuIdEmpleado' => $request->input('usuIdEmpleado') // Obtenemos el ID del body JSON
+        ];
+        
+        // 🔥 CRÍTICO: Llamada PATCH a Spring Boot con el endpoint ESPECÍFICO
+        $response = $this->apiService->patch("/pedidos/{$pedidoId}/asignar", $data, [
+            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+        ]);
+
+        if ($response === null) {
+             // Es mejor lanzar la excepción con el mensaje de Spring Boot si es posible
+             throw new \Exception('API Error: No se pudo actualizar el pedido.');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Diseñador asignado con éxito.',
+            'pedido' => $response
+        ]);
+
+    } catch (\Exception $e) {
+        // ... (manejo de errores) ...
+        // El error 500 ahora será manejado por la lógica de ResourceNotFoundException
+        return response()->json(['success' => false, 'message' => 'Error en el servidor al asignar empleado: ' . $e->getMessage()], 500);
+    }
+}
 
     /**
      * Obtener lista de estados disponibles, usando nombres amigables.

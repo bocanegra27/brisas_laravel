@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Gestion de Pedidos - Brisas Gems')
+@section('title', 'Gestión de Pedidos - Brisas Gems')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
 @endpush
 
 @section('content')
@@ -15,7 +16,7 @@
         <div class="dashboard-header animate-in">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h1><i class="bi bi-cart-check-fill me-3"></i>Gestion de Pedidos</h1>
+                    <h1><i class="bi bi-cart-check-fill me-3"></i>Gestión de Pedidos</h1>
                     <div class="stats-pills mt-3">
                         <div class="pill-stat">
                             <i class="bi bi-receipt-cutoff text-primary"></i>
@@ -34,7 +35,7 @@
                         </div>
                         <div class="pill-stat">
                             <i class="bi bi-gear-fill" style="color: #3b82f6;"></i>
-                            <span class="pill-label">Produccion:</span>
+                            <span class="pill-label">Producción:</span>
                             <strong class="pill-value">{{ $stats['produccion'] ?? 0 }}</strong>
                         </div>
                         <div class="pill-stat">
@@ -79,7 +80,7 @@
                                 <div class="search-box">
                                     <i class="bi bi-search"></i>
                                     <input type="text" id="searchCodigo" class="form-control" 
-                                           placeholder="Buscar por codigo de pedido..."
+                                           placeholder="Buscar por código de pedido..."
                                            value="{{ $filtros['codigo'] ?? '' }}">
                                 </div>
                             </div>
@@ -97,12 +98,12 @@
                                 </select>
                             </div>
                             
-                            {{-- Tamano de pagina --}}
+                            {{-- Tamaño de página --}}
                             <div class="col-md-3">
                                 <select id="pageSize" class="form-select">
-                                    <option value="10" {{ $pageSize == 10 ? 'selected' : '' }}>10 por pagina</option>
-                                    <option value="25" {{ $pageSize == 25 ? 'selected' : '' }}>25 por pagina</option>
-                                    <option value="50" {{ $pageSize == 50 ? 'selected' : '' }}>50 por pagina</option>
+                                    <option value="10" {{ $pageSize == 10 ? 'selected' : '' }}>10 por página</option>
+                                    <option value="25" {{ $pageSize == 25 ? 'selected' : '' }}>25 por página</option>
+                                    <option value="50" {{ $pageSize == 50 ? 'selected' : '' }}>50 por página</option>
                                 </select>
                             </div>
                         </div>
@@ -115,42 +116,20 @@
                     <table class="table pedidos-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Codigo</th>
+                                <th>Código</th>
+                                <th>Fecha Creación</th>
+                                {{-- 🔥 NUEVAS COLUMNAS --}}
                                 <th>Cliente</th>
-                                <th>Fecha Creacion</th>
+                                <th>Diseñador</th>
                                 <th>Estado</th>
-                                <th>Personalizacion</th>
-                                <th>Comentarios</th>
+                                <th class="text-center">Personalización</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="pedidosTableBody">
                             @forelse($pedidos as $pedido)
                             <tr class="pedido-row">
-                                <td class="fw-bold">#{{ $pedido['pedId'] }}</td>
-                                
-                                <td>
-                                    <span class="codigo-pedido">{{ $pedido['pedCodigo'] }}</span>
-                                </td>
-                                
-                                <td>
-                                    @if(isset($pedido['usuario']) && $pedido['usuario'])
-                                    <div class="user-info">
-                                        <div class="user-avatar-small">
-                                            {{ strtoupper(substr($pedido['usuario']['nombre'], 0, 1)) }}
-                                        </div>
-                                        <div>
-                                            <span class="d-block">{{ $pedido['usuario']['nombre'] }}</span>
-                                            <small class="text-muted">{{ $pedido['usuario']['correo'] }}</small>
-                                        </div>
-                                    </div>
-                                    @elseif(isset($pedido['pedIdentificadorCliente']) && $pedido['pedIdentificadorCliente'])
-                                    <span class="text-muted">{{ $pedido['pedIdentificadorCliente'] }}</span>
-                                    @else
-                                    <span class="text-muted">Sin asignar</span>
-                                    @endif
-                                </td>
+                                <td class="fw-bold">#{{ $pedido['pedCodigo'] }}</td>
                                 
                                 <td>
                                     <small class="text-muted d-block">
@@ -161,93 +140,76 @@
                                     </span>
                                 </td>
                                 
+                                {{-- COLUMNA CLIENTE (Prioriza nombreCliente enriquecido) --}}
+                                <td>
+                                    @if (!empty($pedido['nombreCliente']))
+                                        {{ $pedido['nombreCliente'] }}
+                                    @elseif (!empty($pedido['pedIdentificadorCliente']))
+                                        <span class="text-muted">{{ $pedido['pedIdentificadorCliente'] }}</span>
+                                    @else
+                                        <span class="text-muted">Desconocido</span>
+                                    @endif
+                                </td>
+                                
+                                {{--  COLUMNA DISEÑADOR (Muestra nombreEmpleado) --}}
                                 <td>
                                     @php
-                                        // Obtener estado ID y nombre con fallbacks
-                                        $estadoId = $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1);
-                                        $estadoNombre = $pedido['estado']['estNombre'] ?? ($pedido['estadoNombre'] ?? 'Desconocido');
-                                        
-                                        // Mapeo de badgeClass
-                                        $badgeClass = match($estadoId) {
-                                            1 => 'badge-pendiente',
-                                            2 => 'badge-confirmado',
-                                            3 => 'badge-diseno',
-                                            4 => 'badge-aprobado',
-                                            5 => 'badge-produccion',
-                                            6 => 'badge-calidad',
-                                            7 => 'badge-listo',
-                                            8 => 'badge-camino',
-                                            9 => 'badge-entregado',
-                                            10 => 'badge-cancelado',
-                                            default => 'badge-secondary'
-                                        };
-                                        
-                                        $iconClass = match($estadoId) {
-                                            1 => 'bi-clock-fill',
-                                            2 => 'bi-check-circle-fill',
-                                            3 => 'bi-palette-fill',
-                                            4 => 'bi-hand-thumbs-up-fill',
-                                            5 => 'bi-gear-fill',
-                                            6 => 'bi-shield-check-fill',
-                                            7 => 'bi-box-seam-fill',
-                                            8 => 'bi-truck',
-                                            9 => 'bi-gift-fill',
-                                            10 => 'bi-x-circle-fill',
-                                            default => 'bi-circle-fill'
-                                        };
+                                        $nombreEmpleado = $pedido['nombreEmpleado'] ?? 'PENDIENTE ASIGNAR';
                                     @endphp
-                                    
-                                    <span class="badge-estado {{ $badgeClass }}">
-                                        <i class="bi {{ $iconClass }}"></i> {{ $estadoNombre }}
-                                    </span>
-                                </td>
-                                
-                                <td>
-                                    @if((isset($pedido['personalizacion']) && $pedido['personalizacion']) || (isset($pedido['perId']) && $pedido['perId']))
-                                    @php
-                                        $perId = $pedido['personalizacion']['perId'] ?? ($pedido['perId'] ?? null);
-                                    @endphp
-                                    @if($perId)
-                                    <button onclick="verPersonalizacion({{ $perId }})" 
-                                            class="badge-personalizacion-btn">
-                                        <i class="bi bi-gem"></i> Ver diseno
-                                    </button>
-                                    @else
-                                    <span class="text-muted">Sin personalizacion</span>
-                                    @endif
-                                    @else
-                                    <span class="text-muted">Sin personalizacion</span>
-                                    @endif
-                                </td>
-                                
-                                <td>
-                                    @if($pedido['pedComentarios'])
-                                    <div class="comentario-preview" data-bs-toggle="tooltip" 
-                                         title="{{ $pedido['pedComentarios'] }}">
-                                        {{ Str::limit($pedido['pedComentarios'], 50) }}
-                                    </div>
-                                    @else
-                                    <span class="text-muted">Sin comentarios</span>
-                                    @endif
-                                </td>
-                                
-                                <td>
-                                    <div class="action-buttons">
-                                        {{-- Gestionar pedido --}}
-                                    <button onclick="gestionarPedido({{ $pedido['pedId'] }}, '{{ e($pedido['pedCodigo']) }}')" 
-                                            class="btn-action btn-gestionar" 
-                                            data-bs-toggle="tooltip" 
-                                            title="Gestionar pedido">
-                                        <i class="bi bi-gear-fill"></i>
-                                    </button>
 
-                                    {{-- Cambiar estado rapido --}}
-                                    <button onclick="cambiarEstadoPedido({{ $pedido['pedId'] }}, {{ $estadoId }})" 
-                                            class="btn-action btn-status" 
-                                            data-bs-toggle="tooltip" 
-                                            title="Cambiar estado">
-                                        <i class="bi bi-arrow-left-right"></i>
-                                    </button>
+                                    @if ($nombreEmpleado === 'PENDIENTE ASIGNAR')
+                                        <span class="badge bg-warning text-dark">{{ $nombreEmpleado }}</span>
+                                    @else
+                                        {{ $nombreEmpleado }}
+                                    @endif
+                                </td>
+
+                                {{-- Columna Estado --}}
+                                <td>
+                                    @php
+                                        $estadoClase = $pedido['estadoClase'] ?? 'bg-secondary';
+                                        $estadoNombre = $pedido['estadoNombre'] ?? ($pedido['estado']['estNombre'] ?? 'Desconocido');
+                                    @endphp
+                                    <span class="badge {{ $estadoClase }}">{{ $estadoNombre }}</span>
+                                </td>
+                                
+                                <td class="text-center">
+                                    @if (!empty($pedido['perId']))
+                                        <button onclick="verPersonalizacion({{ $pedido['perId'] }})" class="badge-personalizacion-btn btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye"></i> Ver diseño
+                                        </button>
+                                    @else
+                                        <span class="text-muted">Sin personalización</span>
+                                    @endif
+                                </td>
+                                
+                                <td>
+                                    <div class="action-buttons d-flex gap-2 align-items-center">
+                                        {{-- Gestionar pedido --}}
+                                        <a href="{{ route('admin.pedidos.gestionar', ['id' => $pedido['pedId']]) }}" 
+                                           class="btn-action btn-gestionar btn btn-sm btn-primary"
+                                           data-bs-toggle="tooltip" title="Gestionar pedido">
+                                            <i class="bi bi-gear-fill"></i>
+                                        </a>
+
+                                        {{-- Cambiar estado rapido --}}
+                                        <button onclick="cambiarEstadoPedido({{ $pedido['pedId'] }}, {{ $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1) }})" 
+                                                class="btn-action btn-status btn btn-sm btn-outline-secondary" 
+                                                data-bs-toggle="tooltip" title="Cambiar estado">
+                                            <i class="bi bi-arrow-left-right"></i>
+                                        </button>
+
+                                        {{-- 🔥 Botón Asignar/Reasignar Diseñador --}}
+                                        <button type="button" 
+                                                class="btn-action btn-asignar btn btn-sm btn-info"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalAsignarDisenador"
+                                                data-pedidoid="{{ $pedido['pedId'] }}"
+                                                data-actualdisenadorid="{{ $pedido['usuIdEmpleado'] ?? '' }}"
+                                                data-actualdisenadornombre="{{ $pedido['nombreEmpleado'] ?? '' }}"
+                                                title="{{ ($pedido['usuIdEmpleado'] ?? null) ? 'Reasignar Diseñador' : 'Asignar Diseñador' }}">
+                                            <i class="bi bi-person-plus"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -329,9 +291,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-arrow-left-right me-2"></i>Cambiar Estado del Pedido
-                </h5>
+                <h5 class="modal-title"><i class="bi bi-arrow-left-right me-2"></i>Cambiar Estado del Pedido</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -347,7 +307,6 @@
                         </select>
                     </div>
                     
-                    {{-- CAMBIO CRÍTICO: AGREGAR CAMPO DE COMENTARIOS PARA EL HISTORIAL --}}
                     <div class="mb-3">
                         <label class="form-label fw-bold">Comentarios de Historial (Opcional)</label>
                         <textarea class="form-control" id="comentariosEstado" name="comentarios" rows="3" placeholder="Ej: Pago de anticipo recibido, asignado a diseñador Miguel."></textarea>
@@ -355,7 +314,7 @@
 
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle-fill me-2"></i>
-                        Los cambios de estado se registraran automaticamente en el historial del pedido.
+                        Los cambios de estado se registrarán automáticamente en el historial del pedido.
                     </div>
                 </form>
             </div>
@@ -369,39 +328,185 @@
     </div>
 </div>
 
+{{-- Modal para Asignar Diseñador --}}
+<div class="modal fade" id="modalAsignarDisenador" tabindex="-1" aria-labelledby="modalAsignarDisenadorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAsignarDisenadorLabel">Asignar/Reasignar Diseñador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form id="formAsignarDisenador">
+                <div class="modal-body">
+                    <input type="hidden" id="asignarPedidoId" name="pedidoId">
+                    
+                    <div class="mb-3">
+                        <label for="disenadorSelect" class="form-label">Seleccionar Diseñador</label>
+                        <select class="form-select" id="disenadorSelect" name="usuIdEmpleado" required>
+                            <option value="">Seleccione un diseñador</option>
+                            {{--  Bucle para poblar con los datos de Spring Boot --}}
+                            @foreach($disenadores as $disenador)
+                                <option value="{{ $disenador['id'] }}">
+                                    {{ $disenador['nombre'] }} ({{ $disenador['rolNombre'] }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">El pedido será asignado a este empleado (diseñador).</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Guardar Asignación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
-<script src="{{ asset('assets/js/pedidos.js') }}"></script>
-<script>
-    // Inicializar tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
-    
-    // Aplicar filtros
-    document.getElementById('filterEstado')?.addEventListener('change', aplicarFiltros);
-    document.getElementById('pageSize')?.addEventListener('change', aplicarFiltros);
-    
-    // Busqueda por codigo
-    let timeoutCodigo;
-    document.getElementById('searchCodigo')?.addEventListener('input', function() {
-        clearTimeout(timeoutCodigo);
-        timeoutCodigo = setTimeout(aplicarFiltros, 500);
-    });
-    
-    function aplicarFiltros() {
-        const estadoId = document.getElementById('filterEstado')?.value || '';
-        const codigo = document.getElementById('searchCodigo')?.value || '';
-        const size = document.getElementById('pageSize')?.value || '10';
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+    <script src="{{ asset('assets/js/pedidos.js') }}"></script>
+
+    <script>
+        // Inicializar tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
         
-        const url = new URL(window.location.href);
-        url.searchParams.set('page', '0');
-        url.searchParams.set('size', size);
-        url.searchParams.set('estadoId', estadoId);
-        url.searchParams.set('codigo', codigo);
+        // Aplicar filtros
+        document.getElementById('filterEstado')?.addEventListener('change', aplicarFiltros);
+        document.getElementById('pageSize')?.addEventListener('change', aplicarFiltros);
         
-        window.location.href = url.toString();
-    }
-</script>
+        // Búsqueda por código (debounce)
+        let timeoutCodigo;
+        document.getElementById('searchCodigo')?.addEventListener('input', function() {
+            clearTimeout(timeoutCodigo);
+            timeoutCodigo = setTimeout(aplicarFiltros, 500);
+        });
+        
+        function aplicarFiltros() {
+            const estadoId = document.getElementById('filterEstado')?.value || '';
+            const codigo = document.getElementById('searchCodigo')?.value || '';
+            const size = document.getElementById('pageSize')?.value || '10';
+            
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', '0');
+            url.searchParams.set('size', size);
+            url.searchParams.set('estadoId', estadoId);
+            url.searchParams.set('codigo', codigo);
+            
+            window.location.href = url.toString();
+        }
+
+        // ---------------------------------------------------
+        // Modal Asignar Diseñador: comportamiento y envío
+        // ---------------------------------------------------
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalAsignarEl = document.getElementById('modalAsignarDisenador');
+            const asignarPedidoId = document.getElementById('asignarPedidoId');
+            const disenadorSelect = document.getElementById('disenadorSelect');
+            const formAsignar = document.getElementById('formAsignarDisenador');
+
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.content : null;
+
+            // Función para cargar diseñadores vía AJAX si no vienen pasados desde el backend
+            async function cargarDisenadoresSiNecesario() {
+                const hasOptions = Array.from(disenadorSelect.options).some(opt => opt.value && opt.value !== '');
+                if (hasOptions) return;
+
+                try {
+                    const res = await fetch('/admin/disenadores/list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!res.ok) return;
+                    const json = await res.json();
+                    if (!Array.isArray(json)) return;
+
+                    disenadorSelect.innerHTML = '<option value="">Seleccione un diseñador</option>';
+                    json.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.usuId ?? d.id ?? '';
+                        opt.textContent = d.nombre ?? d.nombreCompleto ?? (d.correo ?? 'Empleado');
+                        disenadorSelect.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.warn('No se pudieron cargar diseñadores automáticamente:', err);
+                }
+            }
+
+            // Cuando se abre el modal, rellenar los campos
+            modalAsignarEl.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const pedidoId = button.getAttribute('data-pedidoid');
+                const actualDisenadorId = button.getAttribute('data-actualdisenadorid') || '';
+
+                asignarPedidoId.value = pedidoId;
+
+                cargarDisenadoresSiNecesario().then(() => {
+                    if (actualDisenadorId) {
+                        disenadorSelect.value = actualDisenadorId;
+                    } else {
+                        disenadorSelect.value = '';
+                    }
+                });
+            });
+
+            // Submit del formulario — PATCH al endpoint Laravel que hace proxy a Spring Boot
+            formAsignar.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const pedidoId = asignarPedidoId.value;
+                const nuevoDisenadorId = disenadorSelect.value;
+
+                if (!nuevoDisenadorId) {
+                    Swal.fire('Advertencia', 'Debe seleccionar un diseñador.', 'warning');
+                    return;
+                }
+
+                const confirm = await Swal.fire({
+                    title: 'Confirmar asignación',
+                    text: '¿Deseas asignar este diseñador al pedido?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, asignar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!confirm.isConfirmed) return;
+
+                Swal.fire({
+                    title: 'Asignando...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const res = await fetch(`/admin/pedidos/${pedidoId}/asignar-empleado`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+                        },
+                        body: JSON.stringify({ usuIdEmpleado: parseInt(nuevoDisenadorId, 10) })
+                    });
+
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        throw new Error(body.message || 'Error en la asignación');
+                    }
+
+                    const data = await res.json();
+
+                    Swal.fire('Hecho', 'Diseñador asignado correctamente.', 'success').then(() => {
+                        const modal = bootstrap.Modal.getInstance(modalAsignarEl);
+                        modal?.hide();
+                        location.reload();
+                    });
+
+                } catch (err) {
+                    Swal.fire('Error', err.message || 'No se pudo asignar el diseñador.', 'error');
+                }
+            });
+        });
+    </script>
 @endpush
