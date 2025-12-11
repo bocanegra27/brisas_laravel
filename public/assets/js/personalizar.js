@@ -13,7 +13,7 @@ const PersonalizacionState = {
     material: 'oro-amarillo',
     tamano: '7-mm',
     talla: '5',
-    vistaActual: 'frontal',
+    vistaActual: 'superior',
     vistas: ['superior', 'frontal', 'perfil'],
 
     /**

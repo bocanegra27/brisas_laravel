@@ -63,7 +63,7 @@
                         <div class="preview-image-container">
                             <img 
                                 id="vista-principal" 
-                                src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=frontal') }}" 
+                                src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=superior') }}" 
                                 alt="Vista previa de la joya" 
                                 class="img-fluid preview-image">
                         </div>
@@ -73,7 +73,7 @@
                             <button type="button" class="btn btn-outline-primary btn-sm" id="btn-vista-anterior">
                                 <i class="bi bi-chevron-left"></i>
                             </button>
-                            <span class="badge bg-primary px-3 py-2" id="current-view-label">Vista Frontal</span>
+                            <span class="badge bg-primary px-3 py-2" id="current-view-label">Vista Superior</span>
                             <button type="button" class="btn btn-outline-primary btn-sm" id="btn-vista-siguiente">
                                 <i class="bi bi-chevron-right"></i>
                             </button>
@@ -81,15 +81,15 @@
                         
                         <!-- Miniaturas de vistas - AHORA USAN PROXY -->
                         <div class="view-thumbnails d-flex justify-content-center gap-2 mt-3">
-                            <button type="button" class="thumbnail-btn" data-view="superior">
-                                <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=superior') }}" 
-                                     alt="Vista Superior" class="img-thumbnail">
-                                <span class="thumbnail-label">Superior</span>
-                            </button>
-                            <button type="button" class="thumbnail-btn active" data-view="frontal">
+                            <button type="button" class="thumbnail-btn" data-view="frontal">
                                 <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=frontal') }}" 
                                      alt="Vista Frontal" class="img-thumbnail">
                                 <span class="thumbnail-label">Frontal</span>
+                            </button>
+                            <button type="button" class="thumbnail-btn active" data-view="superior">
+                                <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=superior') }}" 
+                                     alt="Vista Superior" class="img-thumbnail">
+                                <span class="thumbnail-label">Superior</span>
                             </button>
                             <button type="button" class="thumbnail-btn" data-view="perfil">
                                 <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=perfil') }}" 
