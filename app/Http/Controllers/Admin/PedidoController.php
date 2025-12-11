@@ -148,6 +148,12 @@ class PedidoController extends Controller
  * En Fase 3 sera la vista robusta completa con timeline
  * GET /admin/pedidos/{id}/gestionar
  */
+// En app/Http/Controllers/Admin/PedidoController.php
+
+/**
+ * Vista de gestion del pedido con Timeline.
+ * GET /admin/pedidos/{id}/gestionar
+ */
 public function gestionar($id)
 {
     try {
@@ -157,19 +163,28 @@ public function gestionar($id)
             ]
         ]);
 
-        if ($response === null) {
+        // 🔥 CORRECCIÓN CRÍTICA: Normalizar la clave de la respuesta
+        if (is_array($response) && isset($response['ped_id'])) {
+            // Si la clave viene como ped_id (guion bajo), la renombramos a pedId para que Blade la entienda.
+            $response['pedId'] = $response['ped_id']; 
+        }
+
+        // 🔥 VALIDACIÓN CORREGIDA:
+        if (!is_array($response) || !isset($response['pedId'])) {
+            Log::warning('PedidoController@gestionar: Pedido no encontrado o respuesta inválida.', ['id' => $id, 'response' => $response]);
             return redirect()
                 ->route('admin.pedidos.index')
-                ->with('error', 'Pedido no encontrado.');
+                ->with('error', 'Pedido no encontrado o la API devolvió datos incorrectos.');
         }
 
         $pedido = $this->enriquecerPedido($response);
         $estadosArray = $this->getEstadosDisponibles();
 
-        // Convertir array de objetos a array asociativo para la vista
+        // Convertir array de objetos a array asociativo para el select en la vista
         $estados = [];
         foreach ($estadosArray as $estado) {
-            $estados[$estado['id']] = $estado['nombre'];
+            // Usar estId como clave y nombre como valor
+            $estados[$estado['id']] = $estado['nombre']; 
         }
 
         return view('admin.pedidos.gestionar', [
@@ -188,7 +203,6 @@ public function gestionar($id)
             ->with('error', 'Error al cargar el pedido.');
     }
 }
-
 
 
     /**
@@ -387,15 +401,31 @@ public function gestionar($id)
             ]);
 
             if ($response === null || !is_array($response)) {
-                return response()->json(['success' => false, 'message' => 'Error al obtener el historial.'], 500);
+                Log::error('PedidoController@obtenerHistorial: Error al obtener historial', [
+                    'pedidoId' => $pedidoId,
+                    'response' => $response
+                ]);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Error al obtener el historial.'
+                ], 500);
             }
             
-            // Spring Boot debe devolver una lista ordenada de DTOs del historial
-            return response()->json(['success' => true, 'historial' => $response]);
+            // Spring Boot devuelve una lista ordenada de DTOs del historial
+            return response()->json([
+                'success' => true, 
+                'historial' => $response
+            ]);
 
         } catch (\Exception $e) {
-            Log::error('PedidoController@obtenerHistorial: Excepción.', ['error' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => 'Error interno al cargar el historial.'], 500);
+            Log::error('PedidoController@obtenerHistorial: Excepción.', [
+                'pedidoId' => $pedidoId,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Error interno al cargar el historial.'
+            ], 500);
         }
     }
     

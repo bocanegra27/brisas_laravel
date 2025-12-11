@@ -176,56 +176,14 @@
                     <h5 class="card-title">
                         <i class="bi bi-clock-history me-2"></i>Progreso del Pedido
                     </h5>
-                    <div class="timeline-container">
-                        @php
-                            $todosEstados = [
-                                1 => ['nombre' => 'Pendiente Confirmacion', 'icono' => 'bi-clock-fill'],
-                                2 => ['nombre' => 'Confirmado', 'icono' => 'bi-check-circle-fill'],
-                                3 => ['nombre' => 'En Diseno', 'icono' => 'bi-palette-fill'],
-                                4 => ['nombre' => 'Aprobado por Cliente', 'icono' => 'bi-hand-thumbs-up-fill'],
-                                5 => ['nombre' => 'En Produccion', 'icono' => 'bi-gear-fill'],
-                                6 => ['nombre' => 'Control de Calidad', 'icono' => 'bi-shield-check-fill'],
-                                7 => ['nombre' => 'Listo para Entrega', 'icono' => 'bi-box-seam-fill'],
-                                8 => ['nombre' => 'En Camino', 'icono' => 'bi-truck'],
-                                9 => ['nombre' => 'Entregado', 'icono' => 'bi-gift-fill'],
-                                10 => ['nombre' => 'Cancelado', 'icono' => 'bi-x-circle-fill']
-                            ];
-                        @endphp
-
-                        <div class="timeline-vertical">
-                            @foreach($todosEstados as $id => $info)
-                                @php
-                                    $esActual = ($estadoId == $id);
-                                    $completado = ($id < $estadoId && $estadoId != 10);
-                                    $cancelado = ($estadoId == 10);
-                                    
-                                    $claseEstado = '';
-                                    if ($cancelado && $id != 10) {
-                                        $claseEstado = 'timeline-item-disabled';
-                                    } elseif ($esActual) {
-                                        $claseEstado = 'timeline-item-active';
-                                    } elseif ($completado) {
-                                        $claseEstado = 'timeline-item-completed';
-                                    } else {
-                                        $claseEstado = 'timeline-item-pending';
-                                    }
-                                @endphp
-                                
-                                <div class="timeline-item {{ $claseEstado }}">
-                                    <div class="timeline-marker">
-                                        <i class="bi {{ $info['icono'] }}"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6 class="timeline-title">{{ $info['nombre'] }}</h6>
-                                        @if($esActual)
-                                            <span class="timeline-badge">Estado Actual</span>
-                                        @elseif($completado)
-                                            <span class="timeline-badge completed">Completado</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
+                    
+                    {{--  CONTENEDOR DONDE SE RENDERIZA EL HISTORIAL REAL --}}
+                    <div class="timeline-container" id="historialTimeline">
+                        <div class="text-center py-5" id="timelineLoading">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="text-muted mt-2">Cargando historial...</p>
                         </div>
+                        {{-- Aquí se inyectarán las entradas de historial con JS --}}
                     </div>
                 </div>
 
@@ -286,104 +244,262 @@
 </div>
 
 @endsection
-
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 <script>
-// Actualizar estado del pedido
-function actualizarEstadoPedido(event, pedidoId) {
-    event.preventDefault();
-    
-    const estadoId = document.getElementById('nuevoEstadoSelect').value;
-    const comentarios = document.getElementById('comentariosEstado').value;
-    
-    Swal.fire({
-        title: 'Actualizando...',
-        text: 'Por favor espera',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    fetch(`/admin/pedidos/${pedidoId}/estado`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        },
-        body: JSON.stringify({
-            estadoId: parseInt(estadoId),
-            comentarios: comentarios
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: 'Exito',
-                text: 'Estado actualizado correctamente',
-                icon: 'success',
-                confirmButtonColor: '#009688'
-            }).then(() => {
-                window.location.reload();
-            });
-        } else {
-            throw new Error(data.message || 'Error al actualizar');
-        }
-    })
-    .catch(error => {
-        Swal.fire({
-            title: 'Error',
-            text: error.message,
-            icon: 'error',
-            confirmButtonColor: '#ef4444'
-        });
-    });
-    
-    return false;
-}
+    // ===============================================
+    // Configuración Global y Mapeos
+    // ===============================================
 
-// Ver detalles de personalizacion
-function verDetallesPersonalizacion(perId) {
-    const modal = new bootstrap.Modal(document.getElementById('modalPersonalizacion'));
-    modal.show();
+    // Mapeo de Estados
+    const ESTADOS_MAP = {
+        1: { nombre: '1. Cotización Pendiente', icono: 'bi-clock-fill', clase: 'pendiente' },
+        2: { nombre: '2. Pago Diseño Pendiente', icono: 'bi-check-circle-fill', clase: 'confirmado' },
+        3: { nombre: '3. Diseño en Proceso', icono: 'bi-palette-fill', clase: 'diseno' },
+        4: { nombre: '4. Diseño Aprobado', icono: 'bi-hand-thumbs-up-fill', clase: 'aprobado' },
+        5: { nombre: '5. Tallado (Producción)', icono: 'bi-gear-fill', clase: 'produccion' },
+        6: { nombre: '6. Engaste', icono: 'bi-gem', clase: 'produccion' },
+        7: { nombre: '7. Pulido', icono: 'bi-sparkle', clase: 'produccion' },
+        8: { nombre: '8. Inspección de Calidad', icono: 'bi-shield-check-fill', clase: 'calidad' },
+        9: { nombre: '9. Finalizado (Entrega)', icono: 'bi-gift-fill', clase: 'finalizado' },
+        10: { nombre: '10. Cancelado', icono: 'bi-x-circle-fill', clase: 'cancelado' }
+    };
     
-    fetch(`/api/personalizaciones/${perId}/detalles`, {
-        headers: {
-            'Authorization': 'Bearer ' + (localStorage.getItem('jwt_token') || '')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        let html = '<div class="row g-3">';
+    // Variables globales
+    const pedidoId = {{ $pedido['pedId'] ?? 0 }};
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Cargando historial para pedido ID:', pedidoId);
         
-        if (data.detalles) {
-            data.detalles.forEach(detalle => {
-                html += `
-                    <div class="col-md-6">
-                        <div class="detalle-personalizacion">
-                            <strong>${detalle.valNombre}:</strong>
-                            <span>${detalle.opcionNombre}</span>
-                        </div>
+        if (pedidoId && pedidoId > 0) {
+            cargarHistorialPedido(pedidoId);
+        } else {
+            console.error('ID de pedido inválido:', pedidoId);
+            document.getElementById('historialTimeline').innerHTML = 
+                '<p class="text-danger text-center py-4">Error: ID de pedido no válido.</p>';
+        }
+    });
+
+    // ===============================================
+    // 1. ACTUALIZACIÓN DE ESTADO
+    // ===============================================
+
+    function actualizarEstadoPedido(event, pedidoId) {
+        event.preventDefault();
+        
+        const estadoId = document.getElementById('nuevoEstadoSelect').value;
+        const comentarios = document.getElementById('comentariosEstado').value;
+        
+        Swal.fire({
+            title: 'Actualizando...',
+            text: 'Registrando cambio en el historial',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        fetch(`/admin/pedidos/${pedidoId}/estado-historial`, { 
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken 
+            },
+            body: JSON.stringify({
+                estadoId: parseInt(estadoId),
+                comentarios: comentarios
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || `Error HTTP ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Éxito',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#009688'
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            } else {
+                throw new Error(data.message || 'Error al actualizar (API).');
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                title: 'Error',
+                text: error.message,
+                icon: 'error',
+                confirmButtonColor: '#ef4444'
+            });
+        });
+        
+        return false;
+    }
+
+    // ===============================================
+    // 2. CARGA DEL TIMELINE
+    // ===============================================
+
+    function cargarHistorialPedido(id) {
+        // Validación
+        if (!id || id === 0) {
+            console.error("ID de pedido no válido:", id);
+            document.getElementById('historialTimeline').innerHTML = 
+                '<p class="text-danger text-center py-4">Error: ID de pedido no válido.</p>';
+            return; 
+        }
+        
+        // Construir la URL correctamente usando template string
+        const url = `/admin/pedidos/${id}/historial`;
+        
+        console.log('Fetching historial desde:', url);
+
+        fetch(url, {
+            method: 'GET',
+            headers: { 
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            } 
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos recibidos:', data);
+            
+            const container = document.getElementById('historialTimeline');
+            container.innerHTML = '';
+
+            if (data.success && data.historial && data.historial.length > 0) {
+                renderizarTimeline(container, data.historial);
+            } else {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-info-circle display-6 d-block mb-2"></i>
+                        Aún no hay registros en el historial de este pedido.
                     </div>
                 `;
+            }
+        })
+        .catch(error => {
+            console.error('Error cargando historial:', error);
+            document.getElementById('historialTimeline').innerHTML = 
+                `<p class="text-danger text-center py-4">Error: ${error.message}</p>`;
+        });
+    }
+    
+    function renderizarTimeline(container, historial) {
+        let html = '<div class="timeline-vertical">';
+        
+        historial.forEach((item, index) => {
+            const info = ESTADOS_MAP[item.estId] || { 
+                nombre: 'Desconocido', 
+                icono: 'bi-question-circle', 
+                clase: 'secundario' 
+            };
+            
+            const fecha = new Date(item.hisFechaCambio).toLocaleString('es-CO', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
             });
-        }
+            
+            const esActual = index === 0 && item.estId !== 10;
+            
+            let claseItem = 'timeline-item-completed';
+            if (item.estId === 10) {
+                claseItem = 'timeline-item-cancelado';
+            } else if (esActual) {
+                 claseItem = 'timeline-item-active';
+            }
+            
+            html += `
+                <div class="timeline-item ${claseItem}">
+                    <div class="timeline-marker">
+                        <i class="bi ${info.icono}"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h6 class="timeline-title">
+                            ${info.nombre}
+                            ${esActual ? '<span class="timeline-badge active">ESTADO ACTUAL</span>' : ''}
+                            ${item.estId === 10 ? '<span class="timeline-badge cancelado">CANCELADO</span>' : ''}
+                        </h6>
+                        <span class="timeline-date">${fecha}</span>
+                        <p class="timeline-comment mt-1">${item.hisComentarios || 'Cambio registrado sin notas.'}</p>
+                        <p class="timeline-responsible small text-muted">Responsable: ${item.responsableNombre || 'Sistema'}</p>
+                        
+                        ${item.hisImagen ? `<div class="timeline-image-link mt-2">
+                            <a href="${item.hisImagen}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-image"></i> Ver Evidencia
+                            </a>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `;
+        });
         
         html += '</div>';
-        document.getElementById('modalPersonalizacionContent').innerHTML = html;
-    })
-    .catch(error => {
-        document.getElementById('modalPersonalizacionContent').innerHTML = 
-            '<p class="text-danger">Error al cargar la personalizacion</p>';
-    });
-}
+        container.innerHTML = html;
+    }
 
-// Ver mensaje origen
-function verMensajeOrigen(conId) {
-    window.location.href = `/admin/mensajes?highlight=${conId}`;
-}
+    // ===============================================
+    // 3. FUNCIONES AUXILIARES
+    // ===============================================
+
+    function verDetallesPersonalizacion(perId) {
+        const modal = new bootstrap.Modal(document.getElementById('modalPersonalizacion'));
+        modal.show();
+        
+        const modalContent = document.getElementById('modalPersonalizacionContent');
+        modalContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
+        
+        fetch(`/api/personalizaciones/${perId}/detalles`, {
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token') || '')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let html = '<div class="row g-3">';
+            if (data.detalles) {
+                 data.detalles.forEach(detalle => {
+                    html += `
+                        <div class="col-md-6">
+                            <div class="detalle-personalizacion">
+                                <strong>${detalle.valNombre}:</strong>
+                                <span>${detalle.opcionNombre}</span>
+                            </div>
+                        </div>
+                    `;
+                 });
+            }
+            html += '</div>';
+            modalContent.innerHTML = html;
+        })
+        .catch(error => {
+             modalContent.innerHTML = '<p class="text-danger">Error al cargar la personalización</p>';
+        });
+    }
+
+    function verMensajeOrigen(conId) {
+        window.location.href = `/admin/mensajes?highlight=${conId}`;
+    }
 </script>
 @endpush
