@@ -152,11 +152,10 @@
 
                     <div class="header-minimal__dropdown-menu">
                         {{-- Opción: Mi Perfil (todos los roles) --}}
-                        {{-- Pendiente de implementar --}}
-                        {{-- <a href="{{ url('/perfil') }}" class="header-minimal__dropdown-item">
+                        <a href="{{ route('perfil.index') }}" class="header-minimal__dropdown-item">
                             <i class="bi bi-person header-minimal__dropdown-icon"></i>
                             Mi Perfil
-                        </a> --}}
+                        </a>
 
                         {{-- Opciones adicionales según rol --}}
                         @if($isUser)

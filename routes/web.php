@@ -108,3 +108,12 @@ Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer
 Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
 });
+
+// ============================================
+// PERFIL DE USUARIO (COMÚN PARA TODOS)
+// ============================================
+Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function () {
+    Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('perfil.index');
+    Route::put('/actualizar', [App\Http\Controllers\ProfileController::class, 'update'])->name('perfil.update');
+    Route::patch('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('perfil.password');
+});

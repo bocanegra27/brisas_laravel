@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Servicio centralizado para comunicación con la API de Spring Boot
- * 
- * Client (Guzzle)
+ * * Client (Guzzle)
  * Maneja autenticación JWT y errores de forma consistente
  */
 class ApiService
@@ -54,7 +53,8 @@ class ApiService
                 'DELETE' => $request->delete($url, $data ?? []),
                 default => throw new \InvalidArgumentException("Método HTTP no soportado: {$method}")
             };
-            // Log para erroes
+            
+            // Log para errores (Solo si debug está activo)
             if (config('app.debug')) {
                 Log::info("API Request", [
                     'method' => $method,
@@ -109,6 +109,15 @@ class ApiService
     public function put(string $endpoint, array $data, array $options = []): ?array
     {
         return $this->request('PUT', $endpoint, $data, $options);
+    }
+
+    /**
+     * PATCH request simplificado
+     * Agregado para soportar actualizaciones parciales y cambio de contraseña
+     */
+    public function patch(string $endpoint, array $data, array $options = []): ?array
+    {
+        return $this->request('PATCH', $endpoint, $data, $options);
     }
 
     /**
