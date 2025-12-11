@@ -367,7 +367,7 @@ textarea.form-control {
                                     id="mensaje" 
                                     name="mensaje" 
                                     placeholder="Cuéntanos más sobre lo que necesitas..."
-                                    required>{{ old('mensaje', $resumen) }}</textarea>
+                                    required>{{ old('mensaje') }}</textarea>
                                 @error('mensaje')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
