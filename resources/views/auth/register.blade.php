@@ -36,7 +36,6 @@
                             </div>
                         @endif
 
-                        <!-- Formulario de Registro -->
                         <form action="{{ route('register.handle') }}" method="POST">
                             @csrf
 
@@ -134,9 +133,9 @@
                                 </div>
                             </div>
 
-                            {{-- Contraseña --}}
+                            {{-- Contraseña y Confirmación --}}
                             <div class="row">
-                                <div class="col-md-12 mb-4">
+                                <div class="col-md-6 mb-4">
                                     <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
                                     <input 
                                         type="password" 
@@ -150,7 +149,19 @@
                                     @error('password')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="form-text text-muted">Debe tener al menos 8 caracteres</small>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="password_confirmation" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
+                                    <input 
+                                        type="password" 
+                                        class="form-control" 
+                                        id="password_confirmation" 
+                                        name="password_confirmation" 
+                                        minlength="8" 
+                                        placeholder="Repite la contraseña"
+                                        required
+                                    >
                                 </div>
                             </div>
 
