@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Brisas Gems</title>
+    <title>Recuperar Contraseña - Brisas Gems</title>
     <link rel="icon" href="{{ asset('assets/img/icons/icono.png') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
@@ -48,7 +48,7 @@
         .login-header h2 {
             font-weight: 700;
             margin: 0;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
         }
         
         .login-header p {
@@ -85,29 +85,18 @@
             box-shadow: 0 5px 15px rgba(0, 150, 136, 0.3);
         }
 
-        .password-toggle {
-            cursor: pointer;
+        .back-link {
             color: #6c757d;
-            z-index: 10;
-        }
-
-        .forgot-link {
-            color: var(--primary-color);
             text-decoration: none;
             font-size: 0.9rem;
             transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .forgot-link:hover {
-            color: var(--primary-hover);
-            text-decoration: underline;
-        }
-
-        .register-text {
-            font-size: 0.9rem;
-            text-align: center;
-            margin-top: 20px;
-            color: #6c757d;
+        .back-link:hover {
+            color: var(--primary-color);
         }
     </style>
 </head>
@@ -115,13 +104,13 @@
 
     <div class="login-card">
         <div class="login-header">
-            <i class="bi bi-gem mb-2" style="font-size: 2rem;"></i>
-            <h2>Brisas Gems</h2>
-            <p>Bienvenido de nuevo</p>
+            <i class="bi bi-shield-lock mb-2" style="font-size: 2rem;"></i>
+            <h2>Recuperación</h2>
+            <p>Ingresa tu correo para restablecer tu contraseña</p>
         </div>
 
         <div class="login-body">
-            {{-- Alertas --}}
+            {{-- Mensajes de Éxito o Error --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <small>{{ session('success') }}</small>
@@ -140,65 +129,29 @@
                 </div>
             @endif
 
-            <form action="{{ route('login.handle') }}" method="POST">
+            <form action="{{ route('password.email') }}" method="POST">
                 @csrf
                 
-                {{-- Email --}}
-                <div class="form-floating mb-3">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" value="{{ old('email') }}" required autofocus>
+                <div class="form-floating mb-4">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required autofocus>
                     <label for="email"><i class="bi bi-envelope me-2"></i>Correo electrónico</label>
                 </div>
 
-                {{-- Password con Ojo --}}
-                <div class="input-group mb-3 position-relative">
-                    <div class="form-floating flex-grow-1">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
-                        <label for="password"><i class="bi bi-lock me-2"></i>Contraseña</label>
-                    </div>
-                    <span class="input-group-text bg-white border-start-0" id="togglePassword" style="cursor: pointer;">
-                        <i class="bi bi-eye-slash" id="eyeIcon"></i>
-                    </span>
-                </div>
-
-                <div class="d-flex justify-content-end mb-4">
-                    {{-- Este enlace ya funcionará porque completamos el Paso 1 --}}
-                    <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
-                </div>
-
-                <div class="d-grid">
+                <div class="d-grid mb-4">
                     <button type="submit" class="btn btn-primary btn-lg">
-                        Ingresar <i class="bi bi-box-arrow-in-right ms-2"></i>
+                        Enviar Enlace <i class="bi bi-send ms-2"></i>
                     </button>
                 </div>
-            </form>
 
-            <div class="register-text">
-                ¿No tienes una cuenta? <a href="{{ route('register.show') }}" class="forgot-link fw-bold">Regístrate aquí</a>
-            </div>
+                <div class="text-center">
+                    <a href="{{ route('login') }}" class="back-link">
+                        <i class="bi bi-arrow-left me-2"></i> Volver al Login
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Lógica del Ojo para ver contraseña
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-        const eyeIcon = document.querySelector('#eyeIcon');
-
-        togglePassword.addEventListener('click', function (e) {
-            // Alternar tipo de input
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            
-            // Alternar icono
-            if (type === 'text') {
-                eyeIcon.classList.remove('bi-eye-slash');
-                eyeIcon.classList.add('bi-eye');
-            } else {
-                eyeIcon.classList.remove('bi-eye');
-                eyeIcon.classList.add('bi-eye-slash');
-            }
-        });
-    </script>
 </body>
 </html>

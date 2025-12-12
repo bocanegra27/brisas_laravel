@@ -135,4 +135,43 @@ class AuthService
         $userRole = Session::get('user_role');
         return $userRole === $role;
     }
+
+    /**
+     * Solicitar recuperación de contraseña al Backend
+     */
+    public function forgotPassword(string $email): bool
+    {
+        // Usamos el ApiService que ya tienes inyectado o instanciado
+        // Si AuthService extiende de ApiService o lo usa, adáptalo.
+        // Asumiendo que usas tu ApiService genérico:
+        
+        try {
+            // Enviamos POST a /auth/forgot-password
+            // Nota: Spring Boot esperará un JSON { "email": "..." }
+            $response = $this->apiService->post('/auth/forgot-password', [
+                'email' => $email
+            ]);
+            
+            // Si la respuesta es exitosa (código 200), retornamos true
+            return true; 
+        } catch (\Exception $e) {
+            // Logueamos el error pero no lo mostramos al usuario por seguridad
+            \Illuminate\Support\Facades\Log::error("Error en recuperación de password: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function resetPassword(string $token, string $newPassword): bool
+    {
+        try {
+            // POST a /auth/reset-password
+            $response = $this->apiService->post('/auth/reset-password', [
+                'token' => $token,
+                'newPassword' => $newPassword
+            ]);
+            return $response !== null;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Controlador de registro de usuarios
- * 
- * Maneja el registro público de nuevos usuarios
+ * * Maneja el registro público de nuevos usuarios
  */
 class RegisterController extends Controller
 {
@@ -38,7 +37,8 @@ class RegisterController extends Controller
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:100|min:3',
             'correo' => 'required|email|max:100',
-            'password' => 'required|string|min:8|max:100',
+            // 🔥 CAMBIO AQUÍ: Agregado 'confirmed'
+            'password' => 'required|string|min:8|max:100|confirmed',
             'telefono' => 'nullable|string|max:20',
             'docnum' => 'required|string|max:20',
             'tipdocId' => 'required|integer'
@@ -52,6 +52,8 @@ class RegisterController extends Controller
             'password.required' => 'La contraseña es obligatoria',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres',
             'password.max' => 'La contraseña no puede exceder 100 caracteres',
+            // 🔥 CAMBIO AQUÍ: Mensaje personalizado para el error de confirmación
+            'password.confirmed' => 'Las contraseñas no coinciden. Por favor verifícalas.',
             'telefono.max' => 'El teléfono no puede exceder 20 caracteres',
             'docnum.required' => 'El número de documento es obligatorio',
             'docnum.max' => 'El número de documento no puede exceder 20 caracteres',
@@ -62,7 +64,8 @@ class RegisterController extends Controller
         if ($validator->fails()) {
             return back()
                 ->withErrors($validator)
-                ->withInput($request->except('password'));
+                // Evitamos devolver las contraseñas por seguridad
+                ->withInput($request->except('password', 'password_confirmation'));
         }
 
         // Preparar datos para enviar al API
@@ -90,6 +93,6 @@ class RegisterController extends Controller
         // Registro fallido - mostrar error
         return back()
             ->withErrors(['correo' => $result['message']])
-            ->withInput($request->except('password'));
+            ->withInput($request->except('password', 'password_confirmation'));
     }
 }
