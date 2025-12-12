@@ -118,11 +118,9 @@
                             <tr>
                                 <th>Código</th>
                                 <th>Fecha Creación</th>
-                                {{-- 🔥 NUEVAS COLUMNAS --}}
                                 <th>Cliente</th>
                                 <th>Diseñador</th>
                                 <th>Estado</th>
-                                <th class="text-center">Personalización</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -132,11 +130,16 @@
                                 <td class="fw-bold">#{{ $pedido['pedCodigo'] }}</td>
                                 
                                 <td>
+                                    @php
+                                        $fechaLocal = \Carbon\Carbon::parse($pedido['pedFechaCreacion'])
+                                            ->setTimezone(config('app.timezone')); // Asume tu timezone (ej: America/Bogota)
+                                    @endphp
+                                    
                                     <small class="text-muted d-block">
-                                        {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'])->format('d/m/Y') }}
+                                        {{ $fechaLocal->format('d/m/Y') }}
                                     </small>
                                     <span class="fw-medium">
-                                        {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'])->format('H:i') }}
+                                        {{ $fechaLocal->format('h:i a') }} {{-- h:i a for 12-hour clock (ej: 06:40 pm) --}}
                                     </span>
                                 </td>
                                 
@@ -167,20 +170,13 @@
                                 {{-- Columna Estado --}}
                                 <td>
                                     @php
-                                        $estadoClase = $pedido['estadoClase'] ?? 'bg-secondary';
-                                        $estadoNombre = $pedido['estadoNombre'] ?? ($pedido['estado']['estNombre'] ?? 'Desconocido');
+                                        // Obtener el nombre crudo de la BD (ej: 'pago_diseno_pendiente')
+                                        $estadoCrudo = $pedido['estadoNombre'] ?? ($pedido['estado']['estNombre'] ?? 'desconocido');
+                                        
+                                        // Usar la variable mapeada, cayendo al nombre crudo si falla el mapeo (aunque no debería)
+                                        $estadoLimpio = $estadoMapeo[$estadoCrudo] ?? $estadoCrudo;
                                     @endphp
-                                    <span class="badge {{ $estadoClase }}">{{ $estadoNombre }}</span>
-                                </td>
-                                
-                                <td class="text-center">
-                                    @if (!empty($pedido['perId']))
-                                        <button onclick="verPersonalizacion({{ $pedido['perId'] }})" class="badge-personalizacion-btn btn btn-sm btn-outline-info">
-                                            <i class="bi bi-eye"></i> Ver diseño
-                                        </button>
-                                    @else
-                                        <span class="text-muted">Sin personalización</span>
-                                    @endif
+                                    <span class="text-secondary fw-medium">{{ $estadoLimpio }}</span>
                                 </td>
                                 
                                 <td>
@@ -199,7 +195,7 @@
                                             <i class="bi bi-arrow-left-right"></i>
                                         </button>
 
-                                        {{-- 🔥 Botón Asignar/Reasignar Diseñador --}}
+                                        {{-- Botón Asignar/Reasignar Diseñador --}}
                                         <button type="button" 
                                                 class="btn-action btn-asignar btn btn-sm btn-info"
                                                 data-bs-toggle="modal"

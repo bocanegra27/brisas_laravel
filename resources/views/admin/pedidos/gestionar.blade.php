@@ -61,107 +61,104 @@
             {{-- Columna Izquierda: Informacion y Acciones --}}
             <div class="col-lg-4">
                 
-{{-- Card: Informacion del Cliente --}}
-<div class="info-card animate-in animate-delay-1">
-    <h5 class="card-title">
-        <i class="bi bi-person-circle me-2"></i>Cliente
-    </h5>
-    <div class="card-content">
-        @php
-            $cliente = $pedido['clienteDetalles'] ?? null;
-            
-            // Determinar tipo de cliente
-            $tipo = $cliente['tipo'] ?? null;
-            $esRegistrado = $tipo === 'usuario_registrado';
-            $esContacto = $tipo === 'contacto_externo';
-            $sinDetalles = $tipo === 'sin_detalles';
-            
-            // Obtener datos dependiendo del tipo
-            if ($esRegistrado) {
-                $nombre = $cliente['usuNombre'] ?? 'Usuario Registrado';
-                $correo = $cliente['usuCorreo'] ?? '';
-                $telefono = $cliente['usuTelefono'] ?? '';
-                $tipoLabel = 'Registrado';
-                $tipoIcon = 'person-check-fill';
-                $tipoBadge = 'registrado';
-            } elseif ($esContacto) {
-                $nombre = $cliente['conNombre'] ?? 'Cliente Externo';
-                $correo = $cliente['conCorreo'] ?? '';
-                $telefono = $cliente['conTelefono'] ?? '';
-                $tipoLabel = 'Externo';
-                $tipoIcon = 'telephone-fill';
-                $tipoBadge = 'externo';
-            } elseif ($sinDetalles) {
-                $nombre = $cliente['nombre'] ?? $pedido['clienteNombre'] ?? 'Cliente';
-                $correo = '';
-                $telefono = '';
-                $tipoLabel = 'Sin Detalles';
-                $tipoIcon = 'person-fill';
-                $tipoBadge = 'externo';
-            } else {
-                // Fallback final
-                $nombre = $pedido['clienteNombre'] ?? 'Sin Cliente Asignado';
-                $correo = '';
-                $telefono = '';
-                $tipoLabel = 'Desconocido';
-                $tipoIcon = 'question-circle';
-                $tipoBadge = 'externo';
-            }
-        @endphp
+            {{-- Card: Informacion del Cliente --}}
+            <div class="info-card animate-in animate-delay-1">
+                <h5 class="card-title">
+                    <i class="bi bi-person-circle me-2"></i>Cliente
+                </h5>
+                <div class="card-content">
+                    @php
+                        $cliente = $pedido['clienteDetalles'] ?? null;
+                        $tipo = $cliente['tipo'] ?? null;
+                        
+                        // Configuración por tipo de cliente
+                        $config = match($tipo) {
+                            'usuario_registrado' => [
+                                'nombre' => $cliente['usuNombre'] ?? 'Usuario Registrado',
+                                'correo' => $cliente['usuCorreo'] ?? '',
+                                'telefono' => $cliente['usuTelefono'] ?? '',
+                                'label' => 'Registrado',
+                                'icon' => 'person-check-fill',
+                                'badge' => 'registrado',
+                                'mostrarId' => $pedido['usuIdCliente'] ?? null
+                            ],
+                            'contacto_externo' => [
+                                'nombre' => $cliente['conNombre'] ?? 'Cliente Externo',
+                                'correo' => $cliente['conCorreo'] ?? '',
+                                'telefono' => $cliente['conTelefono'] ?? '',
+                                'label' => 'Externo',
+                                'icon' => 'telephone-fill',
+                                'badge' => 'externo',
+                                'mostrarId' => $pedido['conId'] ?? null
+                            ],
+                            'sin_detalles' => [
+                                'nombre' => $cliente['nombre'] ?? $pedido['nombreCliente'] ?? 'Cliente',
+                                'correo' => '',
+                                'telefono' => '',
+                                'label' => 'Sin Detalles',
+                                'icon' => 'person-fill',
+                                'badge' => 'externo',
+                                'mostrarId' => null
+                            ],
+                            default => [
+                                'nombre' => $pedido['nombreCliente'] ?? 'Sin Cliente Asignado',
+                                'correo' => '',
+                                'telefono' => '',
+                                'label' => 'Desconocido',
+                                'icon' => 'question-circle',
+                                'badge' => 'externo',
+                                'mostrarId' => null
+                            ]
+                        };
+                    @endphp
 
-        @if($nombre !== 'Sin Cliente Asignado')
-            <div class="client-info">
-                <div class="client-avatar">
-                    @if($esRegistrado)
-                        {{ strtoupper(substr($nombre, 0, 1)) }}
+                    @if($config['nombre'] !== 'Sin Cliente Asignado')
+                        <div class="client-info">
+                            <div class="client-avatar">
+                                @if($tipo === 'usuario_registrado')
+                                    {{ strtoupper(substr($config['nombre'], 0, 1)) }}
+                                @else
+                                    <i class="bi bi-person-fill"></i>
+                                @endif
+                            </div>
+                            <div class="client-details">
+                                <p class="client-name">{{ $config['nombre'] }}</p>
+                                @if($config['correo'])
+                                    <p class="client-email"><i class="bi bi-envelope me-1"></i>{{ $config['correo'] }}</p>
+                                @endif
+                                @if($config['telefono'])
+                                    <p class="client-phone text-muted"><i class="bi bi-telephone me-1"></i>{{ $config['telefono'] }}</p>
+                                @endif
+                                
+                                <span class="client-type badge-{{ $config['badge'] }}">
+                                    <i class="bi bi-{{ $config['icon'] }}"></i> 
+                                    {{ $config['label'] }}
+                                </span>
+                                
+                                {{-- ID del cliente --}}
+                                @if($config['mostrarId'])
+                                    <span class="text-muted small d-block mt-1">
+                                        <i class="bi bi-hash"></i> 
+                                        ID {{ $tipo === 'usuario_registrado' ? 'Usuario' : 'Contacto' }}: {{ $config['mostrarId'] }}
+                                    </span>
+                                @endif
+                                
+                                {{-- Token de sesión si existe --}}
+                                @if(!empty($pedido['sesionToken']))
+                                    <span class="client-type badge-sesion mt-1 d-block">
+                                        <i class="bi bi-key"></i> Sesión: {{ $pedido['sesionToken'] }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
                     @else
-                        <i class="bi bi-person-fill"></i>
-                    @endif
-                </div>
-                <div class="client-details">
-                    <p class="client-name">{{ $nombre }}</p>
-                    @if($correo)<p class="client-email"><i class="bi bi-envelope me-1"></i>{{ $correo }}</p>@endif
-                    @if($telefono)<p class="client-phone text-muted"><i class="bi bi-telephone me-1"></i>{{ $telefono }}</p>@endif
-                    
-                    <span class="client-type badge-{{ $tipoBadge }}">
-                        <i class="bi bi-{{ $tipoIcon }}"></i> 
-                        {{ $tipoLabel }}
-                    </span>
-                    
-                    {{-- Información adicional según el tipo --}}
-                    @if($esRegistrado && !empty($pedido['usuIdCliente']))
-                        <span class="text-muted small d-block mt-1">
-                            <i class="bi bi-hash"></i> ID Usuario: {{ $pedido['usuIdCliente'] }}
-                        </span>
-                    @endif
-                    
-                    @if($esContacto && !empty($pedido['conId']))
-                        <span class="text-muted small d-block mt-1">
-                            <i class="bi bi-hash"></i> ID Contacto: {{ $pedido['conId'] }}
-                        </span>
-                    @endif
-                    
-                    @if($sinDetalles && !empty($cliente['identificador']))
-                        <span class="text-muted small d-block mt-1">
-                            <i class="bi bi-card-text"></i> {{ $cliente['identificador'] }}
-                        </span>
-                    @endif
-                    
-                    @if(!empty($pedido['sesionToken']))
-                        <span class="client-type badge-sesion mt-1 d-block">
-                            <i class="bi bi-key"></i> Sesión: {{ $pedido['sesionToken'] }}
-                        </span>
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-person-x display-6 d-block mb-2"></i>
+                            <p class="mb-0">Sin cliente asignado</p>
+                        </div>
                     @endif
                 </div>
             </div>
-        @else
-            <div class="text-center text-muted py-3">
-                <i class="bi bi-person-x display-6 d-block mb-2"></i>
-                <p class="mb-0">Sin cliente asignado</p>
-            </div>
-        @endif
-    </div>
-</div>
                 {{-- Card: Cambiar Estado --}}
                 <div class="info-card animate-in animate-delay-2">
                     <h5 class="card-title">

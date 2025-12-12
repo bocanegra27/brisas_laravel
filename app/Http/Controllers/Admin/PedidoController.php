@@ -104,9 +104,7 @@ public function index(Request $request)
             return $this->enriquecerPedido($pedido);
         }, $pedidos);
         
-        // ----------------------------------------------------
-        // 🔥 INSERCIÓN: OBTENER LISTA DE DISEÑADORES/EMPLEADOS
-        // ----------------------------------------------------
+        // obtener lista de diseñadores para filtro
         $disenadoresResponse = $this->apiService->get('/usuarios/empleados', [
             'headers' => [
                 'Authorization' => 'Bearer ' . Session::get('jwt_token')
@@ -122,6 +120,8 @@ public function index(Request $request)
         // Obtener lista de estados disponibles
         $estados = $this->getEstadosDisponibles();
 
+        $estadoMapeo = $this->getEstadoMapeo();
+
         // Preparar datos para la vista
         $data = [
             'pedidos' => $pedidos,
@@ -131,7 +131,8 @@ public function index(Request $request)
             'pageSize' => $pageSize,
             'stats' => $stats,
             'estados' => $estados,
-            'disenadores' => $disenadores, // 🔥 VARIABLE LISTA PARA LA VISTA
+            'disenadores' => $disenadores,
+            'estadoMapeo' => $estadoMapeo,
             'filtros' => [
                 'estadoId' => $estadoId,
                 'codigo' => $codigo
@@ -674,6 +675,24 @@ private function enriquecerPedido(array $pedido): array
             ['id' => 10, 'nombre' => '10. Cancelado']
         ];
     }
+
+    private function getEstadoMapeo()
+{
+    // Mapeo del nombre crudo de la BD (snake_case) al texto amigable deseado
+    return [
+        'cotizacion_pendiente' => 'Cotización Pendiente',
+        'pago_diseno_pendiente' => 'Pago Diseño Pendiente',
+        'diseno_en_proceso' => 'Diseño en Proceso',
+        'diseno_aprobado' => 'Diseño Aprobado',
+        'tallado_produccion' => 'Tallado (Producción)',
+        'engaste' => 'Engaste',
+        'pulido' => 'Pulido',
+        'inspeccion_calidad' => 'Inspección de Calidad',
+        'finalizado_listo_entrega' => 'Finalizado',
+        'cancelado' => 'Cancelado',
+        'desconocido' => 'Estado Desconocido' // Default
+    ];
+}
 
     /**
      * Estadisticas vacias
