@@ -171,27 +171,20 @@ public function gestionar($id)
             ]
         ]);
 
-        // 🔥 CORRECCIÓN CRÍTICA: Normalizar la clave de la respuesta
-        if (is_array($response) && isset($response['ped_id'])) {
-            // Si la clave viene como ped_id (guion bajo), la renombramos a pedId para que Blade la entienda.
-            $response['pedId'] = $response['ped_id']; 
-        }
-
-        // 🔥 VALIDACIÓN CORREGIDA:
+        // Validación simple
         if (!is_array($response) || !isset($response['pedId'])) {
-            Log::warning('PedidoController@gestionar: Pedido no encontrado o respuesta inválida.', ['id' => $id, 'response' => $response]);
             return redirect()
                 ->route('admin.pedidos.index')
-                ->with('error', 'Pedido no encontrado o la API devolvió datos incorrectos.');
+                ->with('error', 'Pedido no encontrado.');
         }
 
+        // Enriquecer el pedido (ahora sí funcionará correctamente)
         $pedido = $this->enriquecerPedido($response);
+
         $estadosArray = $this->getEstadosDisponibles();
 
-        // Convertir array de objetos a array asociativo para el select en la vista
         $estados = [];
         foreach ($estadosArray as $estado) {
-            // Usar estId como clave y nombre como valor
             $estados[$estado['id']] = $estado['nombre']; 
         }
 
@@ -476,33 +469,116 @@ public function gestionar($id)
             ], 500);
         }
     }
+private function enriquecerPedido(array $pedido): array
+{
+    // =====================================================
+    // PASO 1: NORMALIZAR ESTRUCTURA DE ESTADO
+    // =====================================================
+    
+    if (!isset($pedido['estado']) && isset($pedido['estadoNombre'])) {
+        $pedido['estado'] = [
+            'estId' => $pedido['estId'] ?? 1,
+            'estNombre' => $pedido['estadoNombre']
+        ];
+    }
 
+    if (!isset($pedido['personalizacion']) && isset($pedido['perId']) && $pedido['perId'] !== null) {
+        $pedido['personalizacion'] = [
+            'perId' => $pedido['perId']
+        ];
+    }
+    
+    // =====================================================
+    // PASO 2: OBTENER DETALLES DEL CLIENTE
+    // =====================================================
+    
+    $token = Session::get('jwt_token');
+    $clienteInfo = null;
+
+    // A. El cliente es REGISTRADO
+    if (!empty($pedido['usuIdCliente']) && $pedido['usuIdCliente'] !== null && $token) {
+        try {
+            $clienteInfo = $this->apiService->get("/usuarios/{$pedido['usuIdCliente']}", [
+                'headers' => ['Authorization' => 'Bearer ' . $token]
+            ]);
+            
+            if (is_array($clienteInfo)) {
+                $clienteInfo = $this->normalizarClienteKeys($clienteInfo, 'usuario');
+                $clienteInfo['tipo'] = 'usuario_registrado';
+            }
+            
+        } catch (\Exception $e) {
+            Log::warning("Error al buscar detalles de Usuario ID: {$pedido['usuIdCliente']}", [
+                'error' => $e->getMessage()
+            ]);
+        }
+    } 
+    
+    // B. El pedido tiene un Contacto de Origen
+    elseif (!empty($pedido['conId']) && $pedido['conId'] !== null && $token) {
+        try {
+            $clienteInfo = $this->apiService->get("/contactos/{$pedido['conId']}", [
+                'headers' => ['Authorization' => 'Bearer ' . $token]
+            ]);
+            
+            if (is_array($clienteInfo)) {
+                $clienteInfo = $this->normalizarClienteKeys($clienteInfo, 'contacto');
+                $clienteInfo['tipo'] = 'contacto_externo';
+            }
+            
+        } catch (\Exception $e) {
+            Log::warning("Error al buscar detalles de Contacto ID: {$pedido['conId']}", [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    
+    // C. Si no tiene ni usuario ni contacto, usar el nombre básico
+    else {
+        if (!empty($pedido['nombreCliente'])) {
+            $clienteInfo = [
+                'tipo' => 'sin_detalles',
+                'nombre' => $pedido['nombreCliente'],
+                'identificador' => $pedido['pedIdentificadorCliente'] ?? null
+            ];
+        }
+    }
+    
+    $pedido['clienteDetalles'] = $clienteInfo;
+
+    return $pedido;
+}
     /**
-     * Enriquecer pedido con informacion procesada
+     * Normaliza las claves del cliente de snake_case a camelCase
+     * @param array $data Datos del cliente/contacto
+     * @param string $tipo 'usuario' o 'contacto'
+     * @return array Datos normalizados
      */
-    private function enriquecerPedido(array $pedido): array
+    private function normalizarClienteKeys(array $data, string $tipo): array
     {
-        // Normalizar estructura de estado
-        if (!isset($pedido['estado']) && isset($pedido['estadoNombre'])) {
-            $pedido['estado'] = [
-                'estId' => $pedido['estId'] ?? 1,
-                'estNombre' => $pedido['estadoNombre']
+        if ($tipo === 'usuario') {
+            // El API de Spring Boot devuelve: id, nombre, correo, telefono, docnum, activo
+            return [
+                'usuId' => $data['id'] ?? $data['usu_id'] ?? $data['usuId'] ?? null,
+                'usuNombre' => $data['nombre'] ?? $data['usu_nombre'] ?? $data['usuNombre'] ?? null,
+                'usuCorreo' => $data['correo'] ?? $data['usu_correo'] ?? $data['usuCorreo'] ?? null,
+                'usuTelefono' => $data['telefono'] ?? $data['usu_telefono'] ?? $data['usuTelefono'] ?? null,
+                'usuDocnum' => $data['docnum'] ?? $data['usu_docnum'] ?? $data['usuDocnum'] ?? null,
+                'usuActivo' => $data['activo'] ?? $data['usu_activo'] ?? $data['usuActivo'] ?? true,
+            ];
+        } elseif ($tipo === 'contacto') {
+            // El API de Spring Boot devuelve: id, nombre, correo, telefono, mensaje, estado
+            return [
+                'conId' => $data['id'] ?? $data['con_id'] ?? $data['conId'] ?? null,
+                'conNombre' => $data['nombre'] ?? $data['con_nombre'] ?? $data['conNombre'] ?? null,
+                'conCorreo' => $data['correo'] ?? $data['con_correo'] ?? $data['conCorreo'] ?? null,
+                'conTelefono' => $data['telefono'] ?? $data['con_telefono'] ?? $data['conTelefono'] ?? null,
+                'conMensaje' => $data['mensaje'] ?? $data['con_mensaje'] ?? $data['conMensaje'] ?? null,
+                'conEstado' => $data['estado'] ?? $data['con_estado'] ?? $data['conEstado'] ?? null,
             ];
         }
-
-        // Normalizar usuario si viene en formato plano
-        if (!isset($pedido['usuario']) && isset($pedido['usuId'])) {
-            $pedido['usuario'] = null; // Se cargara por separado si es necesario
-        }
-
-        // Normalizar personalizacion
-        if (!isset($pedido['personalizacion']) && isset($pedido['perId']) && $pedido['perId'] !== null) {
-            $pedido['personalizacion'] = [
-                'perId' => $pedido['perId']
-            ];
-        }
-
-        return $pedido;
+        
+        return $data; // Devolver sin cambios si el tipo no coincide
     }
 
     /**
@@ -542,42 +618,42 @@ public function gestionar($id)
         }
     }
     
-/**
- * PATCH /admin/pedidos/{id}/asignar-empleado
- */
-public function asignarEmpleado(Request $request, $pedidoId)
-{
-    $request->validate([
-        'usuIdEmpleado' => 'required|integer' // Validamos el ID del empleado
-    ]);
-
-    try {
-        $data = [
-            'usuIdEmpleado' => $request->input('usuIdEmpleado') // Obtenemos el ID del body JSON
-        ];
-        
-        // 🔥 CRÍTICO: Llamada PATCH a Spring Boot con el endpoint ESPECÍFICO
-        $response = $this->apiService->patch("/pedidos/{$pedidoId}/asignar", $data, [
-            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+    /**
+     * PATCH /admin/pedidos/{id}/asignar-empleado
+     */
+    public function asignarEmpleado(Request $request, $pedidoId)
+    {
+        $request->validate([
+            'usuIdEmpleado' => 'required|integer' // Validamos el ID del empleado
         ]);
 
-        if ($response === null) {
-             // Es mejor lanzar la excepción con el mensaje de Spring Boot si es posible
-             throw new \Exception('API Error: No se pudo actualizar el pedido.');
+        try {
+            $data = [
+                'usuIdEmpleado' => $request->input('usuIdEmpleado') // Obtenemos el ID del body JSON
+            ];
+            
+            // 🔥 CRÍTICO: Llamada PATCH a Spring Boot con el endpoint ESPECÍFICO
+            $response = $this->apiService->patch("/pedidos/{$pedidoId}/asignar", $data, [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
+
+            if ($response === null) {
+                // Es mejor lanzar la excepción con el mensaje de Spring Boot si es posible
+                throw new \Exception('API Error: No se pudo actualizar el pedido.');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Diseñador asignado con éxito.',
+                'pedido' => $response
+            ]);
+
+        } catch (\Exception $e) {
+            // ... (manejo de errores) ...
+            // El error 500 ahora será manejado por la lógica de ResourceNotFoundException
+            return response()->json(['success' => false, 'message' => 'Error en el servidor al asignar empleado: ' . $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Diseñador asignado con éxito.',
-            'pedido' => $response
-        ]);
-
-    } catch (\Exception $e) {
-        // ... (manejo de errores) ...
-        // El error 500 ahora será manejado por la lógica de ResourceNotFoundException
-        return response()->json(['success' => false, 'message' => 'Error en el servidor al asignar empleado: ' . $e->getMessage()], 500);
     }
-}
 
     /**
      * Obtener lista de estados disponibles, usando nombres amigables.
