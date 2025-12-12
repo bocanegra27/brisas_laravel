@@ -1,375 +1,508 @@
-@extends('layouts.app') {{-- Asumiendo que este es tu layout principal --}}
+@extends('layouts.app')
 
-@section('title', 'Gestión de Pedidos')
+@section('title', 'Gestión de Pedidos - Brisas Gems')
+
+@push('styles')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
+@endpush
 
 @section('content')
-<div class="container-fluid p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-gray-800">📦 Pedidos</h1>
-        <div class="d-flex gap-2">
-            {{-- Filtro Rápido --}}
-            <form action="{{ route('admin.pedidos.index') }}" method="GET" class="d-flex">
-                <select name="estadoId" class="form-select me-2" onchange="this.form.submit()">
-                    <option value="">Todos los estados</option>
-                    @foreach($estados as $id => $nombre)
-                        <option value="{{ $id }}" {{ $filtroEstado == $id ? 'selected' : '' }}>
-                            {{ $id }} - {{ $nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
-        </div>
-    @endif
-
-    <div class="row g-4">
-        
-        {{-- COLUMNA IZQUIERDA: CREAR PEDIDO --}}
-        <aside class="col-lg-4">
-            <div class="card border-0 shadow sticky-top" style="top: 20px; border-radius: 15px;">
-                <div class="card-header bg-emerald text-white text-center py-3" style="border-radius: 15px 15px 0 0; background-color: #198754;">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-robot me-2"></i>Nuevo Encargo</h5>
-                </div>
-                <div class="card-body p-4 bg-light">
-                    
-                    <form method="POST" action="{{ route('admin.pedidos.store') }}" enctype="multipart/form-data">
-                        @csrf
-                        
-                        {{-- Aviso de automatización --}}
-                        <div class="alert alert-info border-0 d-flex align-items-center p-2 mb-3 shadow-sm">
-                            <i class="bi bi-magic me-2 fs-4"></i>
-                            <div class="lh-1">
-                                <small>Modo <strong>Inteligente</strong> activo.</small><br>
-                                <small class="text-muted" style="font-size: 0.75rem;">Código generado automáticamente.</small>
-                            </div>
+<div class="pedidos-container">
+    <div class="container-fluid py-5">
+        {{-- Header con Stats Pills --}}
+        <div class="dashboard-header animate-in">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1><i class="bi bi-cart-check-fill me-3"></i>Gestión de Pedidos</h1>
+                    <div class="stats-pills mt-3">
+                        <div class="pill-stat">
+                            <i class="bi bi-receipt-cutoff text-primary"></i>
+                            <span class="pill-label">Total:</span>
+                            <strong class="pill-value">{{ $stats['total'] ?? 0 }}</strong>
                         </div>
-
-                        {{-- SELECCIÓN DE CLIENTE --}}
-                        <div class="mb-3">
-                            <label for="clienteId" class="form-label fw-bold text-secondary small text-uppercase">Cliente</label>
-                            <div class="input-group shadow-sm">
-                                <span class="input-group-text bg-white border-0"><i class="bi bi-person-badge"></i></span>
-                                <select class="form-select border-0" id="clienteId" name="clienteId" required>
-                                    <option value="" selected disabled>Seleccione un cliente...</option>
-                                    
-                                    @if(isset($datosFormulario->clientes) && count($datosFormulario->clientes) > 0)
-                                        @foreach($datosFormulario->clientes as $cliente)
-                                            <option value="{{ $cliente->id }}">
-                                                {{ $cliente->nombre }} (Doc: {{ $cliente->documento }})
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        <option disabled>No hay clientes cargados</option>
-                                    @endif
-                                </select>
-                            </div>
-                            <div class="form-text text-end">
-                                {{--  MEJORA: Enlace funcional a crear usuario --}}
-                                <a href="{{ route('admin.usuarios.crear') }}" class="text-decoration-none small text-success fw-bold">
-                                    <i class="bi bi-plus-circle"></i> Nuevo Cliente
-                                </a>
-                            </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-clock-fill" style="color: #f59e0b;"></i>
+                            <span class="pill-label">Pendientes:</span>
+                            <strong class="pill-value">{{ $stats['pendientes'] ?? 0 }}</strong>
                         </div>
-
-                        <hr class="border-secondary opacity-10 my-3">
-
-                        {{-- PERSONALIZACIÓN --}}
-                        <h6 class="fw-bold text-dark mb-3 small"><i class="bi bi-sliders me-2"></i>Configuración de Joya</h6>
-                        
-                        <div class="row g-2 mb-3">
-                            @if(isset($datosFormulario->opciones))
-                                @foreach($datosFormulario->opciones as $tituloOpcion => $valores)
-                                <div class="col-12">
-                                    <label class="form-label small fw-bold text-muted" style="font-size: 0.75rem; letter-spacing: 0.5px;">{{ strtoupper($tituloOpcion) }}</label>
-                                    <select class="form-select form-select-sm border-0 shadow-sm" name="valoresPersonalizacion[]">
-                                        <option value="" selected disabled>-- Seleccionar --</option>
-                                        @foreach($valores as $valor)
-                                            <option value="{{ $valor->id }}">{{ $valor->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                @endforeach
-                            @endif
+                        <div class="pill-stat">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="pill-label">Confirmados:</span>
+                            <strong class="pill-value">{{ $stats['confirmados'] ?? 0 }}</strong>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary small">Instrucciones / Detalles</label>
-                            <textarea class="form-control border-0 shadow-sm" name="pedComentarios" rows="3" placeholder="Detalles de la joya, grabados..." style="resize: none;" required></textarea>
+                        <div class="pill-stat">
+                            <i class="bi bi-gear-fill" style="color: #3b82f6;"></i>
+                            <span class="pill-label">Producción:</span>
+                            <strong class="pill-value">{{ $stats['produccion'] ?? 0 }}</strong>
                         </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-secondary small"><i class="bi bi-image me-1"></i>Render Inicial (Opcional)</label>
-                            <input type="file" name="render" class="form-control form-control-sm border-0 shadow-sm" accept="image/*,.glb,.gltf">
-                        </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Código</th>
-                            <th>Cliente</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                            <th>Total</th> <th class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-    @forelse($pedidos as $pedido)
-    <tr>
-        <td class="fw-bold text-primary">
-            {{-- Usamos pedCodigo o pedId --}}
-            #{{ $pedido['pedCodigo'] ?? $pedido['pedId'] }}
-        </td>
-        <td>
-            <div class="d-flex flex-column">
-                {{-- CORRECCIÓN: El JSON trae 'pedIdentificadorCliente' o a veces es null --}}
-                <span class="fw-bold">
-                    {{ $pedido['pedIdentificadorCliente'] ?? 'Cliente Anónimo / Web' }}
-                </span>
-                <small class="text-muted">
-                    {{-- ID de Sesión o Contacto si no hay nombre --}}
-                    @if(empty($pedido['pedIdentificadorCliente']))
-                        Sesión: {{ $pedido['sesionId'] ?? 'N/A' }}
-                    @endif
-                </small>
-            </div>
-        </td>
-        <td>
-            {{-- CORRECCIÓN: Nombre de variable 'pedFechaCreacion' (camelCase) --}}
-            {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'] ?? now())->format('d/m/Y H:i') }}
-        </td>
-        <td>
-            {{-- CORRECCIÓN: El estado viene directo como string en 'estadoNombre' --}}
-            @php
-                $estadoNombre = $pedido['estadoNombre'] ?? 'Desconocido';
-                // Asignar colores según el texto del estado
-                $badgeColor = match(true) {
-                    str_contains($estadoNombre, 'pendiente') => 'warning',
-                    str_contains($estadoNombre, 'proceso') => 'primary',
-                    str_contains($estadoNombre, 'entregado') => 'success',
-                    str_contains($estadoNombre, 'cancelado') => 'danger',
-                    default => 'secondary'
-                };
-            @endphp
-            <span class="badge bg-{{ $badgeColor }} rounded-pill text-uppercase">
-                {{ str_replace('_', ' ', $estadoNombre) }}
-            </span>
-        </td>
-        <td>
-            --
-        </td>
-        <td class="text-end">
-            <a href="{{ route('admin.pedidos.ver', $pedido['pedId']) }}" class="btn btn-sm btn-primary">
-                <i class="bi bi-eye"></i> Gestionar
-            </a>
-        </td>
-    </tr>
-    @empty
-    <tr>
-        <td colspan="6" class="text-center py-5">
-            <div class="text-muted">
-                <i class="bi bi-box-seam display-4"></i>
-                <p class="mt-2">No hay pedidos registrados.</p>
-            </div>
-        </td>
-    </tr>
-    @endforelse
-</tbody>
-                </table>
-            </div>
-        </aside>
-
-        {{-- COLUMNA DERECHA: LISTADO VISUAL --}}
-        <section class="col-lg-8">
-            <h5 class="fw-bold text-secondary mb-3 px-2">Línea de Producción</h5>
-
-            @forelse($pedidos as $p)
-                @php
-                    $codigo = $p->pedCodigo ?? 'PENDIENTE';
-                    $estado = $p->estId ?? 1;
-                    $fecha = $p->pedFechaCreacion ?? date('Y-m-d');
-                    $id = $p->pedId ?? $p->ped_id ?? null;
-                    //  Recuperamos el nombre del cliente (enviado desde el backend)
-                    $cliente = $p->clienteNombre ?? 'Cliente Desconocido';
-                    
-                    $nombreEstado = match($estado) {
-                        1 => 'Diseño', 2 => 'Tallado', 3 => 'Engaste',
-                        4 => 'Pulido', 5 => 'Finalizado', 6 => 'Cancelado',
-                        default => 'Desconocido',
-                    };
-                    
-                    $progreso = match($estado) {
-                        1 => 15, 2 => 35, 3 => 60, 4 => 85, 5 => 100, default => 5
-                    };
-                    
-                    $colorEstado = match($estado) {
-                        1 => 'info', 2 => 'warning', 3 => 'primary',
-                        4 => 'secondary', 5 => 'success', 6 => 'danger', default => 'dark'
-                    };
-                @endphp
-
-                @if($id)
-                    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius: 12px;" data-pedido-id="{{ $id }}">
-                        <div class="card-body p-0">
-                            <div class="row g-0">
-                                
-                                {{-- INFO PRINCIPAL --}}
-                                <div class="col-md-8 p-4">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h5 class="fw-bold text-dark mb-0">{{ $codigo }}</h5>
-                                            <small class="text-muted"><i class="bi bi-clock me-1"></i> {{ date('d M Y', strtotime($fecha)) }}</small>
-                                            
-                                            {{--  MEJORA: Mostrar Nombre del Cliente --}}
-                                            <div class="mt-2">
-                                                <span class="badge bg-light text-dark border px-2 py-1">
-                                                    <i class="bi bi-person-circle text-secondary me-1"></i> {{ $cliente }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-{{ $colorEstado }} bg-opacity-25 text-{{ $colorEstado }} px-3 py-1 rounded-pill border border-{{ $colorEstado }}">
-                                            {{ strtoupper($nombreEstado) }}
-                                        </span>
-                                    </div>
-
-                                    <p class="text-muted small bg-light p-3 rounded mb-3 border-start border-3 border-{{ $colorEstado }}">
-                                        {{ $p->pedComentarios }}
-                                    </p>
-
-                                    <div class="d-flex justify-content-between small text-muted mb-1">
-                                        <span>Avance del proceso</span>
-                                        <span>{{ $progreso }}%</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px; border-radius: 4px;">
-                                        <div class="progress-bar bg-{{ $colorEstado }} progress-bar-striped progress-bar-animated" 
-                                             role="progressbar" 
-                                             style="width: {{ $progreso }}%"
-                                             aria-valuenow="{{ $progreso }}"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-
-                                {{-- ACCIONES Y VISOR --}}
-                                <div class="col-md-4 bg-light border-start d-flex flex-column align-items-center justify-content-center p-3 text-center">
-                                    
-                                    <div class="visor-contenedor shadow-sm bg-white rounded-3 overflow-hidden mb-3 position-relative d-flex align-items-center justify-content-center" style="width: 100%; height: 180px;">
-                                        
-                                        @if(isset($p->renderPath) && $p->renderPath)
-                                            @php
-                                                $ext = pathinfo($p->renderPath, PATHINFO_EXTENSION);
-                                                $url = 'http://localhost:8080/' . $p->renderPath;
-                                            @endphp
-
-                                            @if(strtolower($ext) === 'glb' || strtolower($ext) === 'gltf')
-                                                <model-viewer 
-                                                    src="{{ $url }}" 
-                                                    alt="Modelo 3D Joya"
-                                                    auto-rotate
-                                                    camera-controls
-                                                    shadow-intensity="1"
-                                                    style="width: 100%; height: 100%; background-color: #f8f9fa;"
-                                                    loading="lazy">
-                                                </model-viewer>
-                                                <span class="badge bg-primary position-absolute top-0 end-0 m-2 shadow-sm" style="z-index: 10;">
-                                                    <i class="bi bi-box-seam me-1"></i>3D
-                                                </span>
-                                            @else
-                                                <img src="{{ $url }}" alt="Render" style="width: 100%; height: 100%; object-fit: cover;">
-                                                <span class="badge bg-secondary position-absolute top-0 end-0 m-2 shadow-sm">
-                                                    <i class="bi bi-image me-1"></i>IMG
-                                                </span>
-                                            @endif
-                                        @else
-                                            <div class="d-flex flex-column align-items-center justify-content-center h-100 text-muted w-100">
-                                                @if($estado == 5) 
-                                                    <i class="bi bi-box2-heart text-success fs-1"></i>
-                                                @elseif($estado == 6) 
-                                                    <i class="bi bi-x-lg text-danger fs-1"></i>
-                                                @else 
-                                                    <i class="bi bi-tools text-warning fs-1 opacity-50"></i>
-                                                    <small class="mt-2">En proceso</small>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <button class="btn btn-outline-dark btn-sm w-100 rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#panel-{{ $id }}">
-                                        <i class="bi bi-sliders me-1"></i> Gestionar
-                                    </button>
-                                </div>
-                            </div>
-
-                            {{-- PANEL DE GESTIÓN --}}
-                            <div class="collapse bg-white border-top p-3" id="panel-{{ $id }}">
-                                <form method="POST" action="{{ route('pedidos.update', $id) }}" enctype="multipart/form-data" data-form-pedido-id="{{ $id }}">
-                                    @csrf @method('PUT')
-                                    
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Actualizar Etapa</label>
-                                            <select class="form-select form-select-sm" name="estId">
-                                                <option value="1" {{ $estado == 1 ? 'selected' : '' }}>1. Diseño</option>
-                                                <option value="2" {{ $estado == 2 ? 'selected' : '' }}>2. Tallado</option>
-                                                <option value="3" {{ $estado == 3 ? 'selected' : '' }}>3. Engaste</option>
-                                                <option value="4" {{ $estado == 4 ? 'selected' : '' }}>4. Pulido</option>
-                                                <option value="5" {{ $estado == 5 ? 'selected' : '' }}>5. Finalizado</option>
-                                                <option value="6" {{ $estado == 6 ? 'selected' : '' }}>Cancelado</option>
-                                            </select>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Actualizar Render / Modelo</label>
-                                            <input type="file" name="render" class="form-control form-control-sm" accept="image/*,.glb,.gltf">
-                                        </div>
-
-                                        <div class="col-12 d-flex justify-content-between align-items-center mt-3 border-top pt-2">
-                                            <button type="submit" form="delete-form-{{ $id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Seguro que deseas eliminar este pedido?')">
-                                                <i class="bi bi-trash"></i> Eliminar
-                                            </button>
-
-                                            <button type="submit" class="btn btn-sm btn-success px-4 fw-bold">
-                                                <i class="bi bi-check-lg"></i> Guardar Cambios
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                                
-                                <form id="delete-form-{{ $id }}" action="{{ route('pedidos.destroy', $id) }}" method="POST" class="d-none">
-                                    @csrf @method('DELETE')
-                                </form>
-                            </div>
-
+                        <div class="pill-stat">
+                            <i class="bi bi-box-seam-fill" style="color: #10b981;"></i>
+                            <span class="pill-label">Entregados:</span>
+                            <strong class="pill-value">{{ $stats['entregados'] ?? 0 }}</strong>
                         </div>
                     </div>
-                @endif
-            @empty
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox fs-1 text-muted opacity-50"></i>
-                    <p class="text-muted mt-2">No hay pedidos registrados.</p>
                 </div>
-            @endforelse
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
+                </a>
+            </div>
+        </div>
 
-            {{-- Paginación Simple --}}
-            @if($pagination['totalPages'] > 1)
-            <div class="d-flex justify-content-center mt-3">
-                <nav>
-                    <ul class="pagination">
-                        <li class="page-item {{ $pagination['number'] == 0 ? 'disabled' : '' }}">
-                            <a class="page-link" href="?page={{ $pagination['number'] - 1 }}&estadoId={{ $filtroEstado }}">Anterior</a>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link">Página {{ $pagination['number'] + 1 }} de {{ $pagination['totalPages'] }}</span>
-                        </li>
-                        <li class="page-item {{ $pagination['number'] + 1 >= $pagination['totalPages'] ? 'disabled' : '' }}">
-                            <a class="page-link" href="?page={{ $pagination['number'] + 1 }}&estadoId={{ $filtroEstado }}">Siguiente</a>
-                        </li>
-                    </ul>
-                </nav>
+        {{-- Mensajes de exito/error --}}
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show animate-in" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show animate-in" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        {{-- Tabla de pedidos --}}
+        <div class="card pedidos-table-card animate-in animate-delay-5">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Lista de Pedidos</h5>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="row g-3">
+                            {{-- Busqueda por codigo --}}
+                            <div class="col-md-5">
+                                <div class="search-box">
+                                    <i class="bi bi-search"></i>
+                                    <input type="text" id="searchCodigo" class="form-control" 
+                                           placeholder="Buscar por código de pedido..."
+                                           value="{{ $filtros['codigo'] ?? '' }}">
+                                </div>
+                            </div>
+                            
+                            {{-- Filtro por estado --}}
+                            <div class="col-md-4">
+                                <select id="filterEstado" class="form-select">
+                                    <option value="">Todos los estados</option>
+                                    @foreach($estados as $estado)
+                                    <option value="{{ $estado['id'] }}" 
+                                        {{ (isset($filtros['estadoId']) && $filtros['estadoId'] == $estado['id']) ? 'selected' : '' }}>
+                                        {{ $estado['nombre'] }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            {{-- Tamaño de página --}}
+                            <div class="col-md-3">
+                                <select id="pageSize" class="form-select">
+                                    <option value="10" {{ $pageSize == 10 ? 'selected' : '' }}>10 por página</option>
+                                    <option value="25" {{ $pageSize == 25 ? 'selected' : '' }}>25 por página</option>
+                                    <option value="50" {{ $pageSize == 50 ? 'selected' : '' }}>50 por página</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table pedidos-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Fecha Creación</th>
+                                <th>Cliente</th>
+                                <th>Diseñador</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pedidosTableBody">
+                            @forelse($pedidos as $pedido)
+                            <tr class="pedido-row">
+                                <td class="fw-bold">#{{ $pedido['pedCodigo'] }}</td>
+                                
+                                <td>
+                                    @php
+                                        $fechaLocal = \Carbon\Carbon::parse($pedido['pedFechaCreacion'])
+                                            ->setTimezone(config('app.timezone')); // Asume tu timezone (ej: America/Bogota)
+                                    @endphp
+                                    
+                                    <small class="text-muted d-block">
+                                        {{ $fechaLocal->format('d/m/Y') }}
+                                    </small>
+                                    <span class="fw-medium">
+                                        {{ $fechaLocal->format('h:i a') }} {{-- h:i a for 12-hour clock (ej: 06:40 pm) --}}
+                                    </span>
+                                </td>
+                                
+                                {{-- COLUMNA CLIENTE (Prioriza nombreCliente enriquecido) --}}
+                                <td>
+                                    @if (!empty($pedido['nombreCliente']))
+                                        {{ $pedido['nombreCliente'] }}
+                                    @elseif (!empty($pedido['pedIdentificadorCliente']))
+                                        <span class="text-muted">{{ $pedido['pedIdentificadorCliente'] }}</span>
+                                    @else
+                                        <span class="text-muted">Desconocido</span>
+                                    @endif
+                                </td>
+                                
+                                {{--  COLUMNA DISEÑADOR (Muestra nombreEmpleado) --}}
+                                <td>
+                                    @php
+                                        $nombreEmpleado = $pedido['nombreEmpleado'] ?? 'PENDIENTE ASIGNAR';
+                                    @endphp
+
+                                    @if ($nombreEmpleado === 'PENDIENTE ASIGNAR')
+                                        <span class="badge bg-warning text-dark">{{ $nombreEmpleado }}</span>
+                                    @else
+                                        {{ $nombreEmpleado }}
+                                    @endif
+                                </td>
+
+                                {{-- Columna Estado --}}
+                                <td>
+                                    @php
+                                        // Obtener el nombre crudo de la BD (ej: 'pago_diseno_pendiente')
+                                        $estadoCrudo = $pedido['estadoNombre'] ?? ($pedido['estado']['estNombre'] ?? 'desconocido');
+                                        
+                                        // Usar la variable mapeada, cayendo al nombre crudo si falla el mapeo (aunque no debería)
+                                        $estadoLimpio = $estadoMapeo[$estadoCrudo] ?? $estadoCrudo;
+                                    @endphp
+                                    <span class="text-secondary fw-medium">{{ $estadoLimpio }}</span>
+                                </td>
+                                
+                                <td>
+                                    <div class="action-buttons d-flex gap-2 align-items-center">
+                                        {{-- Gestionar pedido --}}
+                                        <a href="{{ route('admin.pedidos.gestionar', ['id' => $pedido['pedId']]) }}" 
+                                           class="btn-action btn-gestionar btn btn-sm btn-primary"
+                                           data-bs-toggle="tooltip" title="Gestionar pedido">
+                                            <i class="bi bi-gear-fill"></i>
+                                        </a>
+
+                                        {{-- Cambiar estado rapido --}}
+                                        <button onclick="cambiarEstadoPedido({{ $pedido['pedId'] }}, {{ $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1) }})" 
+                                                class="btn-action btn-status btn btn-sm btn-outline-secondary" 
+                                                data-bs-toggle="tooltip" title="Cambiar estado">
+                                            <i class="bi bi-arrow-left-right"></i>
+                                        </button>
+
+                                        {{-- Botón Asignar/Reasignar Diseñador --}}
+                                        <button type="button" 
+                                                class="btn-action btn-asignar btn btn-sm btn-info"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalAsignarDisenador"
+                                                data-pedidoid="{{ $pedido['pedId'] }}"
+                                                data-actualdisenadorid="{{ $pedido['usuIdEmpleado'] ?? '' }}"
+                                                data-actualdisenadornombre="{{ $pedido['nombreEmpleado'] ?? '' }}"
+                                                title="{{ ($pedido['usuIdEmpleado'] ?? null) ? 'Reasignar Diseñador' : 'Asignar Diseñador' }}">
+                                            <i class="bi bi-person-plus"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                                    <p class="text-muted mb-0">No hay pedidos registrados</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            {{-- Footer con paginacion --}}
+            @if($totalElements > 0)
+            <div class="card-footer">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="pagination-info mb-0">
+                            Mostrando {{ ($currentPage * $pageSize) + 1 }} 
+                            a {{ min(($currentPage + 1) * $pageSize, $totalElements) }} 
+                            de {{ $totalElements }} pedidos
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <nav aria-label="Paginacion de pedidos">
+                            <ul class="pagination justify-content-end mb-0">
+                                {{-- Primera pagina --}}
+                                <li class="page-item {{ $currentPage == 0 ? 'disabled' : '' }}">
+                                    <a class="page-link" href="?page=0&size={{ $pageSize }}&estadoId={{ $filtros['estadoId'] ?? '' }}&codigo={{ $filtros['codigo'] ?? '' }}">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </a>
+                                </li>
+                                
+                                {{-- Anterior --}}
+                                <li class="page-item {{ $currentPage == 0 ? 'disabled' : '' }}">
+                                    <a class="page-link" href="?page={{ $currentPage - 1 }}&size={{ $pageSize }}&estadoId={{ $filtros['estadoId'] ?? '' }}&codigo={{ $filtros['codigo'] ?? '' }}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                
+                                {{-- Paginas numeradas --}}
+                                @for($i = max(0, $currentPage - 2); $i <= min($totalPages - 1, $currentPage + 2); $i++)
+                                <li class="page-item {{ $i == $currentPage ? 'active' : '' }}">
+                                    <a class="page-link" href="?page={{ $i }}&size={{ $pageSize }}&estadoId={{ $filtros['estadoId'] ?? '' }}&codigo={{ $filtros['codigo'] ?? '' }}">
+                                        {{ $i + 1 }}
+                                    </a>
+                                </li>
+                                @endfor
+                                
+                                {{-- Siguiente --}}
+                                <li class="page-item {{ $currentPage >= $totalPages - 1 ? 'disabled' : '' }}">
+                                    <a class="page-link" href="?page={{ $currentPage + 1 }}&size={{ $pageSize }}&estadoId={{ $filtros['estadoId'] ?? '' }}&codigo={{ $filtros['codigo'] ?? '' }}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                                
+                                {{-- Ultima pagina --}}
+                                <li class="page-item {{ $currentPage >= $totalPages - 1 ? 'disabled' : '' }}">
+                                    <a class="page-link" href="?page={{ $totalPages - 1 }}&size={{ $pageSize }}&estadoId={{ $filtros['estadoId'] ?? '' }}&codigo={{ $filtros['codigo'] ?? '' }}">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
             @endif
         </div>
     </div>
 </div>
+
+{{-- Modal para cambiar estado (Asegúrate de que este bloque NO esté dentro del @forelse) --}}
+<div class="modal fade" id="modalCambiarEstado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-arrow-left-right me-2"></i>Cambiar Estado del Pedido</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCambiarEstado">
+                    <input type="hidden" id="pedidoIdEstado" name="pedidoId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nuevo Estado</label>
+                        <select class="form-select" id="nuevoEstado" name="estadoId" required>
+                            @foreach($estados as $estado)
+                            <option value="{{ $estado['id'] }}">{{ $estado['nombre'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Comentarios de Historial (Opcional)</label>
+                        <textarea class="form-control" id="comentariosEstado" name="comentarios" rows="3" placeholder="Ej: Pago de anticipo recibido, asignado a diseñador Miguel."></textarea>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Los cambios de estado se registrarán automáticamente en el historial del pedido.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarCambioEstado()">
+                    <i class="bi bi-check-circle-fill me-2"></i>Cambiar Estado
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal para Asignar Diseñador --}}
+<div class="modal fade" id="modalAsignarDisenador" tabindex="-1" aria-labelledby="modalAsignarDisenadorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAsignarDisenadorLabel">Asignar/Reasignar Diseñador</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form id="formAsignarDisenador">
+                <div class="modal-body">
+                    <input type="hidden" id="asignarPedidoId" name="pedidoId">
+                    
+                    <div class="mb-3">
+                        <label for="disenadorSelect" class="form-label">Seleccionar Diseñador</label>
+                        <select class="form-select" id="disenadorSelect" name="usuIdEmpleado" required>
+                            <option value="">Seleccione un diseñador</option>
+                            {{--  Bucle para poblar con los datos de Spring Boot --}}
+                            @foreach($disenadores as $disenador)
+                                <option value="{{ $disenador['id'] }}">
+                                    {{ $disenador['nombre'] }} ({{ $disenador['rolNombre'] }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">El pedido será asignado a este empleado (diseñador).</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Guardar Asignación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+    <script src="{{ asset('assets/js/pedidos.js') }}"></script>
+
+    <script>
+        // Inicializar tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].map(el => new bootstrap.Tooltip(el));
+        
+        // Aplicar filtros
+        document.getElementById('filterEstado')?.addEventListener('change', aplicarFiltros);
+        document.getElementById('pageSize')?.addEventListener('change', aplicarFiltros);
+        
+        // Búsqueda por código (debounce)
+        let timeoutCodigo;
+        document.getElementById('searchCodigo')?.addEventListener('input', function() {
+            clearTimeout(timeoutCodigo);
+            timeoutCodigo = setTimeout(aplicarFiltros, 500);
+        });
+        
+        function aplicarFiltros() {
+            const estadoId = document.getElementById('filterEstado')?.value || '';
+            const codigo = document.getElementById('searchCodigo')?.value || '';
+            const size = document.getElementById('pageSize')?.value || '10';
+            
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', '0');
+            url.searchParams.set('size', size);
+            url.searchParams.set('estadoId', estadoId);
+            url.searchParams.set('codigo', codigo);
+            
+            window.location.href = url.toString();
+        }
+
+        // ---------------------------------------------------
+        // Modal Asignar Diseñador: comportamiento y envío
+        // ---------------------------------------------------
+        document.addEventListener('DOMContentLoaded', function () {
+            const modalAsignarEl = document.getElementById('modalAsignarDisenador');
+            const asignarPedidoId = document.getElementById('asignarPedidoId');
+            const disenadorSelect = document.getElementById('disenadorSelect');
+            const formAsignar = document.getElementById('formAsignarDisenador');
+
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.content : null;
+
+            // Función para cargar diseñadores vía AJAX si no vienen pasados desde el backend
+            async function cargarDisenadoresSiNecesario() {
+                const hasOptions = Array.from(disenadorSelect.options).some(opt => opt.value && opt.value !== '');
+                if (hasOptions) return;
+
+                try {
+                    const res = await fetch('/admin/disenadores/list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!res.ok) return;
+                    const json = await res.json();
+                    if (!Array.isArray(json)) return;
+
+                    disenadorSelect.innerHTML = '<option value="">Seleccione un diseñador</option>';
+                    json.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.usuId ?? d.id ?? '';
+                        opt.textContent = d.nombre ?? d.nombreCompleto ?? (d.correo ?? 'Empleado');
+                        disenadorSelect.appendChild(opt);
+                    });
+                } catch (err) {
+                    console.warn('No se pudieron cargar diseñadores automáticamente:', err);
+                }
+            }
+
+            // Cuando se abre el modal, rellenar los campos
+            modalAsignarEl.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const pedidoId = button.getAttribute('data-pedidoid');
+                const actualDisenadorId = button.getAttribute('data-actualdisenadorid') || '';
+
+                asignarPedidoId.value = pedidoId;
+
+                cargarDisenadoresSiNecesario().then(() => {
+                    if (actualDisenadorId) {
+                        disenadorSelect.value = actualDisenadorId;
+                    } else {
+                        disenadorSelect.value = '';
+                    }
+                });
+            });
+
+            // Submit del formulario — PATCH al endpoint Laravel que hace proxy a Spring Boot
+            formAsignar.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const pedidoId = asignarPedidoId.value;
+                const nuevoDisenadorId = disenadorSelect.value;
+
+                if (!nuevoDisenadorId) {
+                    Swal.fire('Advertencia', 'Debe seleccionar un diseñador.', 'warning');
+                    return;
+                }
+
+                const confirm = await Swal.fire({
+                    title: 'Confirmar asignación',
+                    text: '¿Deseas asignar este diseñador al pedido?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, asignar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!confirm.isConfirmed) return;
+
+                Swal.fire({
+                    title: 'Asignando...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                try {
+                    const res = await fetch(`/admin/pedidos/${pedidoId}/asignar-empleado`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {})
+                        },
+                        body: JSON.stringify({ usuIdEmpleado: parseInt(nuevoDisenadorId, 10) })
+                    });
+
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        throw new Error(body.message || 'Error en la asignación');
+                    }
+
+                    const data = await res.json();
+
+                    Swal.fire('Hecho', 'Diseñador asignado correctamente.', 'success').then(() => {
+                        const modal = bootstrap.Modal.getInstance(modalAsignarEl);
+                        modal?.hide();
+                        location.reload();
+                    });
+
+                } catch (err) {
+                    Swal.fire('Error', err.message || 'No se pudo asignar el diseñador.', 'error');
+                }
+            });
+        });
+    </script>
+@endpush
