@@ -411,31 +411,33 @@ textarea.form-control {
 @push('scripts')
 <script>
 // ============================================
-// CARGAR SESIÓN EN FORMULARIO DE CONTACTO
+// CARGAR SESIÓN EN FORMULARIO DE CONTACTO (VERSION CON TOKEN)
 // ============================================
 (function() {
     'use strict';
     
-    const STORAGE_SESION_ID = 'brisas_sesion_id';
+    const STORAGE_SESION_ID = 'anonymous_sesion_id'; // Clave para obtener el ID numérico
     
     document.addEventListener('DOMContentLoaded', function() {
-        // ✅ Verificar PRIMERO si hay usuario autenticado
+        // Verificar si hay usuario autenticado
         @if(session()->has('user_id'))
             console.log('✅ Usuario autenticado - NO se cargará sesionId en contacto');
-            return; // Salir sin cargar sesionId
+            return; 
         @endif
         
         // Solo cargar sesionId si NO está autenticado
         const sesionId = localStorage.getItem(STORAGE_SESION_ID);
         
         if (sesionId) {
-            const inputSesionId = document.getElementById('input-sesion-id');
+            // Asumo que tu formulario de contacto tiene un input oculto con name="sesionId"
+            const inputSesionId = document.getElementById('input-sesion-id'); 
             if (inputSesionId) {
                 inputSesionId.value = sesionId;
                 console.log('✅ sesionId cargado en contacto:', sesionId);
             }
         } else {
             console.log('⚠️ No se encontró sesionId en localStorage');
+            // Nota: Aquí se podría llamar a obtenerOCrearSesion() si es crítico que el contacto tenga un ID de sesión.
         }
     });
     

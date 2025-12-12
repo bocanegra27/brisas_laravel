@@ -7,15 +7,7 @@
     <link rel="icon" href="{{ asset('assets/img/icons/icono.png') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}" />
-    <style>
-        :root { --bs-primary: #009688; }
-        body { background-color: #f0f2f5; }
-        .card { border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .btn-primary { background-color: var(--bs-primary); border-color: var(--bs-primary); }
-        .btn-primary:hover { background-color: #00796b; border-color: #00796b; }
-        .form-label { font-weight: 500; }
-    </style>
-</head>
+    </head>
 <body>
     <div class="container my-5">
         <div class="row justify-content-center">
@@ -36,8 +28,10 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('register.handle') }}" method="POST">
+                        <form id="registroForm" onsubmit="handleRegistration(event)">
                             @csrf
+
+                            <input type="hidden" id="anonymousTokenInput" name="anonymousToken"> 
 
                             {{-- Información Personal --}}
                             <div class="row">
@@ -166,7 +160,7 @@
                             </div>
 
                             <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-primary btn-lg">Registrarse</button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="registerButton">Registrarse</button>
                             </div>
 
                             <div class="text-center">
@@ -175,7 +169,6 @@
                                 </small>
                             </div>
                         </form>
-
                         <hr class="my-4">
 
                         <div class="text-center">
@@ -190,5 +183,84 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const STORAGE_SESION_TOKEN = 'anonymous_token';
+        const API_BASE_URL = '{{ config("services.spring_api.url") }}'; // Usa la config de Laravel
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem(STORAGE_SESION_TOKEN);
+            if (token) {
+                document.getElementById('anonymousTokenInput').value = token;
+                console.log('✅ Token de sesión cargado para conversión:', token.substring(0, 8) + '...');
+            }
+        });
+
+        async function handleRegistration(event) {
+            event.preventDefault(); // Detener el envío de Laravel por defecto
+            
+            const registerButton = document.getElementById('registerButton');
+            const token = document.getElementById('anonymousTokenInput').value;
+
+            // 1. Recolectar datos del formulario
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                correo: document.getElementById('correo').value,
+                telefono: document.getElementById('telefono').value,
+                tipdocId: parseInt(document.getElementById('tipdocId').value),
+                docnum: document.getElementById('docnum').value,
+                password: document.getElementById('password').value,
+                rolId: 1 
+            };
+            
+            // Si hay errores de validación, detenemos el proceso
+            if (!formData.nombre || !formData.correo || !formData.password || !formData.tipdocId || !formData.docnum) {
+                alert('Por favor, rellene todos los campos requeridos (*).');
+                return;
+            }
+
+            registerButton.disabled = true;
+            registerButton.textContent = 'Registrando...';
+            
+            try {
+                let url = API_BASE_URL;
+                let finalMessage = '';
+
+                // 2. Determinar el Endpoint: Conversión o Registro Normal
+                if (token) {
+                    url += `/usuarios/registro/convertir/${token}`;
+                    finalMessage = 'Cuenta creada y la trazabilidad histórica fue vinculada con éxito.';
+                } else {
+                    url += '/usuarios/crear'; 
+                    finalMessage = 'Cuenta creada con éxito.';
+                }
+                
+                // 3. Llamar a la API
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Error HTTP ${response.status}`);
+                }
+
+                // 4. Éxito: Limpiar Local Storage y Redirigir
+                if (token) {
+                    localStorage.removeItem(STORAGE_SESION_TOKEN);
+                }
+                
+                alert(finalMessage);
+                window.location.href = '{{ route('login') }}'; 
+                
+            } catch (error) {
+                // Mostrar los errores
+                alert('Fallo en el registro: ' + error.message);
+                registerButton.disabled = false;
+                registerButton.textContent = 'Registrarse';
+            }
+        }
+    </script>
 </body>
 </html>
