@@ -40,6 +40,8 @@ Route::middleware('guest.custom')->group(function () {
     Route::post('/login', [AuthController::class, 'handleLogin'])->name('login.handle');
     Route::get('/registro', [RegisterController::class, 'showRegistrationForm'])->name('register.show');
     Route::post('/registro', [RegisterController::class, 'handleRegistration'])->name('register.handle');
+    Route::get('/olvide-password', [App\Http\Controllers\Auth\AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/olvide-password', [App\Http\Controllers\Auth\AuthController::class, 'handleForgotPassword'])->name('password.email');
 });
 
 // ============================================
@@ -117,3 +119,7 @@ Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function 
     Route::put('/actualizar', [App\Http\Controllers\ProfileController::class, 'update'])->name('perfil.update');
     Route::patch('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('perfil.password');
 });
+
+// Rutas para Restablecer (Reset)
+    Route::get('/restablecer/{token}', [App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/restablecer', [App\Http\Controllers\Auth\AuthController::class, 'handleResetPassword'])->name('password.update');

@@ -79,4 +79,68 @@ class AuthController extends Controller
         return redirect('/')
             ->with('success', 'Sesión cerrada correctamente');
     }
+
+   /**
+     * Muestra el formulario de recuperación de contraseña
+     */
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Procesa la solicitud de envío de correo de recuperación
+     */
+    public function handleForgotPassword(Request $request)
+    {
+        // 1. Validar el email
+        $request->validate([
+            'email' => 'required|email'
+        ], [
+            'email.required' => 'El correo es obligatorio.',
+            'email.email' => 'Ingresa un correo válido.'
+        ]);
+
+        try {
+            // 2. Llamar al servicio (que se comunicará con Spring Boot)
+            // Nota: Debemos asegurarnos de que el método forgotPassword exista en AuthService
+            $response = $this->authService->forgotPassword($request->email);
+
+            if ($response) {
+                return back()->with('success', 'Si el correo existe, te hemos enviado instrucciones.');
+            } else {
+                return back()->withErrors(['email' => 'No se pudo conectar con el servidor.']);
+            }
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => 'Ocurrió un error inesperado.']);
+        }
+    }
+
+    /**
+     * Muestra el formulario para ingresar la nueva contraseña
+     */
+    public function showResetPassword($token)
+    {
+        return view('auth.reset-password', ['token' => $token]);
+    }
+
+    /**
+     * Procesa el cambio de contraseña
+     */
+    public function handleResetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'password' => 'required|min:8|confirmed' // 'confirmed' verifica password_confirmation
+        ]);
+
+        // Llamar al servicio
+        $success = $this->authService->resetPassword($request->token, $request->password);
+
+        if ($success) {
+            return redirect()->route('login')->with('success', '¡Contraseña cambiada! Ya puedes iniciar sesión.');
+        }
+
+        return back()->withErrors(['token' => 'El enlace es inválido o ha expirado.']);
+    }
 }
