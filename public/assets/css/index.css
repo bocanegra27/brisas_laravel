@@ -27,15 +27,19 @@
 
 .cta-hero {
   position: absolute;
-  bottom: 20%;
+  bottom: 40%;
   left: 50%;
   transform: translateX(-50%);
-  color: white;
-  background: rgba(0,0,0,0.5);
+  width: 70%;
+  max-width: 600px;
+  color: rgb(248, 248, 248);
+  background: rgba(194, 214, 207, 0.878);
   padding: 1.5rem 2rem;
-  border-radius: 12px;
+  border-radius: 20px;
   z-index: 10;
+  text-align: center;
 }
+
 
 .modulo-section h3 {
   margin-bottom: 1rem;

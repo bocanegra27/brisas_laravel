@@ -8,18 +8,21 @@
 
 @section('content')
 
-  <!-- Hero / Carrusel -->
-  <section class="carrusel">
-    <div class="slide active" style="background-image:url('{{ asset('assets/img/index/imagen1.png') }}');"></div>
-    <div class="slide" style="background-image:url('{{ asset('assets/img/index/imagen2.png') }}');"></div>
-    <div class="slide" style="background-image:url('{{ asset('assets/img/index/imagen3.png') }}');"></div>
 
-    <div class="cta-hero text-center">
-      <h1>Diseña tu joya soñada</h1>
-      <p>Personaliza paso a paso con Brisas Gems</p>
-      <a class="btn btn-light" href="{{ url('/personalizar') }}">Comenzar personalización</a>
-    </div>
-  </section>
+  <!-- Hero / Video -->
+<section class="carrusel">
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="{{ asset('assets/video/hero.mp4') }}" type="video/mp4">
+  </video>
+
+  <div class="cta-hero text-center">
+    <h1>Diseña tu joya soñada</h1>
+    <p>Personaliza paso a paso con Brisas Gems</p>
+    <a class="btn btn-light" href="{{ url('/personalizar') }}">Comenzar personalización</a>
+  </div>
+</section>
+
+
 
   <!-- Bienvenida -->
   <section class="info-section py-5 text-center">
@@ -71,6 +74,14 @@
     <h3>¿Necesitas ayuda?</h3>
     <p>Escríbenos para resolver dudas o recibir asesoría personalizada.</p>
     <a class="btn btn-outline-primary" href="{{ url('/contacto') }}">Formulario de contacto</a>
+  </section>
+
+
+    <!-- Hero / Carrusel -->
+  <section class="carrusel">
+    <div class="slide active" style="background-image:url('{{ asset('assets/img/index/imagen1.png') }}');"></div>
+    <div class="slide" style="background-image:url('{{ asset('assets/img/index/imagen2.png') }}');"></div>
+    <div class="slide" style="background-image:url('{{ asset('assets/img/index/imagen3.png') }}');"></div>
   </section>
 @endsection
 
