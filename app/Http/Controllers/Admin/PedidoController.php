@@ -71,7 +71,7 @@ class PedidoController extends Controller
                      'estados' => $estados,
                      'disenadores' => $disenadores,
                      'filtros' => []
-                 ])->with('error', 'Error al cargar los pedidos.');
+                   ])->with('error', 'Error al cargar los pedidos.');
             }
 
             $pedidos = [];
@@ -135,14 +135,96 @@ class PedidoController extends Controller
     }
 
     /**
-     * Vista de gestion del pedido con Timeline.
-     * GET /admin/pedidos/{id}/gestionar
+     * Muestra el formulario para crear un nuevo pedido manual.
+     * GET /admin/pedidos/crear
      */
+    public function create()
+    {
+        try {
+            // Obtener lista de usuarios para poder seleccionar un cliente registrado
+            $usuarios = [];
+            try {
+                $response = $this->apiService->get('/usuarios', [
+                    'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+                ]);
+                
+                if (is_array($response)) {
+                    // Si la API devuelve paginación, extraemos el contenido, si no, usamos el array directo
+                    $data = $response['content'] ?? $response;
+                    
+                    // ✅ CORRECCIÓN FINAL: Usamos Arrow Function (fn) para capturar automáticamente $this 
+                    // y evitar el error "Cannot use $this as lexical variable".
+                    $usuarios = array_map(fn($user) => $this->normalizarUsuarioParaSelect($user), $data);
+                }
+            } catch (\Exception $e) {
+                Log::warning('No se pudieron cargar usuarios para el select de crear pedido.');
+            }
+
+            return view('admin.pedidos.create', [
+                'usuarios' => $usuarios
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.pedidos.index')->with('error', 'Error al cargar formulario de creación.');
+        }
+    }
+
     /**
-     * Vista de gestion del pedido con Timeline.
-     * GET /admin/pedidos/{id}/gestionar
+     * Guarda el nuevo pedido en la base de datos.
+     * POST /admin/pedidos
      */
-   /**
+    public function store(Request $request)
+    {
+        try {
+            // 1. Validar datos
+            $request->validate([
+                'tipo_cliente' => 'required|in:registrado,externo',
+                'usuIdCliente' => 'required_if:tipo_cliente,registrado',
+                'nombre_cliente_ext' => 'required_if:tipo_cliente,externo',
+                'telefono_cliente_ext' => 'required_if:tipo_cliente,externo',
+                'descripcion' => 'required|string|max:1000'
+            ]);
+
+            // 2. Preparar datos (Array plano para multipart)
+            $data = [
+                'pedComentarios' => $request->input('descripcion'),
+                'estId' => '1', // Enviar como string
+            ];
+
+            if ($request->input('tipo_cliente') === 'registrado') {
+                $data['usuIdCliente'] = (string) $request->input('usuIdCliente');
+            } else {
+                $nombre = trim($request->input('nombre_cliente_ext'));
+                $telefono = trim($request->input('telefono_cliente_ext'));
+                // El formato guardado en Java Pedido.pedIdentificadorCliente
+                $data['pedIdentificadorCliente'] = "{$nombre} - {$telefono}"; 
+            }
+
+            // 3. Obtener Configuración
+            $token = Session::get('jwt_token');
+            // Usamos la misma config que usa tu ApiService para mantener coherencia
+            $baseUrl = config('services.spring_api.url', 'http://localhost:8080/api');
+
+            // 4. Usar Http::asMultipart() para enviar el payload correctamente
+            $response = Http::withToken($token)
+                ->asMultipart() 
+                ->post("{$baseUrl}/pedidos", $data);
+
+            // 5. Verificar Respuesta
+            if ($response->successful()) {
+                return redirect()->route('admin.pedidos.index')->with('success', 'Pedido creado exitosamente.');
+            }
+
+            // Loguear error si falla
+            Log::error('API Error crear pedido: ' . $response->body());
+            return back()->withInput()->with('error', 'Error al guardar. La API respondió: ' . $response->status());
+
+        } catch (\Exception $e) {
+            Log::error('Error creando pedido admin: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Error interno al crear el pedido.');
+        }
+    }
+
+    /**
      * Vista de gestión de pedido (Versión Clásica + Historial Directo)
      * GET /admin/pedidos/{id}/gestionar
      */
@@ -170,7 +252,7 @@ class PedidoController extends Controller
                 $estados[$estado['id']] = $estado['nombre']; 
             }
 
-            // 3. 🔥 NUEVO: Obtener el HISTORIAL directamente aquí
+            // 3. Obtener el HISTORIAL directamente aquí
             $historial = [];
             try {
                 $responseHistorial = $this->apiService->get("/pedidos/{$id}/historial", [
@@ -188,7 +270,7 @@ class PedidoController extends Controller
                 'pedido' => $pedido,
                 'estados' => $estados,
                 'estadoId' => $estadoId,
-                'historial' => $historial // <--- Pasamos el historial directo a la vista
+                'historial' => $historial 
             ]);
 
         } catch (\Exception $e) {
@@ -424,39 +506,66 @@ class PedidoController extends Controller
 
     private function enriquecerPedido(array $pedido): array
     {
+        // Asegura que el estado esté bien mapeado
         if (!isset($pedido['estado']) && isset($pedido['estadoNombre'])) {
-             $pedido['estado'] = ['estId' => $pedido['estId'] ?? 1, 'estNombre' => $pedido['estadoNombre']];
+            $pedido['estado'] = ['estId' => $pedido['estId'] ?? 1, 'estNombre' => $pedido['estadoNombre']];
         }
         
         $token = Session::get('jwt_token');
         $clienteInfo = null;
+        
+        // 🚀 PASO CLAVE 1: Confiar en el nombre que ya enriqueció el backend de Java.
+        $nombreClienteDisplay = $pedido['nombreCliente'] ?? null; 
 
-        if (!empty($pedido['usuIdCliente']) && $token) {
+        // 1. Intentamos obtener la información completa del cliente solo si el campo 'nombreCliente'
+        //    está vacío O si el pedido tiene un ID de Cliente Registrado que necesita ser verificado.
+        
+        // Si no tenemos un nombre, PERO tenemos un ID de cliente, hacemos la búsqueda detallada.
+        if (empty($nombreClienteDisplay) && !empty($pedido['usuIdCliente']) && $token) {
             try {
                 $clienteInfo = $this->apiService->get("/usuarios/{$pedido['usuIdCliente']}", ['headers' => ['Authorization' => 'Bearer ' . $token]]);
                 if (is_array($clienteInfo)) {
                     $clienteInfo = $this->normalizarClienteKeys($clienteInfo, 'usuario');
+                    $nombreClienteDisplay = $clienteInfo['usuNombre'] ?? $nombreClienteDisplay;
                     $clienteInfo['tipo'] = 'usuario_registrado';
                 }
-            } catch (\Exception $e) {}
-        } elseif (!empty($pedido['conId']) && $token) {
+            } catch (\Exception $e) {
+                 // Si falla, el nombre sigue siendo el que vino de Java (si vino) o null.
+            }
+        
+        // 2. Cliente Manual / Externo (Si no fue enriquecido por Java, lo hacemos ahora)
+        } elseif (empty($nombreClienteDisplay) && !empty($pedido['pedIdentificadorCliente'])) {
+            $nombreClienteDisplay = $pedido['pedIdentificadorCliente'];
+            $clienteInfo = ['tipo' => 'manual', 'nombre' => $nombreClienteDisplay];
+        
+        // 3. Cliente desde Contacto (Si no fue enriquecido por Java, lo hacemos ahora)
+        } elseif (empty($nombreClienteDisplay) && !empty($pedido['conId']) && $token) {
             try {
                 $clienteInfo = $this->apiService->get("/contactos/{$pedido['conId']}", ['headers' => ['Authorization' => 'Bearer ' . $token]]);
                 if (is_array($clienteInfo)) {
                     $clienteInfo = $this->normalizarClienteKeys($clienteInfo, 'contacto');
+                    $nombreClienteDisplay = $clienteInfo['conNombre'] ?? $nombreClienteDisplay;
                     $clienteInfo['tipo'] = 'contacto_externo';
                 }
             } catch (\Exception $e) {}
-        } else {
-            if (!empty($pedido['nombreCliente'])) {
-                $clienteInfo = ['tipo' => 'sin_detalles', 'nombre' => $pedido['nombreCliente']];
-            }
         }
+
+        // Asignamos el nombre final: Confía en lo que viene de Java ($pedido['nombreCliente']) si no se modificó antes.
+        $pedido['nombreCliente'] = $nombreClienteDisplay ?? $pedido['nombreCliente'] ?? 'Desconocido/Anónimo'; 
         
-        $pedido['clienteDetalles'] = $clienteInfo;
+        // Aseguramos que el detalle esté presente si es un pedido manual.
+        if (!isset($pedido['clienteDetalles']) && !empty($pedido['pedIdentificadorCliente'])) {
+             $pedido['clienteDetalles'] = ['tipo' => 'manual', 'nombre' => $pedido['pedIdentificadorCliente']];
+        } else {
+             $pedido['clienteDetalles'] = $clienteInfo ?? ['tipo' => 'sin_detalles', 'nombre' => $pedido['nombreCliente'] ?? 'Anónimo'];
+        }
+
         return $pedido;
     }
-
+    
+    /**
+     * Normaliza las claves de un array de datos de cliente/contacto.
+     */
     private function normalizarClienteKeys(array $data, string $tipo): array
     {
         if ($tipo === 'usuario') {
@@ -467,6 +576,7 @@ class PedidoController extends Controller
                 'usuTelefono' => $data['telefono'] ?? $data['usu_telefono'] ?? null,
             ];
         } elseif ($tipo === 'contacto') {
+            // Asume que los datos de contacto pueden tener claves ligeramente diferentes
             return [
                 'conId' => $data['id'] ?? $data['con_id'] ?? null,
                 'conNombre' => $data['nombre'] ?? $data['con_nombre'] ?? null,
@@ -475,5 +585,24 @@ class PedidoController extends Controller
             ];
         }
         return $data;
+    }
+
+    /**
+     * Normaliza las claves de un objeto de usuario para el select de la vista de creación.
+     */
+    private function normalizarUsuarioParaSelect(array $user): array
+    {
+        // Asumimos que los campos pueden llamarse 'id'/'nombre'/'correo' o 'usuId'/'usuNombre'/'usuCorreo'
+        $id = $user['usuId'] ?? $user['id'] ?? null;
+        $nombre = $user['usuNombre'] ?? $user['nombre'] ?? null;
+        $correo = $user['usuCorreo'] ?? $user['correo'] ?? null;
+        $rol = $user['rol']['rolNombre'] ?? null;
+
+        return [
+            'usuId' => $id,
+            'usuNombre' => $nombre,
+            'usuCorreo' => $correo,
+            'rol' => ['rolNombre' => $rol] 
+        ];
     }
 }

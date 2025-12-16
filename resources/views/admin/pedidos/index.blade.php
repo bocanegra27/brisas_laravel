@@ -45,9 +45,14 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
-                </a>
+                <div class="d-flex gap-2">
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-house-door-fill"></i>
+    </a>
+    <a href="{{ route('admin.pedidos.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Crear Nuevo Pedido
+    </a>
+</div>
             </div>
         </div>
 
