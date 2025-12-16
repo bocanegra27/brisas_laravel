@@ -94,9 +94,8 @@ class PedidoController extends Controller
                 $pageSize = $size;
             }
 
-            $pedidos = array_map(function($pedido) {
-                return $this->enriquecerPedido($pedido);
-            }, $pedidos);
+            // ✅ OPTIMIZACIÓN: Usa Arrow Function para acceder a $this de forma segura.
+            $pedidos = array_map(fn($pedido) => $this->enriquecerPedido($pedido), $pedidos);
             
             $estadoMapeo = $this->getEstadoMapeo();
 
@@ -152,8 +151,7 @@ class PedidoController extends Controller
                     // Si la API devuelve paginación, extraemos el contenido, si no, usamos el array directo
                     $data = $response['content'] ?? $response;
                     
-                    // ✅ CORRECCIÓN FINAL: Usamos Arrow Function (fn) para capturar automáticamente $this 
-                    // y evitar el error "Cannot use $this as lexical variable".
+                    // ✅ CORRECCIÓN APLICADA: Uso de Arrow Function (fn) para capturar $this automáticamente.
                     $usuarios = array_map(fn($user) => $this->normalizarUsuarioParaSelect($user), $data);
                 }
             } catch (\Exception $e) {
@@ -375,34 +373,11 @@ class PedidoController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
-    {
-        try {
-            $validated = $request->validate([
-                'estadoId' => 'required|integer|min:1|max:10',
-                'comentarios' => 'nullable|string|max:1000'
-            ]);
-
-            $data = [
-                'estadoId' => (int) $validated['estadoId'],
-                'comentarios' => $validated['comentarios'] ?? null
-            ];
-
-            $response = $this->apiService->put("/pedidos/{$id}", $data, [
-                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
-            ]);
-
-            if ($response === null) {
-                return back()->withInput()->with('error', 'Error al actualizar el pedido.');
-            }
-
-            return redirect()->route('admin.pedidos.index')->with('success', 'Pedido actualizado exitosamente.');
-
-        } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Error al actualizar el pedido.');
-        }
-    }
-
+    /**
+     * ❌ MÉTODO ELIMINADO: update() 
+     * Se eliminó porque la lógica de cambio de estado fue unificada en actualizarEstadoConHistorial.
+     */
+    
     public function destroy($id)
     {
         try {
@@ -514,12 +489,9 @@ class PedidoController extends Controller
         $token = Session::get('jwt_token');
         $clienteInfo = null;
         
-        // 🚀 PASO CLAVE 1: Confiar en el nombre que ya enriqueció el backend de Java.
+        // ✅ CORRECCIÓN FINAL: Usa nombreCliente, no nombreEmpleado.
         $nombreClienteDisplay = $pedido['nombreCliente'] ?? null; 
 
-        // 1. Intentamos obtener la información completa del cliente solo si el campo 'nombreCliente'
-        //    está vacío O si el pedido tiene un ID de Cliente Registrado que necesita ser verificado.
-        
         // Si no tenemos un nombre, PERO tenemos un ID de cliente, hacemos la búsqueda detallada.
         if (empty($nombreClienteDisplay) && !empty($pedido['usuIdCliente']) && $token) {
             try {
@@ -530,7 +502,7 @@ class PedidoController extends Controller
                     $clienteInfo['tipo'] = 'usuario_registrado';
                 }
             } catch (\Exception $e) {
-                 // Si falla, el nombre sigue siendo el que vino de Java (si vino) o null.
+                    // Si falla, el nombre sigue siendo el que vino de Java (si vino) o null.
             }
         
         // 2. Cliente Manual / Externo (Si no fue enriquecido por Java, lo hacemos ahora)

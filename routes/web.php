@@ -13,7 +13,8 @@ use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
 // Importamos el controlador del usuario que acabamos de crear
 use App\Http\Controllers\User\UserPedidoController;
-
+// 🚨 NUEVO: Importamos el controlador del Diseñador
+use App\Http\Controllers\Designer\DesignerPedidoController; 
 // ============================================
 // RUTAS PÚBLICAS
 // ============================================
@@ -99,7 +100,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
         Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
         
-        //  NUEVA RUTA PARA HISTORIAL (Reemplaza la lógica de cambiarEstado)
+        // NUEVA RUTA PARA HISTORIAL (Reemplaza la lógica de cambiarEstado)
         Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
         
         // Ruta para obtener el historial del timeline (API INTERNA)
@@ -116,6 +117,25 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
 // ============================================
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
+    
+    // 🚨 MÓDULO: PEDIDOS (Diseñador)
+    Route::controller(DesignerPedidoController::class)->prefix('pedidos')->group(function () {
+        Route::get('/', 'index')->name('designer.pedidos.index');
+        Route::get('/{id}/gestionar', 'gestionar')->name('designer.pedidos.gestionar');
+        
+        // Funcionalidades: Crear, Guardar, Actualizar estado y Historial
+        Route::post('/', 'store')->name('designer.pedidos.store');
+        Route::get('/crear', 'create')->name('designer.pedidos.create');
+        Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('designer.pedidos.actualizarEstado');
+        
+        // Rutas de API INTERNA
+        Route::get('/{id}/historial', 'obtenerHistorial')->name('designer.pedidos.historial');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('designer.pedidos.crear-desde-mensaje');
+        
+        // El Diseñador NO debería poder eliminar ni reasignar pedidos por defecto.
+        // Si se requiere eliminar, descomentar la siguiente línea:
+        // Route::delete('/{id}', 'destroy')->name('designer.pedidos.destroy');
+    });
 });
 
 // ============================================
@@ -127,8 +147,8 @@ Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->grou
 
     // 🔥 NUEVO: MÓDULO MIS PEDIDOS (CLIENTE)
     Route::controller(UserPedidoController::class)->prefix('mis-pedidos')->group(function () {
-        Route::get('/', 'index')->name('user.pedidos.index');      // Listado
-        Route::get('/{id}', 'show')->name('user.pedidos.show');    // Detalle y Timeline
+        Route::get('/', 'index')->name('user.pedidos.index');     // Listado
+        Route::get('/{id}', 'show')->name('user.pedidos.show');     // Detalle y Timeline
     });
 });
 
