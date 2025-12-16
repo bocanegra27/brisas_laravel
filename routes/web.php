@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
+// Importamos el controlador del usuario que acabamos de crear
+use App\Http\Controllers\User\UserPedidoController;
 
 // ============================================
 // RUTAS PÚBLICAS
@@ -79,7 +81,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
     Route::controller(MensajesController::class)->prefix('mensajes')->group(function () {
         Route::get('/', 'index')->name('admin.mensajes.index');
         Route::get('/{id}', 'ver')->name('admin.mensajes.ver');
-        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion'); // FIX: Mover antes del wildcard
+        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion'); 
         Route::put('/{id}', 'update')->name('admin.mensajes.update');
         Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
@@ -90,7 +92,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::get('/', 'index')->name('admin.pedidos.index');
         Route::get('/{id}/gestionar', 'gestionar')->name('admin.pedidos.gestionar');
         // Rutas de acciones sobre pedidos
-        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); // FIX: Mover antes del wildcard
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
         Route::post('/', 'store')->name('admin.pedidos.store');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
@@ -119,7 +121,14 @@ Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer
 // ROL: USUARIO (CLIENTE)
 // ============================================
 Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
+    
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
+
+    // 🔥 NUEVO: MÓDULO MIS PEDIDOS (CLIENTE)
+    Route::controller(UserPedidoController::class)->prefix('mis-pedidos')->group(function () {
+        Route::get('/', 'index')->name('user.pedidos.index');      // Listado
+        Route::get('/{id}', 'show')->name('user.pedidos.show');    // Detalle y Timeline
+    });
 });
 
 // ============================================
@@ -132,5 +141,5 @@ Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function 
 });
 
 // Rutas para Restablecer (Reset)
-    Route::get('/restablecer/{token}', [App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('/restablecer', [App\Http\Controllers\Auth\AuthController::class, 'handleResetPassword'])->name('password.update');
+Route::get('/restablecer/{token}', [App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/restablecer', [App\Http\Controllers\Auth\AuthController::class, 'handleResetPassword'])->name('password.update');

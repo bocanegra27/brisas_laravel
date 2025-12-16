@@ -1,0 +1,44 @@
+]633;E;{ echo "BINSAS_LARAVEL/"\x3b echo "├── app/"\x3b echo "│   ├── Http/"\x3b echo "│   │   ├── Controllers/"\x3b echo "│   │   │   └── [Nombre]Controller.php"\x3b echo "│   │   └── Requests/"\x3b echo "│   │       └── [Nombre]Request.php"\x3b echo "│   ├── Models/"\x3b echo "│   │   └── [Nombre].php"\x3b echo "│   ├── Services/"\x3b echo "│   │   └── [Nombre]Service.php"\x3b echo "│   ├── Repositories/"\x3b echo "│   │   └── [Nombre]Repository.php"\x3b echo "│   └── Providers/"\x3b echo "│       └── [Nombre]ServiceProvider.php"\x3b echo "├── config/"\x3b echo "│   └── [nombre].php"\x3b echo "├── database/"\x3b echo "│   ├── migrations/"\x3b echo "│   │   └── [timestamp]_create_[nombre]_table.php"\x3b echo "│   ├── seeders/"\x3b echo "│   │   └── [Nombre]Seeder.php"\x3b echo "│   └── factories/"\x3b echo "│       └── [Nombre]Factory.php"\x3b echo "├── resources/"\x3b echo "│   ├── views/"\x3b echo "│   │   └── [nombre]/"\x3b echo "│   │       ├── index.blade.php"\x3b echo "│   │       ├── create.blade.php"\x3b echo "│   │       ├── edit.blade.php"\x3b echo "│   │       └── show.blade.php"\x3b echo "│   └── lang/"\x3b echo "│       └── [locale]/"\x3b echo "│           └── [nombre].php"\x3b echo "├── routes/"\x3b echo "│   ├── web.php"\x3b echo "│   └── api.php"\x3b echo "├── tests/"\x3b echo "│   ├── Feature/"\x3b echo "│   │   └── [Nombre]Test.php"\x3b echo "│   └── Unit/"\x3b echo "│       └── [Nombre]Test.php"\x3b echo "├── composer.json"\x3b echo "└── package.json"\x3b } > estructura_modulo_laravel.txt;b5ef3876-5beb-42cf-a34e-c3e331dc63bb]633;CBINSAS_LARAVEL/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   └── [Nombre]Controller.php
+│   │   └── Requests/
+│   │       └── [Nombre]Request.php
+│   ├── Models/
+│   │   └── [Nombre].php
+│   ├── Services/
+│   │   └── [Nombre]Service.php
+│   ├── Repositories/
+│   │   └── [Nombre]Repository.php
+│   └── Providers/
+│       └── [Nombre]ServiceProvider.php
+├── config/
+│   └── [nombre].php
+├── database/
+│   ├── migrations/
+│   │   └── [timestamp]_create_[nombre]_table.php
+│   ├── seeders/
+│   │   └── [Nombre]Seeder.php
+│   └── factories/
+│       └── [Nombre]Factory.php
+├── resources/
+│   ├── views/
+│   │   └── [nombre]/
+│   │       ├── index.blade.php
+│   │       ├── create.blade.php
+│   │       ├── edit.blade.php
+│   │       └── show.blade.php
+│   └── lang/
+│       └── [locale]/
+│           └── [nombre].php
+├── routes/
+│   ├── web.php
+│   └── api.php
+├── tests/
+│   ├── Feature/
+│   │   └── [Nombre]Test.php
+│   └── Unit/
+│       └── [Nombre]Test.php
+├── composer.json
+└── package.json

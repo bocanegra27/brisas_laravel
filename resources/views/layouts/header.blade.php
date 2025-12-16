@@ -1,6 +1,7 @@
 {{-- ============================================
      HEADER ÚNICO ULTRAMINIMALISTA - BRISAS GEMS
      Se adapta según autenticación y rol del usuario
+     ACTUALIZADO: Corrección de rutas para "Mis Pedidos"
      ============================================ --}}
 
 @php
@@ -95,22 +96,10 @@
                     Dashboard
                 </a>
                 {{-- Rutas pendientes de implementar --}}
-                {{-- <a href="{{ url('/designer/disenos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/disenos') ? 'header-minimal__nav-link--active' : '' }}">
-                    Mis Diseños
-                </a>
-                <a href="{{ url('/designer/renders') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/renders') ? 'header-minimal__nav-link--active' : '' }}">
-                    Renders
-                </a> --}}
                 <a href="{{ url('/pedidos') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
                     Pedidos
                 </a>
-                {{-- <a href="{{ url('/designer/comunicacion') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/comunicacion') ? 'header-minimal__nav-link--active' : '' }}">
-                    Comunicación
-                </a> --}}
 
             @elseif($isUser)
                 {{-- MENÚ PARA USUARIO NORMAL --}}
@@ -126,8 +115,10 @@
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
                     Contacto
                 </a>
-                <a href="{{ url('/mis-pedidos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'mis-pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                
+                {{-- 🔥 CORRECCIÓN AQUÍ: Ruta correcta usando route helper --}}
+                <a href="{{ route('user.pedidos.index') }}" 
+                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'user/mis-pedidos') ? 'header-minimal__nav-link--active' : '' }}">
                     Mis Pedidos
                 </a>
             @endif
@@ -160,10 +151,12 @@
                         {{-- Opciones adicionales según rol --}}
                         @if($isUser)
                             {{-- Usuario: Mis Pedidos --}}
-                            <a href="{{ url('/mis-pedidos') }}" class="header-minimal__dropdown-item">
+                            {{-- 🔥 CORRECCIÓN AQUÍ: Ruta correcta en el dropdown --}}
+                            <a href="{{ route('user.pedidos.index') }}" class="header-minimal__dropdown-item">
                                 <i class="bi bi-bag-check header-minimal__dropdown-icon"></i>
                                 Mis Pedidos
                             </a>
+                            
                             {{-- Pendiente: Mis Personalizaciones --}}
                             {{-- <a href="{{ url('/mis-personalizaciones') }}" class="header-minimal__dropdown-item">
                                 <i class="bi bi-palette2 header-minimal__dropdown-icon"></i>
