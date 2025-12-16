@@ -28,11 +28,11 @@
 
 {{-- Estado de la Producción --}}
 <h2 class="section-header animate-in animate-delay-1">Estado de la Producción</h2>
+
 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3 g-md-4 mb-5">
-    
-    {{-- Cotización Pendiente --}}
+
     <div class="col animate-in animate-delay-1">
-        <a href="{{ url('/pedidos?estadoId=1') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-warning-soft mx-auto">
@@ -42,12 +42,11 @@
                     <h2 class="display-4 text-warning">{{ $data['pedidosCotizacionPendiente'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Pago Pendiente --}}
     <div class="col animate-in animate-delay-2">
-        <a href="{{ url('/pedidos?estadoId=2') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-danger-soft mx-auto">
@@ -57,12 +56,11 @@
                     <h2 class="display-4 text-danger">{{ $data['pedidosPagoDisenoPendiente'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Diseño en Proceso --}}
     <div class="col animate-in animate-delay-3">
-        <a href="{{ url('/pedidos?estadoId=3') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-primary-soft mx-auto">
@@ -72,12 +70,11 @@
                     <h2 class="display-4 text-primary">{{ $data['pedidosDisenoEnProceso'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Diseño Aprobado --}}
     <div class="col animate-in animate-delay-4">
-        <a href="{{ url('/pedidos?estadoId=4') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-success-soft mx-auto">
@@ -87,12 +84,11 @@
                     <h2 class="display-4 text-success">{{ $data['pedidosDisenoAprobado'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Tallado --}}
     <div class="col animate-in animate-delay-5">
-        <a href="{{ url('/pedidos?estadoId=5') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-info-soft mx-auto">
@@ -102,12 +98,11 @@
                     <h2 class="display-4 text-info">{{ $data['pedidosEnTallado'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Engaste --}}
     <div class="col animate-in animate-delay-6">
-        <a href="{{ url('/pedidos?estadoId=6') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-secondary-soft mx-auto">
@@ -117,12 +112,11 @@
                     <h2 class="display-4 text-secondary">{{ $data['pedidosEnEngaste'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Pulido --}}
     <div class="col animate-in animate-delay-7">
-        <a href="{{ url('/pedidos?estadoId=7') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-warning-soft mx-auto">
@@ -132,12 +126,11 @@
                     <h2 class="display-4 text-warning">{{ $data['pedidosEnPulido'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Inspección --}}
     <div class="col animate-in animate-delay-8">
-        <a href="{{ url('/pedidos?estadoId=8') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-info-soft mx-auto">
@@ -147,12 +140,11 @@
                     <h2 class="display-4 text-info">{{ $data['pedidosInspeccionCalidad'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Finalizado --}}
     <div class="col animate-in animate-delay-9">
-        <a href="{{ url('/pedidos?estadoId=9') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-success-soft mx-auto">
@@ -162,12 +154,11 @@
                     <h2 class="display-4 text-success">{{ $data['pedidosFinalizados'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
-    {{-- Cancelados --}}
     <div class="col animate-in animate-delay-10">
-        <a href="{{ url('/pedidos?estadoId=10') }}" class="stat-card">
+        <div class="stat-card">
             <div class="card">
                 <div class="card-body text-center">
                     <div class="icon-wrapper bg-danger-soft mx-auto">
@@ -177,9 +168,11 @@
                     <h2 class="display-4 text-danger">{{ $data['pedidosCancelados'] ?? 0 }}</h2>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
+
 </div>
+
 
     {{-- Gestión General - ACTUALIZADO --}}
 <h2 class="section-header animate-in animate-delay-2">Gestión General</h2>

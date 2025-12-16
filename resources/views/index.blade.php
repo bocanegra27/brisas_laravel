@@ -82,6 +82,7 @@
     <div class="slide active" style="background-image:url('{{ asset('assets/img/index/imagen1.png') }}');"></div>
     <div class="slide" style="background-image:url('{{ asset('assets/img/index/imagen2.png') }}');"></div>
     <div class="slide" style="background-image:url('{{ asset('assets/img/index/imagen3.png') }}');"></div>
+
   </section>
 @endsection
 
