@@ -127,4 +127,49 @@ class ApiService
     {
         return $this->request('DELETE', $endpoint, null, $options);
     }
+    
+    /**
+     * Envía un archivo junto con datos (Multipart) - Refinado
+     */
+    public function attachFile(string $endpoint, array $data, $file, string $fileName = 'archivo', array $options = []): ?array
+    {
+        try {
+            $url = $this->baseUrl . $endpoint;
+            
+            // Iniciamos la petición asMultipart
+            $request = Http::asMultipart();
+
+            // Agregar el token si existe
+            if (isset($options['headers']['Authorization'])) {
+                $request->withHeaders(['Authorization' => $options['headers']['Authorization']]);
+            }
+
+            // 1. Adjuntar el archivo físico
+            $request->attach(
+                $fileName, 
+                file_get_contents($file->getRealPath()), 
+                $file->getClientOriginalName()
+            );
+
+            // 2. Adjuntar los campos de texto
+            // IMPORTANTE: Spring Boot prefiere recibir los campos como partes individuales en multipart
+            foreach ($data as $key => $value) {
+                // Convertimos todo a string para evitar errores de serialización en el stream
+                $request->attach($key, (string)$value);
+            }
+
+            $response = $request->post($url);
+
+            if ($response->successful()) {
+                return $response->json() ?? [];
+            }
+
+            Log::error("API Multipart Error: " . $response->status(), ['body' => $response->body()]);
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error("API Attach File Failed: " . $e->getMessage());
+            return null;
+        }
+    }
 }

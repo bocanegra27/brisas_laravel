@@ -61,114 +61,116 @@
             {{-- Columna Izquierda: Informacion y Acciones --}}
             <div class="col-lg-4">
                 
-            {{-- Card: Informacion del Cliente --}}
-            <div class="info-card animate-in animate-delay-1">
-                <h5 class="card-title">
-                    <i class="bi bi-person-circle me-2"></i>Cliente
-                </h5>
-                <div class="card-content">
-                    @php
-                        $cliente = $pedido['clienteDetalles'] ?? null;
-                        $tipo = $cliente['tipo'] ?? null;
-                        
-                        // Configuración por tipo de cliente
-                        $config = match($tipo) {
-                            'usuario_registrado' => [
-                                'nombre' => $cliente['usuNombre'] ?? 'Usuario Registrado',
-                                'correo' => $cliente['usuCorreo'] ?? '',
-                                'telefono' => $cliente['usuTelefono'] ?? '',
-                                'label' => 'Registrado',
-                                'icon' => 'person-check-fill',
-                                'badge' => 'registrado',
-                                'mostrarId' => $pedido['usuIdCliente'] ?? null
-                            ],
-                            'contacto_externo' => [
-                                'nombre' => $cliente['conNombre'] ?? 'Cliente Externo',
-                                'correo' => $cliente['conCorreo'] ?? '',
-                                'telefono' => $cliente['conTelefono'] ?? '',
-                                'label' => 'Externo',
-                                'icon' => 'telephone-fill',
-                                'badge' => 'externo',
-                                'mostrarId' => $pedido['conId'] ?? null
-                            ],
-                            'sin_detalles' => [
-                                'nombre' => $cliente['nombre'] ?? $pedido['nombreCliente'] ?? 'Cliente',
-                                'correo' => '',
-                                'telefono' => '',
-                                'label' => 'Sin Detalles',
-                                'icon' => 'person-fill',
-                                'badge' => 'externo',
-                                'mostrarId' => null
-                            ],
-                            default => [
-                                'nombre' => $pedido['nombreCliente'] ?? 'Sin Cliente Asignado',
-                                'correo' => '',
-                                'telefono' => '',
-                                'label' => 'Desconocido',
-                                'icon' => 'question-circle',
-                                'badge' => 'externo',
-                                'mostrarId' => null
-                            ]
-                        };
-                    @endphp
+                {{-- Card: Informacion del Cliente --}}
+                <div class="info-card animate-in animate-delay-1">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-circle me-2"></i>Cliente
+                    </h5>
+                    <div class="card-content">
+                        @php
+                            $cliente = $pedido['clienteDetalles'] ?? null;
+                            $tipo = $cliente['tipo'] ?? null;
+                            
+                            // Configuración por tipo de cliente
+                            $config = match($tipo) {
+                                'usuario_registrado' => [
+                                    'nombre' => $cliente['usuNombre'] ?? 'Usuario Registrado',
+                                    'correo' => $cliente['usuCorreo'] ?? '',
+                                    'telefono' => $cliente['usuTelefono'] ?? '',
+                                    'label' => 'Registrado',
+                                    'icon' => 'person-check-fill',
+                                    'badge' => 'registrado',
+                                    'mostrarId' => $pedido['usuIdCliente'] ?? null
+                                ],
+                                'contacto_externo' => [
+                                    'nombre' => $cliente['conNombre'] ?? 'Cliente Externo',
+                                    'correo' => $cliente['conCorreo'] ?? '',
+                                    'telefono' => $cliente['conTelefono'] ?? '',
+                                    'label' => 'Externo',
+                                    'icon' => 'telephone-fill',
+                                    'badge' => 'externo',
+                                    'mostrarId' => $pedido['conId'] ?? null
+                                ],
+                                'sin_detalles' => [
+                                    'nombre' => $cliente['nombre'] ?? $pedido['nombreCliente'] ?? 'Cliente',
+                                    'correo' => '',
+                                    'telefono' => '',
+                                    'label' => 'Sin Detalles',
+                                    'icon' => 'person-fill',
+                                    'badge' => 'externo',
+                                    'mostrarId' => null
+                                ],
+                                default => [
+                                    'nombre' => $pedido['nombreCliente'] ?? 'Sin Cliente Asignado',
+                                    'correo' => '',
+                                    'telefono' => '',
+                                    'label' => 'Desconocido',
+                                    'icon' => 'question-circle',
+                                    'badge' => 'externo',
+                                    'mostrarId' => null
+                                ]
+                            };
+                        @endphp
 
-                    @if($config['nombre'] !== 'Sin Cliente Asignado')
-                        <div class="client-info">
-                            <div class="client-avatar">
-                                @if($tipo === 'usuario_registrado')
-                                    {{ strtoupper(substr($config['nombre'], 0, 1)) }}
-                                @else
-                                    <i class="bi bi-person-fill"></i>
-                                @endif
-                            </div>
-                            <div class="client-details">
-                                <p class="client-name">{{ $config['nombre'] }}</p>
-                                @if($config['correo'])
-                                    <p class="client-email"><i class="bi bi-envelope me-1"></i>{{ $config['correo'] }}</p>
-                                @endif
-                                @if($config['telefono'])
-                                    <p class="client-phone text-muted"><i class="bi bi-telephone me-1"></i>{{ $config['telefono'] }}</p>
-                                @endif
-                                
-                                <span class="client-type badge-{{ $config['badge'] }}">
-                                    <i class="bi bi-{{ $config['icon'] }}"></i> 
-                                    {{ $config['label'] }}
-                                </span>
-                                
-                                {{-- ID del cliente --}}
-                                @if($config['mostrarId'])
-                                    <span class="text-muted small d-block mt-1">
-                                        <i class="bi bi-hash"></i> 
-                                        ID {{ $tipo === 'usuario_registrado' ? 'Usuario' : 'Contacto' }}: {{ $config['mostrarId'] }}
+                        @if($config['nombre'] !== 'Sin Cliente Asignado')
+                            <div class="client-info">
+                                <div class="client-avatar">
+                                    @if($tipo === 'usuario_registrado')
+                                        {{ strtoupper(substr($config['nombre'], 0, 1)) }}
+                                    @else
+                                        <i class="bi bi-person-fill"></i>
+                                    @endif
+                                </div>
+                                <div class="client-details">
+                                    <p class="client-name">{{ $config['nombre'] }}</p>
+                                    @if($config['correo'])
+                                        <p class="client-email"><i class="bi bi-envelope me-1"></i>{{ $config['correo'] }}</p>
+                                    @endif
+                                    @if($config['telefono'])
+                                        <p class="client-phone text-muted"><i class="bi bi-telephone me-1"></i>{{ $config['telefono'] }}</p>
+                                    @endif
+                                    
+                                    <span class="client-type badge-{{ $config['badge'] }}">
+                                        <i class="bi bi-{{ $config['icon'] }}"></i> 
+                                        {{ $config['label'] }}
                                     </span>
-                                @endif
-                                
-                                {{-- Token de sesión si existe --}}
-                                @if(!empty($pedido['sesionToken']))
-                                    <span class="client-type badge-sesion mt-1 d-block">
-                                        <i class="bi bi-key"></i> Sesión: {{ $pedido['sesionToken'] }}
-                                    </span>
-                                @endif
+                                    
+                                    {{-- ID del cliente --}}
+                                    @if($config['mostrarId'])
+                                        <span class="text-muted small d-block mt-1">
+                                            <i class="bi bi-hash"></i> 
+                                            ID {{ $tipo === 'usuario_registrado' ? 'Usuario' : 'Contacto' }}: {{ $config['mostrarId'] }}
+                                        </span>
+                                    @endif
+                                    
+                                    {{-- Token de sesión si existe --}}
+                                    @if(!empty($pedido['sesionToken']))
+                                        <span class="client-type badge-sesion mt-1 d-block">
+                                            <i class="bi bi-key"></i> Sesión: {{ $pedido['sesionToken'] }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
-                    @else
-                        <div class="text-center text-muted py-3">
-                            <i class="bi bi-person-x display-6 d-block mb-2"></i>
-                            <p class="mb-0">Sin cliente asignado</p>
-                        </div>
-                    @endif
+                        @else
+                            <div class="text-center text-muted py-3">
+                                <i class="bi bi-person-x display-6 d-block mb-2"></i>
+                                <p class="mb-0">Sin cliente asignado</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            </div>
-                {{-- Card: Cambiar Estado --}}
+                {{-- Card: Cambiar Estado (Modificado para Fase 1) --}}
                 <div class="info-card animate-in animate-delay-2">
                     <h5 class="card-title">
                         <i class="bi bi-arrow-left-right me-2"></i>Actualizar Estado
                     </h5>
                     <div class="card-content">
-                        <form id="formCambiarEstado" onsubmit="return actualizarEstadoPedido(event, {{ $pedido['pedId'] }})">
+                        {{-- Eliminamos el onsubmit antiguo para manejarlo con un ID de formulario y FormData --}}
+                        <form id="formCambiarEstado" enctype="multipart/form-data">
+                            @csrf
                             <div class="mb-3">
                                 <label class="form-label">Nuevo Estado</label>
-                                <select id="nuevoEstadoSelect" class="form-select" required>
+                                <select name="estadoId" id="nuevoEstadoSelect" class="form-select" required>
                                     @foreach($estados as $id => $nombre)
                                     <option value="{{ $id }}" {{ $estadoId == $id ? 'selected' : '' }}>
                                         {{ $nombre }}
@@ -178,35 +180,46 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Comentarios</label>
-                                <textarea id="comentariosEstado" class="form-control" rows="3" 
-                                          placeholder="Agregar notas sobre este cambio...">{{ $pedido['pedComentarios'] ?? '' }}</textarea>
+                                <label class="form-label">Comentarios del Cambio</label>
+                                <textarea name="comentarios" id="comentariosEstado" class="form-control" rows="2" 
+                                        placeholder="¿Qué se hizo en este paso?">{{ $pedido['pedComentarios'] ?? '' }}</textarea>
+                            </div>
+
+                            {{-- NUEVO: Campo de Evidencia para el Historial --}}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">
+                                    <i class="bi bi-camera me-1"></i> Foto de Evidencia (Opcional)
+                                </label>
+                                <input type="file" name="his_imagen" id="his_imagen" class="form-control form-control-sm" accept="image/*">
                             </div>
                             
-                            <button type="submit" class="btn btn-primary w-100">
+                            <button type="button" onclick="actualizarEstadoPedido(event, {{ $pedido['pedId'] }})" class="btn btn-primary w-100">
                                 <i class="bi bi-check-circle-fill me-2"></i>Actualizar Estado
                             </button>
                         </form>
                     </div>
                 </div>
 
-                {{-- Card: Personalizacion Vinculada --}}
-                @if((isset($pedido['personalizacion']) && $pedido['personalizacion']) || (isset($pedido['perId']) && $pedido['perId']))
-                <div class="info-card animate-in animate-delay-3">
-                    <h5 class="card-title">
-                        <i class="bi bi-gem me-2"></i>Personalización Vinculada
-                    </h5>
-                    <div class="card-content">
-                        @php
-                            $perId = $pedido['personalizacion']['perId'] ?? ($pedido['perId'] ?? null);
-                        @endphp
-                        <div class="personalizacion-link">
-                            <button onclick="verDetallesPersonalizacion({{ $perId }})" class="btn-ver-personalizacion">
-                                <i class="bi bi-eye-fill me-2"></i>Ver Diseño Personalizado
+                {{-- Solo Admin o Diseñador pueden subir render, y solo en estado Diseño en Proceso (3) --}}
+                @php
+                    $rol = Session::get('user_role');
+                    $estadoId = $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0);
+                @endphp
+
+                @if($rol !== 'ROLE_USUARIO' && $estadoId == 3)
+                    <hr>
+                    <div class="mt-3">
+                        <h6 class="small fw-bold">Subir Propuesta de Diseño:</h6>
+                        <form action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-2">
+                                <input type="file" name="diseno_archivo" class="form-control form-control-sm" accept="image/*,.glb,.gltf" required>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                <i class="bi bi-cloud-upload me-2"></i>Cargar Render/Modelo
                             </button>
-                        </div>
+                        </form>
                     </div>
-                </div>
                 @endif
 
                 {{-- Card: Contacto Origen --}}
@@ -339,19 +352,26 @@
         }
     });
 
-    // ===============================================
-    // 1. ACTUALIZACIÓN DE ESTADO
+// ===============================================
+    // 1. ACTUALIZACIÓN DE ESTADO (CON SOPORTE PARA ARCHIVOS)
     // ===============================================
 
     function actualizarEstadoPedido(event, pedidoId) {
         event.preventDefault();
         
+        // Obtenemos el formulario y creamos el FormData para incluir el archivo
+        const form = document.getElementById('formCambiarEstado');
+        const formData = new FormData(form);
+        
+        // Agregamos manualmente los datos que antes sacabas por ID (por seguridad)
         const estadoId = document.getElementById('nuevoEstadoSelect').value;
         const comentarios = document.getElementById('comentariosEstado').value;
         
+        // Nota: FormData ya incluye automáticamente el archivo si el input tiene name="his_imagen"
+        
         Swal.fire({
             title: 'Actualizando...',
-            text: 'Registrando cambio en el historial',
+            text: 'Registrando cambio y subiendo evidencia si existe',
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => {
@@ -360,15 +380,12 @@
         });
         
         fetch(`/admin/pedidos/${pedidoId}/estado-historial`, { 
-            method: 'PATCH',
+            method: 'POST', // Cambiamos a POST porque PATCH con Multipart suele dar problemas
             headers: {
-                'Content-Type': 'application/json',
+                // IMPORTANTE: NO pongas Content-Type, el navegador lo pondrá automáticamente con el "boundary"
                 'X-CSRF-TOKEN': csrfToken 
             },
-            body: JSON.stringify({
-                estadoId: parseInt(estadoId),
-                comentarios: comentarios
-            })
+            body: formData // Enviamos el objeto FormData directamente
         })
         .then(response => {
             if (!response.ok) {
@@ -503,7 +520,7 @@
                         <p class="timeline-responsible small text-muted">Responsable: ${item.responsableNombre || 'Sistema'}</p>
                         
                         ${item.hisImagen ? `<div class="timeline-image-link mt-2">
-                            <a href="${item.hisImagen}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                            <a href="/admin/pedidos/ver-archivo/${item.hisImagen}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                 <i class="bi bi-image"></i> Ver Evidencia
                             </a>
                         </div>` : ''}

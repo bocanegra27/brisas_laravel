@@ -95,14 +95,21 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
         Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
+        Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
 
         //  NUEVA RUTA PARA HISTORIAL (Reemplaza la lógica de cambiarEstado)
         Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
+
+        // FASE 1: CAMBIAR ESTADO CON FOTO (POST para Multipart)
+        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
         
         // Ruta para obtener el historial del timeline (API INTERNA)
         Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
-
         Route::get('/{id}', 'show')->name('admin.pedidos.ver');
+
+        Route::get('/ver-archivo/{path}', [PedidoController::class, 'verArchivo'])
+        ->where('path', '.*')
+        ->name('admin.pedidos.ver-archivo');
         
     });
     
