@@ -41,98 +41,16 @@
         </div>
     </div>
 
-    {{-- Tabla de Pedidos --}}
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="py-3 ps-4 text-muted text-uppercase small fw-bold">Código</th>
-                            <th class="py-3 text-muted text-uppercase small fw-bold">Fecha</th>
-                            <th class="py-3 text-muted text-uppercase small fw-bold">Descripción</th>
-                            <th class="py-3 text-muted text-uppercase small fw-bold">Precio Est.</th>
-                            <th class="py-3 text-muted text-uppercase small fw-bold">Estado</th>
-                            <th class="py-3 pe-4 text-end text-muted text-uppercase small fw-bold">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pedidos as $pedido)
-                            <tr>
-                                <td class="ps-4 fw-bold text-primary">
-                                    #{{ $pedido['pedCodigo'] }}
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-medium text-dark">
-                                            {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'])->format('d M, Y') }}
-                                        </span>
-                                        <small class="text-muted">
-                                            {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'])->format('h:i A') }}
-                                        </small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="d-inline-block text-truncate" style="max-width: 200px;">
-                                        {{ $pedido['pedComentarios'] ?? 'Pedido Personalizado' }}
-                                    </span>
-                                </td>
-                                <td class="fw-bold text-dark">
-                                    {{-- Usamos el operador ?? 0 para evitar errores si viene null --}}
-                                    ${{ number_format($pedido['pedCostoTotal'] ?? 0, 0) }}
-                                </td>
-                                <td>
-                                    {{-- Lógica de Badges según estado --}}
-                                    @php
-                                        $estadoClass = match($pedido['estId']) {
-                                            1, 2 => 'bg-secondary-subtle text-secondary border-secondary', // Pendiente
-                                            9 => 'bg-success-subtle text-success border-success',          // Entregado
-                                            10 => 'bg-danger-subtle text-danger border-danger',            // Cancelado
-                                            default => 'bg-info-subtle text-info border-info'              // En proceso
-                                        };
-                                        $iconClass = match($pedido['estId']) {
-                                            9 => 'bi-check-circle-fill',
-                                            10 => 'bi-x-circle-fill',
-                                            default => 'bi-clock-fill'
-                                        };
-                                    @endphp
-                                    <span class="badge rounded-pill border {{ $estadoClass }} px-3 py-2">
-                                        <i class="bi {{ $iconClass }} me-1"></i>
-                                        {{ $pedido['estadoNombre'] ?? 'En Proceso' }}
-                                    </span>
-                                </td>
-                                <td class="pe-4 text-end">
-                                    <a href="{{ route('user.pedidos.show', $pedido['pedId']) }}" 
-                                       class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                       title="Ver detalles">
-                                        Ver Seguimiento <i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <div class="text-muted">
-                                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
-                                        <h5 class="fw-normal">No tienes pedidos registrados</h5>
-                                        <p class="small">¡Comienza a crear tu joya única hoy mismo!</p>
-                                        <a href="{{ route('personalizar.index') }}" class="btn btn-primary btn-sm mt-2">
-                                            Crear Nuevo Pedido
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            {{-- Paginación (Visual por ahora) --}}
-            <div class="d-flex justify-content-between align-items-center p-3 border-top">
-                <small class="text-muted">Mostrando {{ count($pedidos) }} pedidos</small>
-                {{-- Si implementas paginación real en el futuro, aquí irían los links --}}
-            </div>
-        </div>
-    </div>
+    {{-- Tabla de Pedidos (componente compartido) --}}
+    @include('components.pedidos.tabla-listado', [
+        'pedidos' => $pedidos,
+        'estados' => $estados ?? [],
+        'filtros' => $filtros ?? [],
+        'pageSize' => $pageSize ?? 10,
+        'currentPage' => $currentPage ?? 0,
+        'totalElements' => $totalElements ?? count($pedidos),
+        'totalPages' => $totalPages ?? 1,
+        'estadoMapeo' => $estadoMapeo ?? [],
+    ])
 </div>
 @endsection
