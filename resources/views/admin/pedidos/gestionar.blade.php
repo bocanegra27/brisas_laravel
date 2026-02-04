@@ -58,20 +58,61 @@
 
         <div class="row g-4 mt-2">
             
-            {{-- Columna Izquierda: Informacion y Acciones --}}
+            {{-- ===========================================================
+                COLUMNA IZQUIERDA: ACCIONES Y CLIENTE (4 col)
+                =========================================================== --}}
             <div class="col-lg-4">
                 
-                {{-- Card: Informacion del Cliente --}}
+                {{-- [FASE 1] CARD: CAMBIAR ESTADO (Prioridad #1 por Usabilidad) --}}
+                <div class="info-card animate-in border-primary shadow-sm">
+                    <h5 class="card-title text-primary">
+                        <i class="bi bi-arrow-left-right me-2"></i>Actualizar Estado
+                    </h5>
+                    <div class="card-content">
+                        <form id="formCambiarEstado" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nuevo Estado</label>
+                                <select name="estadoId" id="nuevoEstadoSelect" class="form-select border-primary" required>
+                                    @foreach($estados as $id => $nombre)
+                                        <option value="{{ $id }}" {{ $estadoId == $id ? 'selected' : '' }}>
+                                            {{ $nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Comentarios del Cambio</label>
+                                <textarea name="comentarios" id="comentariosEstado" class="form-control" rows="2" 
+                                        placeholder="¿Qué se hizo en este paso?">{{ $pedido['pedComentarios'] ?? '' }}</textarea>
+                            </div>
+
+                            {{-- Campo de Evidencia (Fase 1) --}}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">
+                                    <i class="bi bi-camera me-1"></i> Foto de Evidencia (Opcional)
+                                </label>
+                                <input type="file" name="his_imagen" id="his_imagen" class="form-control form-control-sm" accept="image/*">
+                            </div>
+                            
+                            <button type="button" onclick="actualizarEstadoPedido(event, {{ $pedido['pedId'] }})" class="btn btn-primary w-100 shadow-sm">
+                                <i class="bi bi-check-circle-fill me-2"></i>Registrar Avance
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- CARD: INFORMACIÓN DEL CLIENTE --}}
                 <div class="info-card animate-in animate-delay-1">
                     <h5 class="card-title">
-                        <i class="bi bi-person-circle me-2"></i>Cliente
+                        <i class="bi bi-person-circle me-2"></i>Información del Cliente
                     </h5>
                     <div class="card-content">
                         @php
                             $cliente = $pedido['clienteDetalles'] ?? null;
                             $tipo = $cliente['tipo'] ?? null;
                             
-                            // Configuración por tipo de cliente
                             $config = match($tipo) {
                                 'usuario_registrado' => [
                                     'nombre' => $cliente['usuNombre'] ?? 'Usuario Registrado',
@@ -91,146 +132,67 @@
                                     'badge' => 'externo',
                                     'mostrarId' => $pedido['conId'] ?? null
                                 ],
-                                'sin_detalles' => [
-                                    'nombre' => $cliente['nombre'] ?? $pedido['nombreCliente'] ?? 'Cliente',
-                                    'correo' => '',
-                                    'telefono' => '',
-                                    'label' => 'Sin Detalles',
-                                    'icon' => 'person-fill',
-                                    'badge' => 'externo',
-                                    'mostrarId' => null
-                                ],
                                 default => [
-                                    'nombre' => $pedido['nombreCliente'] ?? 'Sin Cliente Asignado',
+                                    'nombre' => $pedido['nombreCliente'] ?? 'Cliente',
                                     'correo' => '',
                                     'telefono' => '',
-                                    'label' => 'Desconocido',
-                                    'icon' => 'question-circle',
+                                    'label' => 'Sin detalles',
+                                    'icon' => 'person-fill',
                                     'badge' => 'externo',
                                     'mostrarId' => null
                                 ]
                             };
                         @endphp
 
-                        @if($config['nombre'] !== 'Sin Cliente Asignado')
-                            <div class="client-info">
-                                <div class="client-avatar">
-                                    @if($tipo === 'usuario_registrado')
-                                        {{ strtoupper(substr($config['nombre'], 0, 1)) }}
-                                    @else
-                                        <i class="bi bi-person-fill"></i>
-                                    @endif
-                                </div>
-                                <div class="client-details">
-                                    <p class="client-name">{{ $config['nombre'] }}</p>
-                                    @if($config['correo'])
-                                        <p class="client-email"><i class="bi bi-envelope me-1"></i>{{ $config['correo'] }}</p>
-                                    @endif
-                                    @if($config['telefono'])
-                                        <p class="client-phone text-muted"><i class="bi bi-telephone me-1"></i>{{ $config['telefono'] }}</p>
-                                    @endif
-                                    
-                                    <span class="client-type badge-{{ $config['badge'] }}">
-                                        <i class="bi bi-{{ $config['icon'] }}"></i> 
-                                        {{ $config['label'] }}
-                                    </span>
-                                    
-                                    {{-- ID del cliente --}}
-                                    @if($config['mostrarId'])
-                                        <span class="text-muted small d-block mt-1">
-                                            <i class="bi bi-hash"></i> 
-                                            ID {{ $tipo === 'usuario_registrado' ? 'Usuario' : 'Contacto' }}: {{ $config['mostrarId'] }}
-                                        </span>
-                                    @endif
-                                    
-                                    {{-- Token de sesión si existe --}}
-                                    @if(!empty($pedido['sesionToken']))
-                                        <span class="client-type badge-sesion mt-1 d-block">
-                                            <i class="bi bi-key"></i> Sesión: {{ $pedido['sesionToken'] }}
-                                        </span>
-                                    @endif
-                                </div>
+                        <div class="client-info">
+                            <div class="client-avatar">
+                                @if($tipo === 'usuario_registrado')
+                                    {{ strtoupper(substr($config['nombre'], 0, 1)) }}
+                                @else
+                                    <i class="bi bi-person-fill"></i>
+                                @endif
                             </div>
-                        @else
-                            <div class="text-center text-muted py-3">
-                                <i class="bi bi-person-x display-6 d-block mb-2"></i>
-                                <p class="mb-0">Sin cliente asignado</p>
+                            <div class="client-details">
+                                <p class="client-name mb-1">{{ $config['nombre'] }}</p>
+                                @if($config['correo'])
+                                    <p class="client-email small mb-1"><i class="bi bi-envelope me-1"></i>{{ $config['correo'] }}</p>
+                                @endif
+                                @if($config['telefono'])
+                                    <p class="client-phone small text-muted"><i class="bi bi-telephone me-1"></i>{{ $config['telefono'] }}</p>
+                                @endif
+                                <span class="client-type badge-{{ $config['badge'] }} mt-2">
+                                    <i class="bi bi-{{ $config['icon'] }}"></i> {{ $config['label'] }}
+                                </span>
                             </div>
-                        @endif
+                        </div>
                     </div>
                 </div>
-                {{-- Card: Cambiar Estado (Modificado para Fase 1) --}}
+
+                {{-- CARD: PERSONALIZACIÓN VINCULADA (Referencia Original) --}}
+                @php $perId = $pedido['personalizacion']['perId'] ?? ($pedido['perId'] ?? null); @endphp
+                @if($perId)
                 <div class="info-card animate-in animate-delay-2">
                     <h5 class="card-title">
-                        <i class="bi bi-arrow-left-right me-2"></i>Actualizar Estado
+                        <i class="bi bi-gem me-2"></i>Referencia de Diseño
                     </h5>
                     <div class="card-content">
-                        {{-- Eliminamos el onsubmit antiguo para manejarlo con un ID de formulario y FormData --}}
-                        <form id="formCambiarEstado" enctype="multipart/form-data">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label">Nuevo Estado</label>
-                                <select name="estadoId" id="nuevoEstadoSelect" class="form-select" required>
-                                    @foreach($estados as $id => $nombre)
-                                    <option value="{{ $id }}" {{ $estadoId == $id ? 'selected' : '' }}>
-                                        {{ $nombre }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Comentarios del Cambio</label>
-                                <textarea name="comentarios" id="comentariosEstado" class="form-control" rows="2" 
-                                        placeholder="¿Qué se hizo en este paso?">{{ $pedido['pedComentarios'] ?? '' }}</textarea>
-                            </div>
-
-                            {{-- NUEVO: Campo de Evidencia para el Historial --}}
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">
-                                    <i class="bi bi-camera me-1"></i> Foto de Evidencia (Opcional)
-                                </label>
-                                <input type="file" name="his_imagen" id="his_imagen" class="form-control form-control-sm" accept="image/*">
-                            </div>
-                            
-                            <button type="button" onclick="actualizarEstadoPedido(event, {{ $pedido['pedId'] }})" class="btn btn-primary w-100">
-                                <i class="bi bi-check-circle-fill me-2"></i>Actualizar Estado
+                        <div class="personalizacion-link">
+                            <button onclick="verDetallesPersonalizacion({{ $perId }})" class="btn-ver-personalizacion w-100">
+                                <i class="bi bi-eye-fill me-2"></i>Ver Selección Inicial
                             </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
-
-                {{-- Solo Admin o Diseñador pueden subir render, y solo en estado Diseño en Proceso (3) --}}
-                @php
-                    $rol = Session::get('user_role');
-                    $estadoId = $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0);
-                @endphp
-
-                @if($rol !== 'ROLE_USUARIO' && $estadoId == 3)
-                    <hr>
-                    <div class="mt-3">
-                        <h6 class="small fw-bold">Subir Propuesta de Diseño:</h6>
-                        <form action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="mb-2">
-                                <input type="file" name="diseno_archivo" class="form-control form-control-sm" accept="image/*,.glb,.gltf" required>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-primary w-100">
-                                <i class="bi bi-cloud-upload me-2"></i>Cargar Render/Modelo
-                            </button>
-                        </form>
-                    </div>
                 @endif
 
-                {{-- Card: Contacto Origen --}}
+                {{-- CARD: CONTACTO ORIGEN (Si existe) --}}
                 @if(isset($pedido['conId']) && $pedido['conId'])
-                <div class="info-card animate-in animate-delay-4">
+                <div class="info-card animate-in animate-delay-3">
                     <h5 class="card-title">
-                        <i class="bi bi-chat-dots-fill me-2"></i>Mensaje Original
+                        <i class="bi bi-chat-dots-fill me-2"></i>Mensaje Origen
                     </h5>
                     <div class="card-content">
-                        <p class="text-muted small mb-2">Este pedido se creó desde un mensaje de contacto</p>
-                        <button onclick="verMensajeOrigen({{ $pedido['conId'] }})" class="btn-ver-mensaje">
+                        <button onclick="verMensajeOrigen({{ $pedido['conId'] }})" class="btn-ver-mensaje w-100">
                             <i class="bi bi-envelope-open-fill me-2"></i>Ver Mensaje Original
                         </button>
                     </div>
@@ -238,57 +200,99 @@
                 @endif
             </div>
 
-            {{-- Columna Derecha: Timeline y Detalles --}}
+            {{-- ===========================================================
+                COLUMNA DERECHA: SEGUIMIENTO Y RESULTADOS (8 col)
+                =========================================================== --}}
             <div class="col-lg-8">
                 
-                {{-- Timeline de Estados --}}
-                <div class="timeline-card animate-in animate-delay-2">
+                {{-- [FASE 1] CARD: LÍNEA DE TIEMPO --}}
+                <div class="timeline-card animate-in mb-4">
                     <h5 class="card-title">
-                        <i class="bi bi-clock-history me-2"></i>Progreso del Pedido
+                        <i class="bi bi-clock-history me-2"></i>Historial del Pedido
                     </h5>
-                    
-                    {{--  CONTENEDOR DONDE SE RENDERIZA EL HISTORIAL REAL --}}
                     <div class="timeline-container" id="historialTimeline">
                         <div class="text-center py-5" id="timelineLoading">
                             <div class="spinner-border text-primary" role="status"></div>
                             <p class="text-muted mt-2">Cargando historial...</p>
                         </div>
-                        {{-- Aquí se inyectarán las entradas de historial con JS --}}
                     </div>
                 </div>
 
-                {{-- Card: Imagenes y Archivos --}}
-                <div class="info-card animate-in animate-delay-3">
-                    <h5 class="card-title">
-                        <i class="bi bi-images me-2"></i>Imágenes del Pedido
-                    </h5>
-                    <div class="card-content">
-                        <div class="imagenes-section">
-                            <p class="text-muted text-center py-4">
-                                <i class="bi bi-image display-6 d-block mb-2"></i>
-                                No hay imágenes adjuntas aún
-                            </p>
-                            <button class="btn btn-outline-primary w-100">
-                                <i class="bi bi-cloud-upload-fill me-2"></i>Subir Imagen
-                            </button>
+                {{-- [FASE 2] CARD: RENDER 3D VINCULADO (ESTACIÓN DE DISEÑO) --}}
+                <div class="info-card animate-in animate-delay-1 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-palette-fill me-2"></i>Render Oficial
+                        </h5>
+                        @if($estadoId == 3)
+                            <span class="badge bg-warning text-dark"><i class="bi bi-pencil-square me-1"></i>En Diseño</span>
+                        @endif
+                    </div>
+                    <div class="card-content border rounded bg-white p-3">
+                        <div class="row align-items-center">
+                            {{-- Visualizador del Render actual --}}
+                            <div class="col-md-7 text-center border-end py-3">
+                                @if(isset($pedido['renderPath']) && $pedido['renderPath'])
+                                    <img src="/admin/pedidos/ver-archivo/{{ $pedido['renderPath'] }}" 
+                                        class="img-fluid rounded shadow-sm" style="max-height: 250px;" alt="Render Oficial">
+                                @else
+                                    <div class="text-muted">
+                                        <i class="bi bi-vector-pen display-4 d-block mb-2"></i>
+                                        <p>No se ha cargado el diseño oficial aún.</p>
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            {{-- Formulario para subir el Render (Solo estado 3 y Admin/Diseño) --}}
+                            <div class="col-md-5 ps-md-4">
+                                @php
+                                    $rol = Session::get('user_role');
+                                    $estadoActualId = $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0);
+                                @endphp
+
+                                @if($rol !== 'ROLE_USUARIO' && $estadoActualId == 3)
+                                    <h6 class="small fw-bold mb-3">Subir Propuesta de Diseño:</h6>
+                                    <form action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <input type="file" name="diseno_archivo" class="form-control form-control-sm" accept="image/*,.glb,.gltf" required>
+                                            <div class="form-text small">Soporta imágenes y modelos 3D.</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-dark w-100">
+                                            <i class="bi bi-cloud-upload me-2"></i>Cargar Diseño Oficial
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="alert alert-light border-0 small mb-0">
+                                        <i class="bi bi-info-circle me-1"></i> 
+                                        El diseño oficial se establece durante la fase de <strong>Diseño en Proceso</strong>.
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Card: Comentarios Generales --}}
-                @if($pedido['pedComentarios'])
-                <div class="info-card animate-in animate-delay-4">
-                    <h5 class="card-title">
-                        <i class="bi bi-sticky-fill me-2"></i>Comentarios
+                {{-- [FASE 3] CARD: GALERÍA DE PRODUCTO TERMINADO --}}
+                <div class="info-card animate-in animate-delay-2 mb-4">
+                    <h5 class="card-title text-success">
+                        <i class="bi bi-stars me-2"></i> Producto Final
                     </h5>
                     <div class="card-content">
-                        <div class="comentarios-box">
-                            {{ $pedido['pedComentarios'] }}
-                        </div>
+                        @if($estadoId >= 9)
+                            {{-- Aquí se implementará la galería de la Fase 3 --}}
+                            <div class="text-center py-4 bg-light rounded">
+                                <i class="bi bi-camera-fill display-6 text-muted mb-2"></i>
+                                <p class="mb-0">¡Listo para la sesión de fotos final!</p>
+                                <button class="btn btn-sm btn-outline-success mt-3">Subir Fotos de Entrega</button>
+                            </div>
+                        @else
+                            <div class="text-center text-muted py-3">
+                                <p class="mb-0 small"><i class="bi bi-lock-fill me-1"></i> Disponible al finalizar el pedido</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
-                @endif
-
             </div>
         </div>
     </div>
