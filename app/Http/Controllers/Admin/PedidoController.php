@@ -726,22 +726,32 @@ private function enriquecerPedido(array $pedido): array
 
     public function subirDiseno(Request $request, $id)
     {
-        // 1. Validación (Si falla aquí, Laravel devuelve JSON automáticamente por el header 'Accept')
+        // 🔥 VALIDACIÓN BÁSICA (solo tamaño)
         $request->validate([
-            'diseno_archivo' => 'required|file|max:10240',
+            'diseno_archivo' => 'required|file|max:51200' // 50 MB
         ]);
 
+        // 🔥 VALIDACIÓN MANUAL DE EXTENSIÓN
+        $file = $request->file('diseno_archivo');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $allowedExtensions = ['glb', 'gltf', 'png', 'jpg', 'jpeg', 'webp'];
+        
+        if (!in_array($extension, $allowedExtensions)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Formato no permitido. Extensiones válidas: ' . implode(', ', $allowedExtensions)
+            ], 422);
+        }
+
         try {
-            // 2. Llamada a Spring Boot
             $response = $this->apiService->attachFile(
                 "/pedidos/{$id}/subir-render-oficial", 
                 [], 
-                $request->file('diseno_archivo'), 
+                $file, 
                 'archivo',
                 ['headers' => ['Authorization' => 'Bearer ' . session('jwt_token')]] 
             );
 
-            // 3. RESPUESTA PARA JAVASCRIPT
             if ($response) {
                 return response()->json([
                     'success' => true,
@@ -760,5 +770,15 @@ private function enriquecerPedido(array $pedido): array
                 'message' => 'Error de conexión: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    // 🔥 MÉTODO AUXILIAR NUEVO
+    private function detectarTipoArchivo($path)
+    {
+        if (!$path) return 'imagen';
+        
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        
+        return in_array($extension, ['glb', 'gltf']) ? 'modelo3d' : 'imagen';
     }
 }

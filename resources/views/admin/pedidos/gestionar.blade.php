@@ -6,6 +6,40 @@
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/gestionar-pedido.css') }}">
+
+{{-- NUEVO: Estilos para Model Viewer --}}
+<style>
+    model-viewer {
+        width: 100%;
+        height: 350px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+    }
+    
+    model-viewer::part(default-progress-bar) {
+        background-color: #009688;
+    }
+    
+    .viewer-controls {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        justify-content: center;
+    }
+    
+    .viewer-controls button {
+        padding: 5px 12px;
+        font-size: 12px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .viewer-controls button:hover {
+        background: #f0f0f0;
+    }
+</style>
 @endpush
 
 @section('content')
@@ -117,22 +151,77 @@
                         <div class="row align-items-center">
                             {{-- Visualizador del Render actual --}}
                             <div class="col-md-7 text-center border-end py-3">
-                                {{-- 🔥 USANDO LA RUTA DESDE EL ARRAY $pedido --}}
-                                @if(isset($pedido['renderPath']) && $pedido['renderPath'])
-                                    <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $pedido['renderPath']]) }}" 
-                                        class="img-fluid rounded shadow-sm" 
-                                        style="max-height: 250px; cursor: pointer;" 
-                                        onclick="window.open(this.src, '_blank')"
-                                        alt="Render Oficial">
-                                    <p class="small text-muted mt-2">Diseño oficial cargado</p>
+                                @php
+                                    $renderPath = $pedido['renderPath'] ?? null;
+                                    $esModelo3D = false;
+                                    
+                                    if ($renderPath) {
+                                        $extension = strtolower(pathinfo($renderPath, PATHINFO_EXTENSION));
+                                        $esModelo3D = in_array($extension, ['glb', 'gltf']);
+                                    }
+                                @endphp
+
+                                @if($renderPath)
+                                    @if($esModelo3D)
+                                        {{-- 🔥 VISOR 3D INTERACTIVO --}}
+                                        <model-viewer
+                                            src="{{ route('admin.pedidos.ver-archivo', ['path' => $renderPath]) }}"
+                                            alt="Modelo 3D del diseño"
+                                            auto-rotate
+                                            camera-controls
+                                            touch-action="pan-y"
+                                            shadow-intensity="1"
+                                            exposure="1"
+                                            environment-image="neutral"
+                                            min-camera-orbit="auto auto 5%"
+                                            max-camera-orbit="auto auto 100%"
+                                        >
+                                            <div class="progress-bar" slot="progress-bar">
+                                                <div class="update-bar"></div>
+                                            </div>
+                                            
+                                            {{-- Botón de AR (Opcional) --}}
+                                            <button slot="ar-button" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-phone"></i> Ver en AR
+                                            </button>
+                                        </model-viewer>
+                                        
+                                        {{-- 🔥 CONTROLES DEL VISOR --}}
+                                        <div class="viewer-controls">
+                                            <button onclick="resetearCamara()" title="Resetear cámara">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Resetear
+                                            </button>
+                                            <button onclick="capturarScreenshot()" title="Captura de pantalla">
+                                                <i class="bi bi-camera"></i> Captura
+                                            </button>
+                                            <button onclick="window.open('{{ route('admin.pedidos.ver-archivo', ['path' => $renderPath]) }}', '_blank')" 
+                                                    title="Descargar modelo">
+                                                <i class="bi bi-download"></i> Descargar
+                                            </button>
+                                        </div>
+                                        
+                                        <p class="small text-muted mt-2">
+                                            <i class="bi bi-box"></i> Modelo 3D interactivo
+                                        </p>
+                                    @else
+                                        {{-- 🔥 IMAGEN ESTÁTICA (tu código actual) --}}
+                                        <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $renderPath]) }}" 
+                                            class="img-fluid rounded shadow-sm" 
+                                            style="max-height: 250px; cursor: pointer;" 
+                                            onclick="window.open(this.src, '_blank')"
+                                            alt="Render Oficial">
+                                        <p class="small text-muted mt-2">Diseño oficial cargado</p>
+                                    @endif
                                 @else
+                                    {{-- 🔥 ESTADO VACÍO --}}
                                     <div class="text-muted">
                                         <i class="bi bi-vector-pen display-4 d-block mb-2"></i>
                                         <p>No se ha cargado el diseño oficial aún.</p>
                                     </div>
                                 @endif
                             </div>
-                            {{-- Formulario para subir el Render (Solo estado 3 y Admin/Diseño) --}}
+
+                            {{-- 🔥 COLUMNA DEL FORMULARIO (col-md-5) --}}
                             <div class="col-md-5 ps-md-4">
                                 @php
                                     $rol = Session::get('user_role');
@@ -144,8 +233,15 @@
                                     <form id="formSubirRender" action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="mb-3">
-                                            <input type="file" name="diseno_archivo" class="form-control form-control-sm" accept="image/*,.glb,.gltf" required>
-                                            <div class="form-text small">Soporta imágenes y modelos 3D.</div>
+                                            <input type="file" 
+                                                   name="diseno_archivo" 
+                                                   class="form-control form-control-sm" 
+                                                   accept="image/*,.glb,.gltf" 
+                                                   required>
+                                            <div class="form-text small">
+                                                📷 Imágenes: JPG, PNG, WebP<br>
+                                                🎨 Modelos 3D: GLB, GLTF
+                                            </div>
                                         </div>
                                         <button type="submit" class="btn btn-sm btn-dark w-100">
                                             <i class="bi bi-cloud-upload me-2"></i>Cargar Diseño Oficial
@@ -157,7 +253,7 @@
                                         El diseño oficial se establece durante la fase de <strong>Diseño en Proceso</strong>.
                                     </div>
                                 @endif
-                            </div>
+                            </div> {{-- FIN del col-md-5 --}}
                         </div>
                     </div>
                 </div>
@@ -324,6 +420,7 @@
 @endsection
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script>
     // ===============================================
     // Configuración Global y Mapeos
@@ -632,5 +729,26 @@
             });
         });
     });
+
+    function resetearCamara() {
+        const viewer = document.querySelector('model-viewer');
+        if (viewer) {
+            viewer.resetTurntableRotation();
+            viewer.cameraOrbit = 'auto auto auto';
+        }
+    }
+    
+    function capturarScreenshot() {
+        const viewer = document.querySelector('model-viewer');
+        if (viewer) {
+            viewer.toBlob().then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'render-3d.png';
+                a.click();
+            });
+        }
+    }
 </script>
 @endpush
