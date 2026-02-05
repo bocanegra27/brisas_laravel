@@ -103,6 +103,86 @@
                     </div>
                 </div>
 
+                {{-- [FASE 2] CARD: RENDER 3D VINCULADO (ESTACIÓN DE DISEÑO) --}}
+                <div class="info-card animate-in animate-delay-1 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-palette-fill me-2"></i>Render Oficial
+                        </h5>
+                        @if($estadoId == 3)
+                            <span class="badge bg-warning text-dark"><i class="bi bi-pencil-square me-1"></i>En Diseño</span>
+                        @endif
+                    </div>
+                    <div class="card-content border rounded bg-white p-3">
+                        <div class="row align-items-center">
+                            {{-- Visualizador del Render actual --}}
+                            <div class="col-md-7 text-center border-end py-3">
+                                {{-- 🔥 USANDO LA RUTA DESDE EL ARRAY $pedido --}}
+                                @if(isset($pedido['renderPath']) && $pedido['renderPath'])
+                                    <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $pedido['renderPath']]) }}" 
+                                        class="img-fluid rounded shadow-sm" 
+                                        style="max-height: 250px; cursor: pointer;" 
+                                        onclick="window.open(this.src, '_blank')"
+                                        alt="Render Oficial">
+                                    <p class="small text-muted mt-2">Diseño oficial cargado</p>
+                                @else
+                                    <div class="text-muted">
+                                        <i class="bi bi-vector-pen display-4 d-block mb-2"></i>
+                                        <p>No se ha cargado el diseño oficial aún.</p>
+                                    </div>
+                                @endif
+                            </div>
+                            {{-- Formulario para subir el Render (Solo estado 3 y Admin/Diseño) --}}
+                            <div class="col-md-5 ps-md-4">
+                                @php
+                                    $rol = Session::get('user_role');
+                                    $estadoActualId = $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0);
+                                @endphp
+
+                                @if($rol !== 'ROLE_USUARIO' && $estadoActualId == 3)
+                                    <h6 class="small fw-bold mb-3">Subir Propuesta de Diseño:</h6>
+                                    <form id="formSubirRender" action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <input type="file" name="diseno_archivo" class="form-control form-control-sm" accept="image/*,.glb,.gltf" required>
+                                            <div class="form-text small">Soporta imágenes y modelos 3D.</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-dark w-100">
+                                            <i class="bi bi-cloud-upload me-2"></i>Cargar Diseño Oficial
+                                        </button>
+                                    </form>
+                                @else
+                                    <div class="alert alert-light border-0 small mb-0">
+                                        <i class="bi bi-info-circle me-1"></i> 
+                                        El diseño oficial se establece durante la fase de <strong>Diseño en Proceso</strong>.
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- [FASE 3] CARD: GALERÍA DE PRODUCTO TERMINADO --}}
+                <div class="info-card animate-in animate-delay-2 mb-4">
+                    <h5 class="card-title text-success">
+                        <i class="bi bi-stars me-2"></i> Producto Final
+                    </h5>
+                    <div class="card-content">
+                        @if($estadoId >= 9)
+                            {{-- Aquí se implementará la galería de la Fase 3 --}}
+                            <div class="text-center py-4 bg-light rounded">
+                                <i class="bi bi-camera-fill display-6 text-muted mb-2"></i>
+                                <p class="mb-0">¡Listo para la sesión de fotos final!</p>
+                                <button class="btn btn-sm btn-outline-success mt-3">Subir Fotos de Entrega</button>
+                            </div>
+                        @else
+                            <div class="text-center text-muted py-3">
+                                <p class="mb-0 small"><i class="bi bi-lock-fill me-1"></i> Disponible al finalizar el pedido</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
                 {{-- CARD: INFORMACIÓN DEL CLIENTE --}}
                 <div class="info-card animate-in animate-delay-1">
                     <h5 class="card-title">
@@ -217,82 +297,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- [FASE 2] CARD: RENDER 3D VINCULADO (ESTACIÓN DE DISEÑO) --}}
-                <div class="info-card animate-in animate-delay-1 mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-palette-fill me-2"></i>Render Oficial
-                        </h5>
-                        @if($estadoId == 3)
-                            <span class="badge bg-warning text-dark"><i class="bi bi-pencil-square me-1"></i>En Diseño</span>
-                        @endif
-                    </div>
-                    <div class="card-content border rounded bg-white p-3">
-                        <div class="row align-items-center">
-                            {{-- Visualizador del Render actual --}}
-                            <div class="col-md-7 text-center border-end py-3">
-                                @if(isset($pedido['renderPath']) && $pedido['renderPath'])
-                                    <img src="/admin/pedidos/ver-archivo/{{ $pedido['renderPath'] }}" 
-                                        class="img-fluid rounded shadow-sm" style="max-height: 250px;" alt="Render Oficial">
-                                @else
-                                    <div class="text-muted">
-                                        <i class="bi bi-vector-pen display-4 d-block mb-2"></i>
-                                        <p>No se ha cargado el diseño oficial aún.</p>
-                                    </div>
-                                @endif
-                            </div>
-                            
-                            {{-- Formulario para subir el Render (Solo estado 3 y Admin/Diseño) --}}
-                            <div class="col-md-5 ps-md-4">
-                                @php
-                                    $rol = Session::get('user_role');
-                                    $estadoActualId = $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0);
-                                @endphp
-
-                                @if($rol !== 'ROLE_USUARIO' && $estadoActualId == 3)
-                                    <h6 class="small fw-bold mb-3">Subir Propuesta de Diseño:</h6>
-                                    <form action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="mb-3">
-                                            <input type="file" name="diseno_archivo" class="form-control form-control-sm" accept="image/*,.glb,.gltf" required>
-                                            <div class="form-text small">Soporta imágenes y modelos 3D.</div>
-                                        </div>
-                                        <button type="submit" class="btn btn-sm btn-dark w-100">
-                                            <i class="bi bi-cloud-upload me-2"></i>Cargar Diseño Oficial
-                                        </button>
-                                    </form>
-                                @else
-                                    <div class="alert alert-light border-0 small mb-0">
-                                        <i class="bi bi-info-circle me-1"></i> 
-                                        El diseño oficial se establece durante la fase de <strong>Diseño en Proceso</strong>.
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- [FASE 3] CARD: GALERÍA DE PRODUCTO TERMINADO --}}
-                <div class="info-card animate-in animate-delay-2 mb-4">
-                    <h5 class="card-title text-success">
-                        <i class="bi bi-stars me-2"></i> Producto Final
-                    </h5>
-                    <div class="card-content">
-                        @if($estadoId >= 9)
-                            {{-- Aquí se implementará la galería de la Fase 3 --}}
-                            <div class="text-center py-4 bg-light rounded">
-                                <i class="bi bi-camera-fill display-6 text-muted mb-2"></i>
-                                <p class="mb-0">¡Listo para la sesión de fotos final!</p>
-                                <button class="btn btn-sm btn-outline-success mt-3">Subir Fotos de Entrega</button>
-                            </div>
-                        @else
-                            <div class="text-center text-muted py-3">
-                                <p class="mb-0 small"><i class="bi bi-lock-fill me-1"></i> Disponible al finalizar el pedido</p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -356,7 +360,7 @@
         }
     });
 
-// ===============================================
+    // ===============================================
     // 1. ACTUALIZACIÓN DE ESTADO (CON SOPORTE PARA ARCHIVOS)
     // ===============================================
 
@@ -579,5 +583,54 @@
     function verMensajeOrigen(conId) {
         window.location.href = `/admin/mensajes?highlight=${conId}`;
     }
+
+    // ===============================================
+    // NUEVO: MANEJO DE SUBIDA DE RENDER (FASE 2)
+    // ===============================================
+    document.getElementById('formSubirRender')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        Swal.fire({
+            title: 'Subiendo Diseño...',
+            text: 'Enviando render al servidor y actualizando historial',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json' // Forzamos a Laravel a responder JSON si hay error
+            },
+            body: formData
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error en el servidor');
+            return data;
+        })
+        .then(data => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Diseño Cargado!',
+                text: 'El render ha sido vinculado al pedido correctamente.',
+                confirmButtonColor: '#009688'
+            }).then(() => {
+                window.location.reload();
+            });
+        })
+        .catch(error => {
+            console.error('Error Fase 2:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al subir',
+                text: error.message,
+                footer: 'Verifica que el archivo no supere los 10MB y que el servidor Java esté activo.'
+            });
+        });
+    });
 </script>
 @endpush

@@ -184,7 +184,6 @@ public function gestionar($id)
         $pedido = $this->enriquecerPedido($response);
 
         $estadosArray = $this->getEstadosDisponibles();
-
         $estados = [];
         foreach ($estadosArray as $estado) {
             $estados[$estado['id']] = $estado['nombre']; 
@@ -192,7 +191,7 @@ public function gestionar($id)
 
         return view('admin.pedidos.gestionar', [
             'pedido' => $pedido,
-            'estados' => $estados
+            'estados' => $estados,
         ]);
 
     } catch (\Exception $e) {
@@ -707,19 +706,16 @@ private function enriquecerPedido(array $pedido): array
 
     public function verArchivo($path)
     {
-        // El $path que viene de la DB es algo como "uploads/historial/archivo.png"
-        // IMPORTANTE: Quité el '/archivos/' que tenías porque tu Spring Boot 
-        // sirve directamente desde la raíz de la URL.
-        
         $baseUrl = "http://localhost:8080/"; 
-        $url = $baseUrl . $path; 
+        $url = $baseUrl . $path;
 
         try {
             $response = Http::get($url);
 
             if ($response->successful()) {
                 return response($response->body(), 200)
-                    ->header('Content-Type', $response->header('Content-Type'));
+                    ->header('Content-Type', $response->header('Content-Type'))
+                    ->header('Cache-Control', 'public, max-age=86400'); // 🔥 AÑADIR ESTA LÍNEA
             }
         } catch (\Exception $e) {
             Log::error("Error al conectar con Spring Boot para archivo: " . $e->getMessage());
@@ -728,22 +724,41 @@ private function enriquecerPedido(array $pedido): array
         abort(404, 'La imagen no existe en el servidor de joyería (Spring Boot).');
     }
 
-    public function subirDiseno(Request $request, $id) {
-        $request->validate(['diseno_archivo' => 'required|file|max:10240']);
-        
-        $response = $this->apiService->attachFile(
-            "/pedidos/{$id}/historial-diseno", 
-            ['comentarios' => 'Se ha cargado un nuevo render.'],
-            $request->file('diseno_archivo'),
-            'diseno_archivo', 
-            ['headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]]
-        );
+    public function subirDiseno(Request $request, $id)
+    {
+        // 1. Validación (Si falla aquí, Laravel devuelve JSON automáticamente por el header 'Accept')
+        $request->validate([
+            'diseno_archivo' => 'required|file|max:10240',
+        ]);
 
-        // DEPUREMOS AQUÍ: Si falla, queremos ver por qué
-        if (!$response) {
-            dd("La API de Spring Boot no respondió. Revisa si el servidor 8080 está encendido y si el endpoint existe.");
+        try {
+            // 2. Llamada a Spring Boot
+            $response = $this->apiService->attachFile(
+                "/pedidos/{$id}/subir-render-oficial", 
+                [], 
+                $request->file('diseno_archivo'), 
+                'archivo',
+                ['headers' => ['Authorization' => 'Bearer ' . session('jwt_token')]] 
+            );
+
+            // 3. RESPUESTA PARA JAVASCRIPT
+            if ($response) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Diseño cargado correctamente y registrado en el historial.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false, 
+                'message' => 'La API de Java no devolvió una respuesta exitosa.'
+            ], 400);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Error de conexión: ' . $e->getMessage()
+            ], 500);
         }
-
-        return back()->with('success', '¡Render cargado!');
     }
 }
