@@ -1,6 +1,7 @@
 {{-- ============================================
      FOOTER MINIMALISTA - BRISAS GEMS
      Diseño elegante que complementa el header
+     Actualizado para usar rutas dinámicas de Laravel
      ============================================ --}}
 
 <footer class="footer-minimal">
@@ -12,7 +13,7 @@
             {{-- COLUMNA 1: Sobre Brisas Gems --}}
             <div class="footer-minimal__column">
                 {{-- Logo opcional --}}
-                <a href="{{ url('/') }}" class="footer-minimal__logo">
+                <a href="{{ route('home') }}" class="footer-minimal__logo">
                     <img src="{{ asset('assets/img/logo/logo_120.png') }}" 
                         alt="Brisas Gems Logo" 
                         class="footer-minimal__logo-img">
@@ -93,22 +94,26 @@
                 <nav aria-label="Enlaces rápidos del footer">
                     <ul class="footer-minimal__nav">
                         <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/') }}" class="footer-minimal__nav-link">
+                            {{-- Usa route('home') en lugar de url('/') --}}
+                            <a href="{{ route('home') }}" class="footer-minimal__nav-link">
                                 Inicio
                             </a>
                         </li>
                         <li class="footer-minimal__nav-item">
+                            {{-- Mantenemos url() aquí si la ruta no tiene nombre en web.php --}}
                             <a href="{{ url('/inspiracion') }}" class="footer-minimal__nav-link">
                                 Inspiración
                             </a>
                         </li>
                         <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/personalizar') }}" class="footer-minimal__nav-link">
+                            {{-- Usa route('personalizar.index') --}}
+                            <a href="{{ route('personalizar.index') }}" class="footer-minimal__nav-link">
                                 Personalización
                             </a>
                         </li>
                         <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/contacto') }}" class="footer-minimal__nav-link">
+                            {{-- Usa route('contacto.create') --}}
+                            <a href="{{ route('contacto.create') }}" class="footer-minimal__nav-link">
                                 Contacto
                             </a>
                         </li>

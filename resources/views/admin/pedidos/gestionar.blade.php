@@ -43,49 +43,31 @@
 @endpush
 
 @section('content')
-<div class="gestionar-pedido-container">
-    <div class="container-fluid py-4">
+<div class="container-fluid py-4">
+
+    {{-- BARRA SUPERIOR DE RESUMEN Y NAVEGACIÓN --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">Gestión de Pedido <span class="text-primary fw-bold">#{{ $pedido['pedCodigo'] }}</span></h2>
+            <p class="text-muted small">Creado el: {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'])->format('d/m/Y h:i A') }}</p>
+        </div>
+        <a href="{{ route('admin.pedidos.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Volver al Listado
+        </a>
+    </div>
+
+    {{-- SECCIÓN DE ESTADO ACTUAL Y ASIGNACIÓN --}}
+    <div class="row mb-5 g-4">
         
-        {{-- Header del pedido --}}
-        <div class="pedido-header animate-in">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <a href="{{ route('admin.pedidos.index') }}" class="btn-back">
-                            <i class="bi bi-arrow-left"></i>
-                        </a>
-                        <div>
-                            <h1 class="pedido-codigo mb-2">{{ $pedido['pedCodigo'] }}</h1>
-                            <p class="pedido-fecha mb-0">
-                                <i class="bi bi-calendar3 me-2"></i>
-                                Creado: {{ \Carbon\Carbon::parse($pedido['pedFechaCreacion'])->format('d/m/Y H:i') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 text-lg-end">
-                    @php
-                        $estadoId = $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1);
-                        $estadoNombre = $pedido['estado']['estNombre'] ?? ($pedido['estadoNombre'] ?? 'Desconocido');
-                        
-                        $badgeClass = match($estadoId) {
-                            1 => 'badge-pendiente',
-                            2 => 'badge-confirmado',
-                            3 => 'badge-diseno',
-                            4 => 'badge-aprobado',
-                            5 => 'badge-produccion',
-                            6 => 'badge-calidad',
-                            7 => 'badge-listo',
-                            8 => 'badge-camino',
-                            9 => 'badge-entregado',
-                            10 => 'badge-cancelado',
-                            default => 'badge-secondary'
-                        };
-                    @endphp
-                    <div class="estado-actual-badge {{ $badgeClass }}">
-                        <span class="label">Estado Actual</span>
-                        <span class="estado">{{ $estadoNombre }}</span>
-                    </div>
+        {{-- CARD 1: ESTADO ACTUAL --}}
+        <div class="col-md-4">
+            <div class="card h-100 shadow border-start border-3 border-info">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-3"><i class="bi bi-funnel me-2"></i>Estado Actual</h6>
+                    <h3 class="card-title text-info">{{ $estados[$pedido['estId']] ?? 'Desconocido' }}</h3>
+                    <p class="card-text small text-secondary">
+                        Actualizado por última vez: {{ \Carbon\Carbon::parse($pedido['historial'][0]['hisFechaCambio'] ?? $pedido['pedFechaCreacion'])->diffForHumans() }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -357,9 +339,6 @@
                                 <i class="bi bi-eye-fill me-2"></i>Ver Selección Inicial
                             </button>
                         </div>
-                    </div>
-                </div>
-                @endif
 
                 {{-- CARD: CONTACTO ORIGEN (Si existe) --}}
                 @if(isset($pedido['conId']) && $pedido['conId'])
@@ -371,9 +350,8 @@
                         <button onclick="verMensajeOrigen({{ $pedido['conId'] }})" class="btn-ver-mensaje w-100">
                             <i class="bi bi-envelope-open-fill me-2"></i>Ver Mensaje Original
                         </button>
-                    </div>
+                    </form>
                 </div>
-                @endif
             </div>
 
             {{-- ===========================================================
@@ -398,50 +376,35 @@
     </div>
 </div>
 
-{{-- Modal para ver personalizacion --}}
-<div class="modal fade" id="modalPersonalizacion" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-gem me-2"></i>Detalles de Personalización
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="modalPersonalizacionContent">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status"></div>
+                                    {{-- Evidencia Fotográfica (Destacada) --}}
+                                    @if(!empty($evento['hisImagen']))
+                                        @php
+                                            $rutaImagen = $evento['hisImagen'];
+                                            if(str_starts_with($rutaImagen, '/')) $rutaImagen = substr($rutaImagen, 1);
+                                            $urlImagen = "http://127.0.0.1:8080/" . $rutaImagen;
+                                        @endphp
+                                        <a href="{{ $urlImagen }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-image"></i> Ver Evidencia
+                                        </a>
+                                    @endif
+                                    
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        
+                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 @endsection
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script>
-    // ===============================================
-    // Configuración Global y Mapeos
-    // ===============================================
-
-    // Mapeo de Estados
-    const ESTADOS_MAP = {
-        1: { nombre: '1. Cotización Pendiente', icono: 'bi-clock-fill', clase: 'pendiente' },
-        2: { nombre: '2. Pago Diseño Pendiente', icono: 'bi-check-circle-fill', clase: 'confirmado' },
-        3: { nombre: '3. Diseño en Proceso', icono: 'bi-palette-fill', clase: 'diseno' },
-        4: { nombre: '4. Diseño Aprobado', icono: 'bi-hand-thumbs-up-fill', clase: 'aprobado' },
-        5: { nombre: '5. Tallado (Producción)', icono: 'bi-gear-fill', clase: 'produccion' },
-        6: { nombre: '6. Engaste', icono: 'bi-gem', clase: 'produccion' },
-        7: { nombre: '7. Pulido', icono: 'bi-sparkle', clase: 'produccion' },
-        8: { nombre: '8. Inspección de Calidad', icono: 'bi-shield-check-fill', clase: 'calidad' },
-        9: { nombre: '9. Finalizado (Entrega)', icono: 'bi-gift-fill', clase: 'finalizado' },
-        10: { nombre: '10. Cancelado', icono: 'bi-x-circle-fill', clase: 'cancelado' }
-    };
-    
-    // Variables globales
-    const pedidoId = {{ $pedido['pedId'] ?? 0 }};
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
     
     // Inicializar al cargar la página
@@ -471,6 +434,7 @@
         // Agregamos manualmente los datos que antes sacabas por ID (por seguridad)
         const estadoId = document.getElementById('nuevoEstadoSelect').value;
         const comentarios = document.getElementById('comentariosEstado').value;
+        const imagenInput = document.getElementById('evidenciaImagen');
         
         // Nota: FormData ya incluye automáticamente el archivo si el input tiene name="his_imagen"
         
@@ -478,12 +442,10 @@
             title: 'Actualizando...',
             text: 'Registrando cambio y subiendo evidencia si existe',
             allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+            didOpen: () => Swal.showLoading()
         });
         
+        // Enviamos la petición POST (simulando PATCH)
         fetch(`/admin/pedidos/${pedidoId}/estado-historial`, { 
             method: 'POST', // Cambiamos a POST porque PATCH con Multipart suele dar problemas
             headers: {
@@ -500,27 +462,24 @@
             }
             return response.json();
         })
-        .then(data => {
-            if (data.success) {
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(({ status, body }) => {
+            if (status >= 400) throw new Error(body.message || 'Error en el servidor');
+
+            if (body.success) {
                 Swal.fire({
-                    title: 'Éxito',
-                    text: data.message,
+                    title: '¡Actualizado!',
+                    text: 'El estado ha cambiado correctamente.',
                     icon: 'success',
-                    confirmButtonColor: '#009688'
-                }).then(() => {
-                    window.location.reload(); 
-                });
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => window.location.reload());
             } else {
-                throw new Error(data.message || 'Error al actualizar (API).');
+                throw new Error(body.message || 'Error desconocido.');
             }
         })
         .catch(error => {
-            Swal.fire({
-                title: 'Error',
-                text: error.message,
-                icon: 'error',
-                confirmButtonColor: '#ef4444'
-            });
+            Swal.fire('Error', error.message, 'error');
         });
         
         return false;
@@ -751,4 +710,45 @@
         }
     }
 </script>
+@endpush
+
+{{-- 💡 ESTILOS ADICIONALES (Se recomienda poner esto en main.css) --}}
+@push('styles')
+<style>
+/* Estilos para simular un Timeline simple en la columna derecha */
+.timeline-container {
+    position: relative;
+    padding-left: 20px; /* Espacio para la línea vertical */
+}
+.timeline-container:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 2px;
+    background-color: #dee2e6; /* Gris claro para la línea */
+}
+.timeline-item {
+    position: relative;
+    margin-left: 10px; /* Separación del punto a la línea */
+    /* Usamos d-flex para alinear el punto con el contenido */
+}
+.timeline-badge {
+    position: absolute;
+    left: -18px; /* Ajusta para centrar el círculo en la línea */
+    top: 5px;
+    z-index: 10;
+    background-color: #fff;
+    padding: 2px;
+    border-radius: 50%;
+    border: 2px solid #fff; /* Pequeño borde para que destaque sobre la línea */
+}
+.timeline-content {
+    background-color: #f8f9fa; /* Fondo suave para cada evento */
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+</style>
 @endpush

@@ -11,7 +11,10 @@ use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
-
+// Importamos el controlador del usuario que acabamos de crear
+use App\Http\Controllers\User\UserPedidoController;
+// 🚨 NUEVO: Importamos el controlador del Diseñador
+use App\Http\Controllers\Designer\DesignerPedidoController; 
 // ============================================
 // RUTAS PÚBLICAS
 // ============================================
@@ -51,9 +54,17 @@ Route::middleware('auth.custom')->group(function () {
     Route::get('/logout', [AuthController::class, 'handleLogout'])->name('logout');
 });
 
-// DASHBOARD UNIFICADO (REDIRIGE SEGÚN ROL)
+// DASHBOARD UNIFICADO (REDIRECCIÓN SILENCIOSA)
 Route::middleware(['auth.custom', 'no.back'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', function () {
+        $role = session('user_role');
+        return match($role) {
+            'ROLE_ADMINISTRADOR' => app(App\Http\Controllers\DashboardController::class)->adminDashboard(),
+            'ROLE_DISEÑADOR'     => redirect()->route('designer.pedidos.index'),
+            'ROLE_USUARIO'       => redirect()->route('user.pedidos.index'),
+            default              => redirect('/'),
+        };
+    })->name('dashboard');
 });
 
 // ============================================
@@ -79,38 +90,39 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
     Route::controller(MensajesController::class)->prefix('mensajes')->group(function () {
         Route::get('/', 'index')->name('admin.mensajes.index');
         Route::get('/{id}', 'ver')->name('admin.mensajes.ver');
-        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion'); // FIX: Mover antes del wildcard
+        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion'); 
         Route::put('/{id}', 'update')->name('admin.mensajes.update');
         Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
     });
     
-    // MÓDULO: PEDIDOS
+// MÓDULO: PEDIDOS
     Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
+        // Vistas principales
         Route::get('/', 'index')->name('admin.pedidos.index');
+        Route::get('/crear', 'create')->name('admin.pedidos.create');
         Route::get('/{id}/gestionar', 'gestionar')->name('admin.pedidos.gestionar');
-
-        // Acciones específicas
-        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
-        Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
-        Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
-        Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
-        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
-        Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
-        
-
-        // Rutas genéricas
-        Route::post('/', 'store')->name('admin.pedidos.store');
         Route::get('/{id}', 'show')->name('admin.pedidos.ver');
+
+        // Acciones sobre pedidos
+        Route::post('/', 'store')->name('admin.pedidos.store');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
 
-
-        // Proxy de archivos
-        Route::get('/ver-archivo/{path}', [PedidoController::class, 'verArchivo'])
-        ->where('path', '.*')
-        ->name('admin.pedidos.ver-archivo');
+        // Gestión de Estados e Historial (Lógica de Bocanegra + tu Frontend)
+        Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
+        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial'); // Soporte para formularios con imágenes
+        Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
         
+        // --- TU MÓDULO: Diseño 3D y Archivos ---
+        Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
+        Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
+        
+        // Proxy de archivos para conectar con Spring Boot
+        Route::get('/ver-archivo/{path}', 'verArchivo')
+            ->where('path', '.*')
+            ->name('admin.pedidos.ver-archivo');
     });
     
 });
@@ -120,13 +132,39 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
 // ============================================
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
+    
+    // 🚨 MÓDULO: PEDIDOS (Diseñador)
+    Route::controller(DesignerPedidoController::class)->prefix('pedidos')->group(function () {
+        Route::get('/', 'index')->name('designer.pedidos.index');
+        Route::get('/{id}/gestionar', 'gestionar')->name('designer.pedidos.gestionar');
+        
+        // Funcionalidades: Crear, Guardar, Actualizar estado y Historial
+        Route::post('/', 'store')->name('designer.pedidos.store');
+        Route::get('/crear', 'create')->name('designer.pedidos.create');
+        Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('designer.pedidos.actualizarEstado');
+        
+        // Rutas de API INTERNA
+        Route::get('/{id}/historial', 'obtenerHistorial')->name('designer.pedidos.historial');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('designer.pedidos.crear-desde-mensaje');
+        
+        // El Diseñador NO debería poder eliminar ni reasignar pedidos por defecto.
+        // Si se requiere eliminar, descomentar la siguiente línea:
+        // Route::delete('/{id}', 'destroy')->name('designer.pedidos.destroy');
+    });
 });
 
 // ============================================
 // ROL: USUARIO (CLIENTE)
 // ============================================
 Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
+    
     Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
+
+    // 🔥 NUEVO: MÓDULO MIS PEDIDOS (CLIENTE)
+    Route::controller(UserPedidoController::class)->prefix('mis-pedidos')->group(function () {
+        Route::get('/', 'index')->name('user.pedidos.index');     // Listado
+        Route::get('/{id}', 'show')->name('user.pedidos.show');     // Detalle y Timeline
+    });
 });
 
 // ============================================
@@ -139,5 +177,5 @@ Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function 
 });
 
 // Rutas para Restablecer (Reset)
-    Route::get('/restablecer/{token}', [App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('/restablecer', [App\Http\Controllers\Auth\AuthController::class, 'handleResetPassword'])->name('password.update');
+Route::get('/restablecer/{token}', [App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/restablecer', [App\Http\Controllers\Auth\AuthController::class, 'handleResetPassword'])->name('password.update');
