@@ -54,9 +54,17 @@ Route::middleware('auth.custom')->group(function () {
     Route::get('/logout', [AuthController::class, 'handleLogout'])->name('logout');
 });
 
-// DASHBOARD UNIFICADO (REDIRIGE SEGÚN ROL)
+// DASHBOARD UNIFICADO (REDIRECCIÓN SILENCIOSA)
 Route::middleware(['auth.custom', 'no.back'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', function () {
+        $role = session('user_role');
+        return match($role) {
+            'ROLE_ADMINISTRADOR' => app(App\Http\Controllers\DashboardController::class)->adminDashboard(),
+            'ROLE_DISEÑADOR'     => redirect()->route('designer.pedidos.index'),
+            'ROLE_USUARIO'       => redirect()->route('user.pedidos.index'),
+            default              => redirect('/'),
+        };
+    })->name('dashboard');
 });
 
 // ============================================

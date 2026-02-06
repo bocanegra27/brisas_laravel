@@ -57,15 +57,27 @@ class AuthController extends Controller
             $request->input('password')
         );
 
-        if ($result) {
-            // Login exitoso - redirigir a dashboard según rol
-            return redirect($result['dashboardUrl'] ?? '/dashboard')
-                ->with('success', $result['message'] ?? 'Bienvenido');
-        }
+        // ... dentro de handleLogin, después de $result = $this->authService->login(...)
 
-        // Login fallido
+if ($result) {
+    // Obtenemos el rol desde la sesión (que el AuthService ya debió guardar)
+    $role = session('user_role');
+
+    // Definimos la ruta destino según el rol
+    $redirectUrl = match($role) {
+        'ROLE_ADMINISTRADOR' => url('/dashboard'),
+        'ROLE_DISEÑADOR'     => route('designer.pedidos.index'),
+        'ROLE_USUARIO'       => route('user.pedidos.index'),
+        default              => url('/'),
+    };
+
+    return redirect($redirectUrl)
+        ->with('success', $result['message'] ?? 'Bienvenido');
+}
+
+        // Si falla, retornamos con error
         return back()
-            ->withErrors(['email' => 'Correo o contraseña incorrectos'])
+            ->withErrors(['login_error' => $result['message'] ?? 'Credenciales inválidas'])
             ->withInput($request->only('email'));
     }
 

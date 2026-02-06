@@ -13,15 +13,19 @@
     $isUser = ($userRole === 'ROLE_USUARIO');
     
     // Determinar URL del logo según contexto
-    if ($isAdmin) {
-        $logoUrl = '/admin/dashboard';
+   if ($isAdmin) {
+        $logoUrl = url('/dashboard');
     } elseif ($isDesigner) {
-        $logoUrl = '/designer/dashboard';
+        $logoUrl = route('designer.pedidos.index');
     } elseif ($isUser) {
-        $logoUrl = '/user/dashboard';
+        // Para el usuario normal, puedes decidir si mandarlo a Inicio o a Mis Pedidos
+        // Si quieres que el logo lo lleve a sus pedidos:
+        $logoUrl = route('user.pedidos.index'); 
     } else {
         $logoUrl = '/';
     }
+    
+    $currentRoute = Request::path();
     
     // Ruta actual para marcar links activos
     $currentRoute = Request::path();

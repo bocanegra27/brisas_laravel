@@ -5,38 +5,18 @@
 <div class="container py-5">
     
     {{-- Encabezado Estilo Dashboard --}}
-    <div class="card border-0 shadow-sm mb-4">
+    <div>
         <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h2 class="fw-bold text-dark mb-1">
-                        <i class="bi bi-list-check me-2 text-primary"></i>Mis Pedidos
-                    </h2>
-                    <p class="text-muted mb-0">Gestiona y rastrea el estado de tus joyas personalizadas</p>
-                </div>
-                <div>
-                    <a href="{{ route('personalizar.index') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-lg me-2"></i>Nuevo Pedido
-                    </a>
-                </div>
+            <div class="welcome-section animate-in">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2>¡Bienvenido, {{ Session::get('user_name', 'Usuario') }}! <span class="wave">👋</span></h2>
+                <p>Gestiona tus pedidos y crea las joyas de tus sueños</p>
             </div>
-
-            {{-- Filtros (Visuales por ahora) --}}
-            <div class="row g-3 mt-3">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por código o descripción...">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select">
-                        <option selected>Todos los estados</option>
-                        <option value="1">Pendientes</option>
-                        <option value="2">En Proceso</option>
-                        <option value="3">Completados</option>
-                    </select>
-                </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{{ route('personalizar.index') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Crear Nueva Joya
+                </a>
             </div>
         </div>
     </div>
