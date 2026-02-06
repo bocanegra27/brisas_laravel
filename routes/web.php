@@ -96,26 +96,33 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
     });
     
-    // MÓDULO: PEDIDOS
+// MÓDULO: PEDIDOS
     Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
+        // Vistas principales
         Route::get('/', 'index')->name('admin.pedidos.index');
-        Route::get('/{id}/gestionar', 'gestionar')->name('admin.pedidos.gestionar');
-        // Rutas de acciones sobre pedidos
-        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
-        Route::post('/', 'store')->name('admin.pedidos.store');
         Route::get('/crear', 'create')->name('admin.pedidos.create');
+        Route::get('/{id}/gestionar', 'gestionar')->name('admin.pedidos.gestionar');
+        Route::get('/{id}', 'show')->name('admin.pedidos.ver');
+
+        // Acciones sobre pedidos
+        Route::post('/', 'store')->name('admin.pedidos.store');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
+
+        // Gestión de Estados e Historial (Lógica de Bocanegra + tu Frontend)
+        Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
+        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial'); // Soporte para formularios con imágenes
+        Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
+        
+        // --- TU MÓDULO: Diseño 3D y Archivos ---
+        Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
         Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
         
-        // NUEVA RUTA PARA HISTORIAL (Reemplaza la lógica de cambiarEstado)
-        Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
-        
-        // Ruta para obtener el historial del timeline (API INTERNA)
-        Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
-
-        Route::get('/{id}', 'show')->name('admin.pedidos.ver');
-        
+        // Proxy de archivos para conectar con Spring Boot
+        Route::get('/ver-archivo/{path}', 'verArchivo')
+            ->where('path', '.*')
+            ->name('admin.pedidos.ver-archivo');
     });
     
 });

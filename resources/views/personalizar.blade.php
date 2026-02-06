@@ -260,15 +260,15 @@
     (function() {
         'use strict';
 
-        const STORAGE_KEY = 'brisas_sesion_token';
-        const STORAGE_SESION_ID = 'brisas_sesion_id';
+        const STORAGE_TOKEN = 'anonymous_token'; // Usaremos esta como clave central en el registro
+        const STORAGE_SESION_ID = 'anonymous_sesion_id'; // Esta es secundaria
 
         /**
          * Obtiene o crea una sesión anónima
          */
         async function obtenerOCrearSesion() {
             // Verificar si ya existe en localStorage
-            let token = localStorage.getItem(STORAGE_KEY);
+            let token = localStorage.getItem(STORAGE_TOKEN);
             let sesionId = localStorage.getItem(STORAGE_SESION_ID);
 
             if (token && sesionId) {
@@ -298,7 +298,7 @@
                 const data = await response.json();
 
                 // Guardar en localStorage
-                localStorage.setItem(STORAGE_KEY, data.sesToken);
+                localStorage.setItem(STORAGE_TOKEN, data.sesToken);
                 localStorage.setItem(STORAGE_SESION_ID, data.sesId);
 
                 console.log('✅ Nueva sesión creada:', data.sesId);

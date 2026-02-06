@@ -7,7 +7,7 @@ use App\Services\ApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http; 
+use Illuminate\Support\Facades\Http;
 
 class PedidoController extends Controller
 {
@@ -280,51 +280,43 @@ class PedidoController extends Controller
     /**
      * Actualizar estado con historial e IMAGEN (Multipart)
      */
-    public function actualizarEstadoConHistorial(Request $request, $pedidoId)
+    public function actualizarEstadoConHistorial(Request $request, $id)
     {
-        try {
-            $nuevoEstadoId = (int) $request->input('estadoId');
-            $comentarios = $request->input('comentarios') ?? 'Actualización de estado.';
-            $imagen = $request->file('imagen');
-            $token = Session::get('jwt_token');
+        // 1. Validar (La imagen es opcional)
+        $request->validate([
+            'estadoId' => 'required|integer',
+            'comentarios' => 'nullable|string',
+            'his_imagen' => 'nullable|image|max:5120', // Máximo 5MB
+        ]);
 
-            $baseUrl = config('services.api.url') ?? 'http://localhost:8080/api'; 
-            $httpRequest = Http::withToken($token);
+        $data = [
+            'nuevoEstadoId' => $request->estadoId,
+            'comentarios' => $request->comentarios ?? 'Sin comentarios.',
+        ];
 
-            if ($imagen) {
-                $httpRequest->attach(
-                    'imagen', 
-                    file_get_contents($imagen->getRealPath()), 
-                    $imagen->getClientOriginalName()
-                );
-            }
-
-            $response = $httpRequest->patch("{$baseUrl}/pedidos/{$pedidoId}/estado", [
-                'nuevoEstadoId' => $nuevoEstadoId,
-                'comentarios' => $comentarios
-            ]);
-
-            if ($response->successful()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Estado actualizado y evidencia guardada.',
-                    'pedido' => $response->json()
-                ]);
-            }
-
-            Log::error('PedidoController@actualizarEstadoConHistorial: API Fallo.', ['status' => $response->status(), 'body' => $response->body()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Error API: ' . $response->body()
-            ], $response->status());
-
-        } catch (\Exception $e) {
-            Log::error('PedidoController@actualizarEstadoConHistorial: Excepción.', ['error' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Error interno: ' . $e->getMessage()
-            ], 500);
+        // 2. Enviar a Spring Boot
+        if ($request->hasFile('his_imagen')) {
+            // Si hay archivo, usamos attachFile
+            $response = $this->apiService->attachFile(
+                "/pedidos/{$id}/estado-con-foto", 
+                $data, 
+                $request->file('his_imagen'), 
+                'his_imagen', // Nombre del @RequestParam en Java
+                ['headers' => ['Authorization' => 'Bearer ' . session('jwt_token')]]
+            );
+        } else {
+            // Si no hay archivo, usamos un POST normal al endpoint de historial que ya tienes
+            $response = $this->apiService->patch("/pedidos/{$id}/estado", [
+                'nuevoEstadoId' => (int)$request->estadoId,
+                'comentarios' => $request->comentarios
+            ], ['headers' => ['Authorization' => 'Bearer ' . session('jwt_token')]]);
         }
+
+        if ($response) {
+            return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente.']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Error al comunicar con el servidor de joyería.'], 500);
     }
 
     public function obtenerHistorial($pedidoId)
@@ -576,5 +568,83 @@ class PedidoController extends Controller
             'usuCorreo' => $correo,
             'rol' => ['rolNombre' => $rol] 
         ];
+    }
+
+    public function verArchivo($path)
+    {
+        $baseUrl = "http://localhost:8080/"; 
+        $url = $baseUrl . $path;
+
+        try {
+            $response = Http::get($url);
+
+            if ($response->successful()) {
+                return response($response->body(), 200)
+                    ->header('Content-Type', $response->header('Content-Type'))
+                    ->header('Cache-Control', 'public, max-age=86400'); // 🔥 AÑADIR ESTA LÍNEA
+            }
+        } catch (\Exception $e) {
+            Log::error("Error al conectar con Spring Boot para archivo: " . $e->getMessage());
+        }
+
+        abort(404, 'La imagen no existe en el servidor de joyería (Spring Boot).');
+    }
+
+    public function subirDiseno(Request $request, $id)
+    {
+        // 🔥 VALIDACIÓN BÁSICA (solo tamaño)
+        $request->validate([
+            'diseno_archivo' => 'required|file|max:51200' // 50 MB
+        ]);
+
+        // 🔥 VALIDACIÓN MANUAL DE EXTENSIÓN
+        $file = $request->file('diseno_archivo');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $allowedExtensions = ['glb', 'gltf', 'png', 'jpg', 'jpeg', 'webp'];
+        
+        if (!in_array($extension, $allowedExtensions)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Formato no permitido. Extensiones válidas: ' . implode(', ', $allowedExtensions)
+            ], 422);
+        }
+
+        try {
+            $response = $this->apiService->attachFile(
+                "/pedidos/{$id}/subir-render-oficial", 
+                [], 
+                $file, 
+                'archivo',
+                ['headers' => ['Authorization' => 'Bearer ' . session('jwt_token')]] 
+            );
+
+            if ($response) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Diseño cargado correctamente y registrado en el historial.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false, 
+                'message' => 'La API de Java no devolvió una respuesta exitosa.'
+            ], 400);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Error de conexión: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // 🔥 MÉTODO AUXILIAR NUEVO
+    private function detectarTipoArchivo($path)
+    {
+        if (!$path) return 'imagen';
+        
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        
+        return in_array($extension, ['glb', 'gltf']) ? 'modelo3d' : 'imagen';
     }
 }
