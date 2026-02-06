@@ -260,24 +260,43 @@
 
                 {{-- [FASE 3] CARD: GALERÍA DE PRODUCTO TERMINADO --}}
                 <div class="info-card animate-in animate-delay-2 mb-4">
-                    <h5 class="card-title text-success">
-                        <i class="bi bi-stars me-2"></i> Producto Final
-                    </h5>
-                    <div class="card-content">
-                        @if($estadoId >= 9)
-                            {{-- Aquí se implementará la galería de la Fase 3 --}}
-                            <div class="text-center py-4 bg-light rounded">
-                                <i class="bi bi-camera-fill display-6 text-muted mb-2"></i>
-                                <p class="mb-0">¡Listo para la sesión de fotos final!</p>
-                                <button class="btn btn-sm btn-outline-success mt-3">Subir Fotos de Entrega</button>
-                            </div>
-                        @else
-                            <div class="text-center text-muted py-3">
-                                <p class="mb-0 small"><i class="bi bi-lock-fill me-1"></i> Disponible al finalizar el pedido</p>
-                            </div>
-                        @endif
-                    </div>
+                <h5 class="card-title text-success">
+                    <i class="bi bi-stars me-2"></i> Producto Final
+                </h5>
+                <div class="card-content">
+                    {{-- Si el estado es 9 (Finalizado) o mayor, permitimos ver/subir --}}
+                    @if($estadoId >= 9)
+                        <div class="text-center py-3">
+                            <form id="formFotoFinal" action="{{ route('admin.pedidos.subir-producto-final', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-2">
+                                    <input type="file" name="producto_foto" class="form-control form-control-sm" accept="image/*" required>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-success w-100">
+                                    <i class="bi bi-camera-fill me-2"></i>Subir Foto Real
+                                </button>
+                            </form>
+                        </div>
+                        
+                        {{-- Aquí iterarías las fotos que lleguen del controlador --}}
+                        <div class="row g-2 mt-2">
+                            @foreach($fotosFinales ?? [] as $foto)
+                                <div class="col-4">
+                                    <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $foto['proImagen']]) }}" 
+                                        class="img-fluid rounded border shadow-sm" style="cursor:pointer" 
+                                        onclick="window.open(this.src)">
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center text-muted py-3">
+                            <p class="mb-0 small">
+                                <i class="bi bi-lock-fill me-1"></i> Disponible cuando el pedido esté en fase de <strong>Finalizado</strong>.
+                            </p>
+                        </div>
+                    @endif
                 </div>
+            </div>
 
                 {{-- CARD: INFORMACIÓN DEL CLIENTE --}}
                 <div class="info-card animate-in animate-delay-1">
@@ -750,5 +769,49 @@
             });
         }
     }
+
+        document.getElementById('formFotoFinal')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        Swal.fire({
+            title: 'Subiendo Producto Final...',
+            text: 'Cargando evidencia fotográfica del trabajo terminado.',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
+
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: formData
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error en el servidor');
+            return data;
+        })
+        .then(data => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Producto Registrado!',
+                text: data.message,
+                confirmButtonColor: '#009688'
+            }).then(() => {
+                window.location.reload(); // Recarga para ver la foto en la galería
+            });
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al subir',
+                text: error.message
+            });
+        });
+    });
 </script>
 @endpush

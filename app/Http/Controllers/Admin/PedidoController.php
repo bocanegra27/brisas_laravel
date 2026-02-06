@@ -781,4 +781,49 @@ private function enriquecerPedido(array $pedido): array
         
         return in_array($extension, ['glb', 'gltf']) ? 'modelo3d' : 'imagen';
     }
+
+    /**
+     * Sube una foto del producto real (Fase 3).
+     * POST /admin/pedidos/{id}/subir-producto-final
+     */
+    public function subirProductoFinal(Request $request, $id)
+    {
+        // 1. Validar que sea una imagen
+        $request->validate([
+            'producto_foto' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+        ]);
+
+        try {
+            // 2. Capturar el objeto del archivo
+            $file = $request->file('producto_foto');
+
+            /**
+             * 3. Llamada usando el orden posicional que ya te funciona en 'subirDiseno':
+             * Arg 1: Endpoint
+             * Arg 2: Data (Array vacío)
+             * Arg 3: El objeto del archivo ($file)
+             * Arg 4: El nombre del parámetro que espera Java ('archivo')
+             * Arg 5: Opciones (Headers)
+             */
+            $response = $this->apiService->attachFile(
+                "/fotos/subir/{$id}", 
+                [], 
+                $file, 
+                'archivo',
+                ['headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]] 
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto del producto final cargada exitosamente.'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error("Fallo en subirProductoFinal: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error técnico: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
