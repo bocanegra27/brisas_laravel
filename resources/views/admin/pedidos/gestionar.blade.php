@@ -258,45 +258,42 @@
                     </div>
                 </div>
 
-                {{-- [FASE 3] CARD: GALERÍA DE PRODUCTO TERMINADO --}}
+                {{-- CARD: GALERÍA DE PRODUCTO TERMINADO (Visible desde estado 5 en adelante) --}}
                 <div class="info-card animate-in animate-delay-2 mb-4">
-                <h5 class="card-title text-success">
-                    <i class="bi bi-stars me-2"></i> Producto Final
-                </h5>
-                <div class="card-content">
-                    {{-- Si el estado es 9 (Finalizado) o mayor, permitimos ver/subir --}}
-                    @if($estadoId >= 9)
-                        <div class="text-center py-3">
+                    <h5 class="card-title text-success">
+                        <i class="bi bi-camera-fill me-2"></i>Galería de Producto Real
+                    </h5>
+                    <div class="card-content">
+                        {{-- Subida de archivos (Solo para admin/disañador) --}}
+                        @if(Session::get('user_role') !== 'ROLE_USUARIO')
                             <form id="formFotoFinal" action="{{ route('admin.pedidos.subir-producto-final', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                <div class="mb-2">
+                                <div class="input-group mb-3">
                                     <input type="file" name="producto_foto" class="form-control form-control-sm" accept="image/*" required>
+                                    <button class="btn btn-sm btn-success" type="submit">Añadir Foto</button>
                                 </div>
-                                <button type="submit" class="btn btn-sm btn-success w-100">
-                                    <i class="bi bi-camera-fill me-2"></i>Subir Foto Real
-                                </button>
                             </form>
-                        </div>
+                        @endif
                         
-                        {{-- Aquí iterarías las fotos que lleguen del controlador --}}
-                        <div class="row g-2 mt-2">
-                            @foreach($fotosFinales ?? [] as $foto)
-                                <div class="col-4">
-                                    <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $foto['proImagen']]) }}" 
-                                        class="img-fluid rounded border shadow-sm" style="cursor:pointer" 
-                                        onclick="window.open(this.src)">
+                        {{-- Galería Multiphoto --}}
+                        <div class="row g-2 mt-2" id="galeriaFotosFinales">
+                            @if(isset($pedido['fotosFinales']) && count($pedido['fotosFinales']) > 0)
+                                @foreach($pedido['fotosFinales'] as $foto)
+                                    <div class="col-4 position-relative">
+                                        <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $foto['fotImagenFinal']]) }}" 
+                                            class="img-fluid rounded border shadow-sm img-thumbnail-gallery" 
+                                            style="aspect-ratio: 1/1; object-fit: cover; cursor: pointer;"
+                                            onclick="window.open(this.src)">
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="col-12 text-center py-3 text-muted">
+                                    <small>No hay fotos reales cargadas todavía.</small>
                                 </div>
-                            @endforeach
+                            @endif
                         </div>
-                    @else
-                        <div class="text-center text-muted py-3">
-                            <p class="mb-0 small">
-                                <i class="bi bi-lock-fill me-1"></i> Disponible cuando el pedido esté en fase de <strong>Finalizado</strong>.
-                            </p>
-                        </div>
-                    @endif
+                    </div>
                 </div>
-            </div>
 
                 {{-- CARD: INFORMACIÓN DEL CLIENTE --}}
                 <div class="info-card animate-in animate-delay-1">

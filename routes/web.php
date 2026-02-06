@@ -9,28 +9,41 @@ use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
 use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\PersonalizarController;
-use App\Http\Controllers\ImagenProxyController;
+use App\Http\Controllers\ImagenProxyController; // <--- Asegúrate que esto esté aquí
 use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\ProfileController;
 
 // ============================================
 // RUTAS PÚBLICAS
 // ============================================
+
 // Página de inicio
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Personalización de joyas
-Route::get('/personalizar', [PersonalizarController::class, 'index'])->name('personalizar.index');
-Route::post('/personalizar/guardar', [PersonalizarController::class, 'guardar'])->name('personalizar.guardar');
-Route::get('/personalizar/{id}/detalles', [PersonalizarController::class, 'obtenerDetalles'])->name('personalizar.detalles');
+Route::controller(PersonalizarController::class)->prefix('personalizar')->group(function () {
+    Route::get('/', 'index')->name('personalizar.index');
+    Route::post('/guardar', 'guardar')->name('personalizar.guardar');
+    Route::get('/{id}/detalles', 'obtenerDetalles')->name('personalizar.detalles');
+});
 
 // Formulario de contacto
 Route::get('/contacto', [ContactoController::class, 'create'])->name('contacto.create');
 Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.store');
 
-// Proxy de imágenes
-Route::get('/imagen/vista-anillo', [ImagenProxyController::class, 'vistaAnillo'])->name('imagen.vista-anillo');
-Route::get('/imagen/icono-opcion', [ImagenProxyController::class, 'iconoOpcion'])->name('imagen.icono-opcion');
-Route::get('/imagen/limpiar-cache', [ImagenProxyController::class, 'limpiarCache'])->name('imagen.limpiar-cache');
+// ============================================
+// PROXY DE IMÁGENES (PUENTE A SPRING BOOT)
+// ============================================
+Route::controller(ImagenProxyController::class)->prefix('imagen')->group(function () {
+    // Visor de anillos 3D/2D
+    Route::get('/vista-anillo', 'vistaAnillo')->name('imagen.anillo');
+    
+    // Iconos de las opciones (materiales, formas)
+    Route::get('/icono-opcion', 'iconoOpcion')->name('imagen.icono');
+    
+    // Utilidad para limpiar caché si las imágenes fallan
+    Route::get('/limpiar-cache', 'limpiarCache')->name('imagen.limpiar-cache');
+});
 
 // ============================================
 // AUTENTICACIÓN (INVITADOS SOLAMENTE)
@@ -40,8 +53,12 @@ Route::middleware('guest.custom')->group(function () {
     Route::post('/login', [AuthController::class, 'handleLogin'])->name('login.handle');
     Route::get('/registro', [RegisterController::class, 'showRegistrationForm'])->name('register.show');
     Route::post('/registro', [RegisterController::class, 'handleRegistration'])->name('register.handle');
-    Route::get('/olvide-password', [App\Http\Controllers\Auth\AuthController::class, 'showForgotPassword'])->name('password.request');
-    Route::post('/olvide-password', [App\Http\Controllers\Auth\AuthController::class, 'handleForgotPassword'])->name('password.email');
+    
+    // Recuperación de contraseña
+    Route::get('/olvide-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/olvide-password', [AuthController::class, 'handleForgotPassword'])->name('password.email');
+    Route::get('/restablecer/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/restablecer', [AuthController::class, 'handleResetPassword'])->name('password.update');
 });
 
 // ============================================
@@ -51,7 +68,9 @@ Route::middleware('auth.custom')->group(function () {
     Route::get('/logout', [AuthController::class, 'handleLogout'])->name('logout');
 });
 
+// ============================================
 // DASHBOARD UNIFICADO (REDIRIGE SEGÚN ROL)
+// ============================================
 Route::middleware(['auth.custom', 'no.back'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
@@ -75,11 +94,11 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::delete('/{id}', 'eliminar')->name('admin.usuarios.eliminar');
     });
     
-    // MÓDULO: MENSAJES/CONTACTOS (MEJORADO)
+    // MÓDULO: MENSAJES/CONTACTOS
     Route::controller(MensajesController::class)->prefix('mensajes')->group(function () {
         Route::get('/', 'index')->name('admin.mensajes.index');
         Route::get('/{id}', 'ver')->name('admin.mensajes.ver');
-        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion'); // FIX: Mover antes del wildcard
+        Route::get('/{id}/con-personalizacion', 'verConPersonalizacion')->name('admin.mensajes.ver-con-personalizacion');
         Route::put('/{id}', 'update')->name('admin.mensajes.update');
         Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.mensajes.cambiar-estado');
         Route::delete('/{id}', 'eliminar')->name('admin.mensajes.eliminar');
@@ -94,26 +113,25 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
         Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
         Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
+        
+        // Manejo de estados (Patch y Post por seguridad/compatibilidad)
         Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
-        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
+        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial'); // Alias para formularios POST
+        
         Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
         Route::post('/{id}/subir-producto-final', 'subirProductoFinal')->name('admin.pedidos.subir-producto-final');
-        
 
-        // Rutas genéricas
+        // CRUD Básico
         Route::post('/', 'store')->name('admin.pedidos.store');
         Route::get('/{id}', 'show')->name('admin.pedidos.ver');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
 
-
-        // Proxy de archivos
-        Route::get('/ver-archivo/{path}', [PedidoController::class, 'verArchivo'])
-        ->where('path', '.*')
-        ->name('admin.pedidos.ver-archivo');
-        
+        // Proxy de archivos internos (Admin)
+        Route::get('/ver-archivo/{path}', 'verArchivo')
+             ->where('path', '.*')
+             ->name('admin.pedidos.ver-archivo');
     });
-    
 });
 
 // ============================================
@@ -134,11 +152,7 @@ Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->grou
 // PERFIL DE USUARIO (COMÚN PARA TODOS)
 // ============================================
 Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function () {
-    Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('perfil.index');
-    Route::put('/actualizar', [App\Http\Controllers\ProfileController::class, 'update'])->name('perfil.update');
-    Route::patch('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('perfil.password');
+    Route::get('/', [ProfileController::class, 'index'])->name('perfil.index');
+    Route::put('/actualizar', [ProfileController::class, 'update'])->name('perfil.update');
+    Route::patch('/password', [ProfileController::class, 'updatePassword'])->name('perfil.password');
 });
-
-// Rutas para Restablecer (Reset)
-    Route::get('/restablecer/{token}', [App\Http\Controllers\Auth\AuthController::class, 'showResetPassword'])->name('password.reset');
-    Route::post('/restablecer', [App\Http\Controllers\Auth\AuthController::class, 'handleResetPassword'])->name('password.update');
