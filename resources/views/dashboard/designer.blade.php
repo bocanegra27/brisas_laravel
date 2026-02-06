@@ -33,7 +33,6 @@
     </h2>
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 g-md-4 mb-5">
         <div class="col animate-in animate-delay-1">
-            {{-- Ruta pendiente: /designer/disenos --}}
             <a href="{{ url('/designer/dashboard') }}" class="stat-card">
                 <div class="card">
                     <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; border-radius: 50%; opacity: 0.08; z-index: 0; background: linear-gradient(135deg, #009688 0%, #00796b 100%);"></div>
@@ -49,7 +48,6 @@
         </div>
 
         <div class="col animate-in animate-delay-2">
-            {{-- Ruta pendiente: /designer/renders --}}
             <a href="{{ url('/designer/dashboard') }}" class="stat-card">
                 <div class="card">
                     <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; border-radius: 50%; opacity: 0.08; z-index: 0; background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);"></div>
@@ -65,7 +63,6 @@
         </div>
 
         <div class="col animate-in animate-delay-3">
-            {{-- Ruta pendiente: /designer/comunicacion --}}
             <a href="{{ url('/designer/dashboard') }}" class="stat-card">
                 <div class="card">
                     <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; border-radius: 50%; opacity: 0.08; z-index: 0; background: linear-gradient(135deg, #ffc107 0%, #f57c00 100%);"></div>
@@ -81,7 +78,8 @@
         </div>
 
         <div class="col animate-in animate-delay-4">
-            <a href="{{ url('/pedidos') }}" class="stat-card">
+            {{-- ENLACE CORREGIDO: Ahora apunta a designer.pedidos.index --}}
+            <a href="{{ route('designer.pedidos.index') }}" class="stat-card">
                 <div class="card">
                     <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; border-radius: 50%; opacity: 0.08; z-index: 0; background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);"></div>
                     <div class="card-body text-center">
@@ -102,8 +100,8 @@
         Acciones Rápidas
     </h2>
     <div class="row g-3 g-md-4">
+        {{-- Nuevo Diseño (Mantenido) --}}
         <div class="col-md-6 animate-in animate-delay-1">
-            {{-- Ruta pendiente: /designer/nuevo-diseno --}}
             <a href="{{ url('/designer/dashboard') }}" class="action-card">
                 <div class="d-flex align-items-start gap-3">
                     <div class="icon-wrapper bg-primary-gradient" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0;">
@@ -118,8 +116,8 @@
             </a>
         </div>
 
+        {{-- Revisar Renders (Mantenido) --}}
         <div class="col-md-6 animate-in animate-delay-2">
-            {{-- Ruta pendiente: /designer/renders --}}
             <a href="{{ url('/designer/dashboard') }}" class="action-card">
                 <div class="d-flex align-items-start gap-3">
                     <div class="icon-wrapper bg-info-gradient" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0;">
@@ -134,8 +132,8 @@
             </a>
         </div>
 
+        {{-- Comunicación con Clientes (Mantenido) --}}
         <div class="col-md-6 animate-in animate-delay-3">
-            {{-- Ruta pendiente: /designer/comunicacion --}}
             <a href="{{ url('/designer/dashboard') }}" class="action-card">
                 <div class="d-flex align-items-start gap-3">
                     <div class="icon-wrapper bg-warning-gradient" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0;">
@@ -150,8 +148,10 @@
             </a>
         </div>
 
+        {{-- Gestionar Pedidos (ENLACE CORREGIDO) --}}
         <div class="col-md-6 animate-in animate-delay-4">
-            <a href="{{ url('/pedidos') }}" class="action-card">
+            {{-- ENLACE CORREGIDO: Ahora apunta a designer.pedidos.index --}}
+            <a href="{{ route('designer.pedidos.index') }}" class="action-card">
                 <div class="d-flex align-items-start gap-3">
                     <div class="icon-wrapper bg-success-gradient" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0;">
                         <i class="bi bi-list-check text-white" style="font-size: 1.75rem;"></i>

@@ -1,7 +1,3 @@
-{{-- ============================================
-     HEADER ÚNICO ULTRAMINIMALISTA - BRISAS GEMS
-     Se adapta según autenticación y rol del usuario
-     ============================================ --}}
 
 @php
     // Detectar estado de autenticación y datos del usuario
@@ -17,15 +13,19 @@
     $isUser = ($userRole === 'ROLE_USUARIO');
     
     // Determinar URL del logo según contexto
-    if ($isAdmin) {
-        $logoUrl = '/admin/dashboard';
+   if ($isAdmin) {
+        $logoUrl = url('/dashboard');
     } elseif ($isDesigner) {
-        $logoUrl = '/designer/dashboard';
+        $logoUrl = route('designer.pedidos.index');
     } elseif ($isUser) {
-        $logoUrl = '/user/dashboard';
+        // Para el usuario normal, puedes decidir si mandarlo a Inicio o a Mis Pedidos
+        // Si quieres que el logo lo lleve a sus pedidos:
+        $logoUrl = route('user.pedidos.index'); 
     } else {
         $logoUrl = '/';
     }
+    
+    $currentRoute = Request::path();
     
     // Ruta actual para marcar links activos
     $currentRoute = Request::path();
@@ -54,80 +54,71 @@
             @if(!$isAuthenticated)
                 {{-- MENÚ PARA INVITADOS (No autenticados) --}}
                 <a href="{{ url('/') }}" 
-                   class="header-minimal__nav-link {{ $currentRoute == '/' ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ $currentRoute == '/' ? 'header-minimal__nav-link--active' : '' }}">
                     Inicio
                 </a>
                 <a href="{{ route('personalizar.index') }}"
-                   class="header-minimal__nav-link">Personalizar
+                    class="header-minimal__nav-link">Personalizar
                 </a>
                 {{--<a href="{{ url('/inspiracion') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'inspiracion') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'inspiracion') ? 'header-minimal__nav-link--active' : '' }}">
                     Inspiración
                 </a>--}}
                 <a href="{{ url('/contacto') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
                     Contacto
                 </a>
 
             @elseif($isAdmin)
                 {{-- MENÚ PARA ADMINISTRADOR --}}
                 <a href="{{ url('/admin/dashboard') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
                     Dashboard
                 </a>
                 <a href="{{ route('admin.usuarios.index') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'usuarios') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'usuarios') ? 'header-minimal__nav-link--active' : '' }}">
                     Usuarios
                 </a>
                 <a href="{{ route('admin.mensajes.index') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/contactos') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/contactos') ? 'header-minimal__nav-link--active' : '' }}">
                     Contactos
                 </a>
                 <a href="{{ route('admin.pedidos.index') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
                     Pedidos
                 </a>
 
             @elseif($isDesigner)
                 {{-- MENÚ PARA DISEÑADOR --}}
                 <a href="{{ url('/designer/dashboard') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
                     Dashboard
                 </a>
-                {{-- Rutas pendientes de implementar --}}
-                {{-- <a href="{{ url('/designer/disenos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/disenos') ? 'header-minimal__nav-link--active' : '' }}">
-                    Mis Diseños
-                </a>
-                <a href="{{ url('/designer/renders') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/renders') ? 'header-minimal__nav-link--active' : '' }}">
-                    Renders
-                </a> --}}
-                <a href="{{ url('/pedidos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                
+                {{-- 🔥 CORRECCIÓN APLICADA: Usar route() con el nombre correcto --}}
+                <a href="{{ route('designer.pedidos.index') }}" 
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/pedidos') ? 'header-minimal__nav-link--active' : '' }}">
                     Pedidos
                 </a>
-                {{-- <a href="{{ url('/designer/comunicacion') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/comunicacion') ? 'header-minimal__nav-link--active' : '' }}">
-                    Comunicación
-                </a> --}}
 
             @elseif($isUser)
                 {{-- MENÚ PARA USUARIO NORMAL --}}
                 <a href="{{ url('/') }}" 
-                   class="header-minimal__nav-link {{ $currentRoute == '/' ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ $currentRoute == '/' ? 'header-minimal__nav-link--active' : '' }}">
                     Inicio
                 </a>
                 <a href="{{ url('/personalizar') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'personalizar') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'personalizar') ? 'header-minimal__nav-link--active' : '' }}">
                     Personalizar
                 </a>
                 <a href="{{ url('/contacto') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'contacto') ? 'header-minimal__nav-link--active' : '' }}">
                     Contacto
                 </a>
-                <a href="{{ url('/mis-pedidos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'mis-pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                
+                {{-- CORRECCIÓN MANTENIDA: Ruta correcta usando route helper --}}
+                <a href="{{ route('user.pedidos.index') }}" 
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'user/mis-pedidos') ? 'header-minimal__nav-link--active' : '' }}">
                     Mis Pedidos
                 </a>
             @endif
@@ -160,10 +151,12 @@
                         {{-- Opciones adicionales según rol --}}
                         @if($isUser)
                             {{-- Usuario: Mis Pedidos --}}
-                            <a href="{{ url('/mis-pedidos') }}" class="header-minimal__dropdown-item">
+                            {{-- CORRECCIÓN MANTENIDA: Ruta correcta en el dropdown --}}
+                            <a href="{{ route('user.pedidos.index') }}" class="header-minimal__dropdown-item">
                                 <i class="bi bi-bag-check header-minimal__dropdown-icon"></i>
                                 Mis Pedidos
                             </a>
+                            
                             {{-- Pendiente: Mis Personalizaciones --}}
                             {{-- <a href="{{ url('/mis-personalizaciones') }}" class="header-minimal__dropdown-item">
                                 <i class="bi bi-palette2 header-minimal__dropdown-icon"></i>
@@ -189,7 +182,7 @@
     </div>
 </header>
 
-{{-- ===== JAVASCRIPT PARA INTERACTIVIDAD ===== --}}
+{{-- ===== JAVASCRIPT PARA INTERACTIVIDAD (Mantenido) ===== --}}
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {

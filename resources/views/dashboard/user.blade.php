@@ -18,7 +18,7 @@
                 <p>Gestiona tus pedidos y crea las joyas de tus sueños</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a href="{{ url('/personalizar') }}" class="btn btn-light btn-lg">
+                <a href="{{ route('personalizar.index') }}" class="btn btn-light btn-lg">
                     <i class="bi bi-plus-circle me-2"></i>Crear Nueva Joya
                 </a>
             </div>
@@ -32,7 +32,8 @@
     </h2>
     <div class="row row-cols-1 row-cols-md-3 g-3 g-md-4 mb-5">
         <div class="col animate-in animate-delay-1">
-            <a href="{{ url('/mis-pedidos') }}" class="stat-card">
+            {{-- 🔥 CORRECCIÓN 1: Usar la ruta nombrada para evitar el error 404 --}}
+            <a href="{{ route('user.pedidos.index') }}" class="stat-card">
                 <div class="card">
                     <div class="card-body">
                         <div class="icon-wrapper bg-primary-soft">
@@ -46,8 +47,8 @@
         </div>
 
         <div class="col animate-in animate-delay-2">
-            {{-- Ruta pendiente: /mis-personalizaciones --}}
-            <a href="{{ url('/user/dashboard') }}" class="stat-card">
+            {{-- Ruta pendiente: idealmente crear una ruta user.personalizaciones.index --}}
+            <a href="#" class="stat-card">
                 <div class="card">
                     <div class="card-body">
                         <div class="icon-wrapper bg-info-soft">
@@ -61,8 +62,8 @@
         </div>
 
         <div class="col animate-in animate-delay-3">
-            {{-- Ruta pendiente: /historial --}}
-            <a href="{{ url('/user/dashboard') }}" class="stat-card">
+            {{-- Ruta pendiente --}}
+            <a href="#" class="stat-card">
                 <div class="card">
                     <div class="card-body">
                         <div class="icon-wrapper bg-success-soft">
@@ -87,25 +88,28 @@
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-6">
-                            <a href="{{ url('/personalizar') }}" class="quick-action-btn">
+                            {{-- Se recomienda usar route() si la tienes definida --}}
+                            <a href="{{ route('personalizar.index') }}" class="quick-action-btn">
                                 <i class="bi bi-plus-circle"></i>
                                 <span>Personalizar Joya</span>
                             </a>
                         </div>
                         <div class="col-6">
+                            {{-- Si no tienes ruta nombrada para inspiración, url() está bien --}}
                             <a href="{{ url('/inspiracion') }}" class="quick-action-btn">
                                 <i class="bi bi-images"></i>
                                 <span>Ver Inspiración</span>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{{ url('/mis-pedidos') }}" class="quick-action-btn">
+                            {{-- 🔥 CORRECCIÓN 2: Ruta correcta para Mis Pedidos --}}
+                            <a href="{{ route('user.pedidos.index') }}" class="quick-action-btn">
                                 <i class="bi bi-list-check"></i>
                                 <span>Mis Pedidos</span>
                             </a>
                         </div>
                         <div class="col-6">
-                            <a href="{{ url('/contacto') }}" class="quick-action-btn">
+                            <a href="{{ route('contacto.create') }}" class="quick-action-btn">
                                 <i class="bi bi-headset"></i>
                                 <span>Soporte</span>
                             </a>
