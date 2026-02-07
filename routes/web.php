@@ -12,6 +12,7 @@ use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController; // <--- Asegúrate que esto esté aquí
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\PersonalizacionAdminController;
 
 // ============================================
 // RUTAS PÚBLICAS
@@ -131,6 +132,29 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::get('/ver-archivo/{path}', 'verArchivo')
              ->where('path', '.*')
              ->name('admin.pedidos.ver-archivo');
+    });
+
+    // MÓDULO: PERSONALIZACIÓN
+    // Gestión del catálogo dinámico (Categorías -> Opciones -> Valores)
+    Route::prefix('personalizacion')->group(function () {
+        
+        Route::controller(PersonalizacionAdminController::class)->group(function () {
+            // 1. Gestión de Categorías (Anillos, Pulseras, etc.)
+            Route::get('/categorias', 'indexCategorias')->name('admin.personalizacion.categorias.index');
+            Route::post('/categorias', 'storeCategoria')->name('admin.personalizacion.categorias.store');
+            Route::delete('/categorias/{id}','eliminarCategoria')->name('admin.personalizacion.categorias.eliminar');
+            
+            // 2. Gestión de Opciones (Forma, Metal, Tipo de Cierre, etc.)
+            // Filtra por ?catId={id}
+            Route::get('/opciones', 'indexOpciones')->name('admin.personalizacion.opciones.index');
+            Route::post('/opciones', 'storeOpcion')->name('admin.personalizacion.opciones.store');
+            
+            // 3. Gestión de Valores e Imágenes (Oro, Plata, Cuero, etc.)
+            // Filtra por ?opcId={id}
+            Route::get('/valores', 'indexValores')->name('admin.personalizacion.valores.index');
+            Route::post('/valores', 'storeValor')->name('admin.personalizacion.valores.store');
+            Route::delete('/valores/{id}', 'eliminarValor')->name('admin.personalizacion.valores.eliminar');
+        });
     });
 });
 

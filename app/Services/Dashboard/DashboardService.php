@@ -44,6 +44,11 @@ class DashboardService
             $responseArchivados = $this->apiService->get('/contactos/count?estado=archivado', [
                 'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
+            
+            // ✅ CATEGORÍAS (NUEVO) - Agregar aquí
+            $categorias = $this->apiService->get('/categorias', [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
 
             // ✅ Pedidos por Estado (NUEVOS)
             $responseCotizacion = $this->apiService->get('/pedidos/count?estadoId=1', [
@@ -116,6 +121,9 @@ class DashboardService
                 'totalContactosAtendidos' => $atendidos,
                 'totalContactosArchivados' => $archivados,
                 'totalContactos' => $pendientes + $atendidos + $archivados,
+
+                // Categorias
+                'totalCategorias' => count($categorias ?? []),
                 
                 // Pedidos por Estado
                 'pedidosCotizacionPendiente' => $cotizacion,
@@ -203,6 +211,9 @@ class DashboardService
             'totalContactosAtendidos' => 0,
             'totalContactosArchivados' => 0,
             'totalContactos' => 0,
+
+            // Categorías
+            'totalCategorias' => 0,
             
             // Pedidos por Estado
             'pedidosCotizacionPendiente' => 0,

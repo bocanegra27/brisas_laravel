@@ -26,6 +26,83 @@
         </div>
     </div>
 
+    {{-- Gestión General - Ahora con 4 Columnas --}}
+    <h2 class="section-header animate-in animate-delay-1">Gestión del Sistema</h2>
+    <div class="row g-3 g-md-4">
+        
+        {{-- 1. GESTIÓN DE USUARIOS --}}
+        <div class="col-xl-3 col-md-6 animate-in animate-delay-1">
+            <a href="{{ route('admin.usuarios.index') }}" class="stat-card">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-success-soft mx-auto">
+                            <i class="bi bi-people text-success"></i>
+                        </div>
+                        <p class="card-text">Usuarios</p>
+                        <h2 class="display-4 text-success">{{ ($data['totalUsuariosActivos'] ?? 0) + ($data['totalUsuariosInactivos'] ?? 0) }}</h2>
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <span class="badge badge-success">{{ $data['totalUsuariosActivos'] ?? 0 }} Activos</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- 2. MENSAJES/CONTACTOS --}}
+        <div class="col-xl-3 col-md-6 animate-in animate-delay-2">
+            <a href="{{ route('admin.mensajes.index') }}" class="stat-card">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-danger-soft mx-auto">
+                            <i class="bi bi-envelope-exclamation text-danger"></i>
+                        </div>
+                        <p class="card-text">Mensajes</p>
+                        <h2 class="display-4 text-danger">{{ $data['totalContactos'] ?? 0 }}</h2>
+                        <div class="d-flex justify-content-center gap-1 mt-2">
+                            <span class="badge badge-warning">Pendientes: {{ $data['totalContactosPendientes'] ?? 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- 3. PEDIDOS --}}
+        <div class="col-xl-3 col-md-6 animate-in animate-delay-3">
+            <a href="{{ route('admin.pedidos.index') }}" class="stat-card">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-secondary-soft mx-auto">
+                            <i class="bi bi-box-seam text-secondary"></i>
+                        </div>
+                        <p class="card-text">Producción</p>
+                        <h2 class="display-4 text-secondary">
+                            {{ ($data['pedidosEnDiseño'] ?? 0) + ($data['pedidosEnTallado'] ?? 0) + ($data['pedidosEnEngaste'] ?? 0) + ($data['pedidosEnPulido'] ?? 0) }}
+                        </h2>
+                        <span class="trend up"><i class="bi bi-arrow-up"></i> Activos</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- 4. NUEVA: GESTIÓN DE PERSONALIZACIÓN --}}
+        <div class="col-xl-3 col-md-6 animate-in animate-delay-4">
+            <a href="{{ route('admin.personalizacion.categorias.index') }}" class="stat-card">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-indigo-soft mx-auto">
+                            <i class="bi bi-gem text-indigo"></i>
+                        </div>
+                        <p class="card-text">Personalización</p>
+                        <h2 class="display-4 text-indigo">{{ $data['totalCategorias'] ?? 2 }}</h2>
+                        <div class="mt-2 text-muted small">
+                            Gestionar Catálogo Dinámico
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
 {{-- Estado de la Producción --}}
 <h2 class="section-header animate-in animate-delay-1">Estado de la Producción</h2>
 
@@ -174,81 +251,5 @@
 </div>
 
 
-    {{-- Gestión General - ACTUALIZADO --}}
-<h2 class="section-header animate-in animate-delay-2">Gestión General</h2>
-<div class="row g-3 g-md-4">
-    {{-- 1. GESTIÓN DE USUARIOS --}}
-    <div class="col-lg-4 col-md-6 animate-in animate-delay-1">
-        <a href="{{ route('admin.usuarios.index') }}" class="stat-card">
-            <div class="card">
-                <div class="card-body text-center">
-                    <div class="icon-wrapper bg-success-soft mx-auto">
-                        <i class="bi bi-people text-success"></i>
-                    </div>
-                    <p class="card-text">Gestión de Usuarios</p>
-                    <h2 class="display-4 text-success">{{ ($data['totalUsuariosActivos'] ?? 0) + ($data['totalUsuariosInactivos'] ?? 0) }}</h2>
-                    <div class="d-flex justify-content-center gap-3 mt-2">
-                        <span class="badge badge-success">
-                            <i class="bi bi-check-circle"></i> {{ $data['totalUsuariosActivos'] ?? 0 }} Activos
-                        </span>
-                        <span class="badge badge-secondary">
-                            <i class="bi bi-dash-circle"></i> {{ $data['totalUsuariosInactivos'] ?? 0 }} Inactivos
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-
-    {{-- 2. MENSAJES/CONTACTOS --}}
-    <div class="col-lg-4 col-md-6 animate-in animate-delay-2">
-        <a href="{{ route('admin.mensajes.index') }}" class="stat-card">
-            <div class="card">
-                <div class="card-body text-center">
-                    <div class="icon-wrapper bg-danger-soft mx-auto">
-                        <i class="bi bi-envelope-exclamation text-danger"></i>
-                    </div>
-                    <p class="card-text">Mensajes</p>
-                    <h2 class="display-4 text-danger">{{ $data['totalContactos'] ?? 0 }}</h2>
-                    <div class="d-flex justify-content-center gap-2 mt-2 flex-wrap">
-                        <span class="badge badge-warning">
-                            <i class="bi bi-clock-fill"></i> {{ $data['totalContactosPendientes'] ?? 0 }}
-                        </span>
-                        <span class="badge badge-success">
-                            <i class="bi bi-check-circle-fill"></i> {{ $data['totalContactosAtendidos'] ?? 0 }}
-                        </span>
-                        <span class="badge badge-secondary">
-                            <i class="bi bi-archive-fill"></i> {{ $data['totalContactosArchivados'] ?? 0 }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    {{-- 3. PEDIDOS --}}
-    <div class="col-lg-4 col-md-6 animate-in animate-delay-3">
-        <a href="{{ route('admin.pedidos.index') }}" class="stat-card">
-            <div class="card">
-                <div class="card-body text-center">
-                    <div class="icon-wrapper bg-secondary-soft mx-auto">
-                        <i class="bi bi-box-seam text-secondary"></i>
-                    </div>
-                    <p class="card-text">Pedidos</p>
-                    <h2 class="display-4 text-secondary">
-                        {{ 
-                            ($data['pedidosEnDiseño'] ?? 0) + 
-                            ($data['pedidosEnTallado'] ?? 0) + 
-                            ($data['pedidosEnEngaste'] ?? 0) + 
-                            ($data['pedidosEnPulido'] ?? 0) 
-                        }}
-                    </h2>
-                    <span class="trend up">
-                        <i class="bi bi-arrow-up"></i> +6 esta semana
-                    </span>
-                </div>
-            </div>
-        </a>
-    </div>
-</div>
 </main>
 @endsection
