@@ -172,4 +172,66 @@ class ApiService
             return null;
         }
     }
+
+    /**
+     * Enviar petición POST con archivos (Multipart) - VERSIÓN FLEXIBLE
+     * Permite enviar multipart incluso si el archivo es NULL (para casos opcionales).
+     *
+     * @param string $endpoint
+     * @param array $data Datos de texto (key => value)
+     * @param \Illuminate\Http\UploadedFile|null $file El archivo a subir (puede ser null)
+     * @param string $fileKey El nombre del campo del archivo (ej: 'archivo')
+     * @return mixed
+     */
+    public function postMultipart($endpoint, $data, $file = null, $fileKey = 'archivo')
+    {
+        try {
+            $url = $this->baseUrl . $endpoint;
+            
+            // Iniciamos la petición HTTP
+            // Usamos asMultipart() para que Laravel gestione el boundary correctamente
+            $request = Http::asMultipart();
+
+            // Agregar Authorization header si hay sesión
+            if (session()->has('jwt_token')) {
+                $request->withHeaders([
+                    'Authorization' => 'Bearer ' . session('jwt_token')
+                ]);
+            }
+
+            // 1. Adjuntar archivo SI existe
+            if ($file) {
+                $request->attach(
+                    $fileKey, 
+                    file_get_contents($file->getRealPath()), 
+                    $file->getClientOriginalName()
+                );
+            }
+
+            // 2. Adjuntar los campos de texto
+            foreach ($data as $key => $value) {
+                // asMultipart requiere que pasemos los datos como array al método post()
+                // O podemos usar attach() para cada campo si son simples.
+                // La forma más robusta en Laravel Http Client para mezclar archivos y textos:
+                // Usar attach() para archivos y pasar el array de datos en el post().
+                // PERO, Spring Boot a veces prefiere que todo vaya como "partes".
+                // Vamos a hacerlo adjuntando cada campo como parte, que es lo más seguro para Java.
+                $request->attach($key, (string)$value);
+            }
+
+            // 3. Enviar la petición (el body va vacío porque ya adjuntamos todo con attach)
+            $response = $request->post($url, []);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            Log::error("Error en POST MULTIPART a {$endpoint}: " . $response->body());
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error("Excepción en POST MULTIPART a {$endpoint}: " . $e->getMessage());
+            return null;
+        }
+    }
 }

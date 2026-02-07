@@ -148,6 +148,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
             // Filtra por ?catId={id}
             Route::get('/opciones', 'indexOpciones')->name('admin.personalizacion.opciones.index');
             Route::post('/opciones', 'storeOpcion')->name('admin.personalizacion.opciones.store');
+            Route::delete('/opciones/{id}', 'eliminarOpcion')->name('admin.personalizacion.opciones.eliminar');
             
             // 3. Gestión de Valores e Imágenes (Oro, Plata, Cuero, etc.)
             // Filtra por ?opcId={id}
