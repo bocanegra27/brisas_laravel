@@ -53,25 +53,39 @@ class PersonalizacionAdminController extends Controller
         ]);
     }
 
-    // 3. LISTAR VALORES FILTRADOS POR OPCIÓN (Aquí es donde se ven las imágenes)
+    // 3. LISTAR VALORES FILTRADOS POR OPCIÓN
     public function indexValores(Request $request)
     {
         $opcId = $request->query('opcId');
         if (!$opcId) return redirect()->route('admin.personalizacion.categorias.index');
 
+        // 1. Obtener la lista de valores (imágenes)
         $valores = $this->apiService->get("/valores?opcId={$opcId}", [
             'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
         ]);
 
-        // Obtenemos los detalles de la opción para el contexto
+        // 2. Obtener los detalles de la Opción actual (para saber su nombre y su catId)
         $opcion = $this->apiService->get("/opciones/{$opcId}", [
             'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
         ]);
 
+        // 3. === LO QUE FALTABA: OBTENER EL SLUG DE LA CATEGORÍA ===
+        // Necesitamos saber si es "anillos" o "pulseras" para la ruta de la imagen.
+        // Traemos todas las categorías y buscamos la que coincida con el catId de la opción.
+        $categorias = $this->apiService->get('/categorias', [
+            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+        ]);
+        
+        // Buscamos la categoría padre usando Collections de Laravel
+        $categoriaPadre = collect($categorias)->firstWhere('id', $opcion['catId'] ?? null);
+        $catSlug = $categoriaPadre['slug'] ?? 'general'; // 'general' es un fallback por si falla
+
+        // 4. Retornar la vista con TODAS las variables
         return view('admin.personalizacion.valores.index', [
             'valores' => $valores ?? [],
-            'opcion' => $opcion,
-            'opcId' => $opcId
+            'opcion'  => $opcion,
+            'opcId'   => $opcId,
+            'catSlug' => $catSlug // <--- ¡AQUÍ ESTÁ LA SOLUCIÓN!
         ]);
     }
 
@@ -190,5 +204,28 @@ public function storeValor(Request $request)
 
         return back()->with('error', 'No se pudo eliminar el valor.');
     }
+
+    public function subirVista(Request $request)
+    {
+        $request->validate([
+            'valorId' => 'required|integer',
+            'tipo'    => 'required|string|in:frontal,superior,perfil',
+            'archivo' => 'required|image|mimes:png,jpg,webp|max:3000'
+        ]);
+
+        // URL: /valores/{id}/vistas
+        // Enviamos: tipo (text), archivo (file)
+        $response = $this->apiService->postMultipart("/valores/{$request->valorId}/vistas", [
+            'tipo' => $request->tipo
+        ], $request->file('archivo'), 'archivo');
+
+        if ($response) {
+            return back()->with('success', "Vista '{$request->tipo}' subida correctamente.");
+        }
+
+        return back()->with('error', 'Error al subir la vista.');
+    }
+
+
 
 }

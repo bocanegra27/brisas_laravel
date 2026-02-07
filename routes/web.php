@@ -155,6 +155,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
             Route::get('/valores', 'indexValores')->name('admin.personalizacion.valores.index');
             Route::post('/valores', 'storeValor')->name('admin.personalizacion.valores.store');
             Route::delete('/valores/{id}', 'eliminarValor')->name('admin.personalizacion.valores.eliminar');
+            Route::post('/valores/vistas', 'subirVista')->name('admin.personalizacion.valores.subirVista');
         });
     });
 });

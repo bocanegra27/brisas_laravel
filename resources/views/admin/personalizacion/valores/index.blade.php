@@ -10,7 +10,7 @@
         <div>
             <div class="mb-1">
                 <a href="{{ route('admin.personalizacion.opciones.index', ['catId' => $opcion['catId'] ?? '']) }}" class="text-decoration-none text-muted small">
-                    <i class="bi bi-arrow-left"></i> Volver
+                    <i class="bi bi-arrow-left"></i> Volver a Opciones
                 </a>
             </div>
             <h2 class="mb-0">
@@ -27,42 +27,59 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show"><i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    @endif
 
     {{-- Grid de Valores --}}
     <div class="row row-cols-2 row-cols-md-4 row-cols-xl-5 g-4">
         @forelse($valores as $valor)
             <div class="col">
-                <div class="card h-100 shadow-sm border-0">
+                <div class="card h-100 shadow-sm border-0 card-hover-effect">
                     <div class="card-body text-center d-flex flex-column justify-content-center align-items-center p-4">
                         
-                        {{-- Si tiene imagen la muestra, si no, muestra un icono de texto --}}
+                        {{-- Ícono / Placeholder --}}
                         @if(!empty($valor['imagen']))
-                            <img src="http://localhost:8080/{{ $valor['imagen'] }}" class="mb-3" style="height: 50px; object-fit: contain;">
+                            <img src="http://localhost:8080/assets/img/personalizacion/{{ $catSlug }}/opciones/{{ $opcId }}/{{ $valor['imagen'] }}" 
+                                 class="mb-3 rounded-circle border p-1" style="width: 60px; height: 60px; object-fit: cover;">
                         @else
-                            <div class="avatar-placeholder bg-light text-primary rounded-circle mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                <i class="bi bi-type-h1 fs-3"></i>
+                            <div class="avatar-placeholder bg-primary-subtle text-primary rounded-circle mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
+                                <span class="fs-3 fw-bold">{{ strtoupper(substr($valor['nombre'], 0, 1)) }}</span>
                             </div>
                         @endif
 
-                        <h5 class="fw-bold text-dark mb-0">{{ $valor['nombre'] }}</h5>
-                        <small class="text-muted">ID: {{ $valor['id'] }}</small>
+                        <h5 class="fw-bold text-dark mb-1">{{ $valor['nombre'] }}</h5>
+                        <small class="text-muted mb-3">ID: {{ $valor['id'] }}</small>
+
+                        {{-- Botón GESTIONAR VISTAS --}}
+                        {{-- AGREGAMOS DATOS EXTRA AQUÍ PARA LA RUTA DE LA IMAGEN --}}
+                        <button type="button" 
+                                class="btn btn-outline-info btn-sm w-100 mb-2" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#modalVistas"
+                                data-valor-id="{{ $valor['id'] }}"
+                                data-valor-nombre="{{ $valor['nombre'] }}"
+                                data-cat-slug="{{ $catSlug }}"
+                                data-opc-id="{{ $opcId }}">
+                            <i class="bi bi-layers me-1"></i> Gestionar Vistas
+                        </button>
                     </div>
 
-                    <div class="card-footer bg-white border-0 pt-0 pb-3">
+                    <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">
                         <form action="{{ route('admin.personalizacion.valores.eliminar', $valor['id']) }}" method="POST" onsubmit="return confirm('¿Eliminar?');">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-trash"></i> Eliminar</button>
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="bi bi-trash me-1"></i> Eliminar</button>
                         </form>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="col-12"><div class="alert alert-info">No hay valores creados (ej: Oro, Plata). ¡Crea el primero!</div></div>
+            <div class="col-12"><div class="alert alert-info">No hay valores creados.</div></div>
         @endforelse
     </div>
 </div>
 
-{{-- Modal Simplificado (SOLO NOMBRE) --}}
+{{-- MODAL 1: Crear Valor --}}
 <div class="modal fade" id="modalCrearValor" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -76,26 +93,169 @@
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Nombre</label>
-                        <input type="text" class="form-control" name="nombre" placeholder="Ej: Oro Amarillo" required autofocus>
+                        <input type="text" class="form-control" name="nombre" required>
                     </div>
-                    
-                    {{-- Input de archivo OCULTO o OPCIONAL (si decides usarlo a futuro) --}}
-                    <div class="collapse" id="campoImagen">
+                    <div class="collapse" id="campoImagenIcono">
                         <div class="mb-3">
-                            <label class="form-label">Imagen (Opcional)</label>
-                            <input type="file" class="form-control" name="archivo">
+                            <label class="form-label small">Ícono (Opcional)</label>
+                            <input type="file" class="form-control" name="archivo" accept="image/png, image/jpeg">
                         </div>
                     </div>
-                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="collapse" data-bs-target="#campoImagen">
-                        ¿Subir imagen? (Opcional)
+                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="collapse" data-bs-target="#campoImagenIcono">
+                        ¿Subir ícono?
                     </button>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary px-4">Guardar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+{{-- MODAL 2: Gestionar Vistas (Con Indicadores Visuales) --}}
+<div class="modal fade" id="modalVistas" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="bi bi-layers-fill me-2"></i>Vistas: <span id="lblValorNombre" class="fw-bold"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4 text-center">
+                    
+                    {{-- SUPERIOR --}}
+                    <div class="col-md-4">
+                        {{-- ID para cambiar el color --}}
+                        <div id="card-superior" class="card h-100 border shadow-sm transition-all">
+                            <div class="card-header bg-transparent fw-bold border-bottom-0 pt-3">
+                                {{-- Icono de estado --}}
+                                <i id="icon-superior" class="bi bi-arrow-up-circle me-1"></i> Superior
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('admin.personalizacion.valores.subirVista') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="valorId" id="inputValorIdSuperior">
+                                    <input type="hidden" name="tipo" value="superior">
+                                    <input type="file" name="archivo" class="form-control form-control-sm mb-2" required accept="image/png">
+                                    <button type="submit" class="btn btn-sm btn-outline-dark w-100">Subir</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- FRONTAL --}}
+                    <div class="col-md-4">
+                        <div id="card-frontal" class="card h-100 border shadow-sm transition-all">
+                            <div class="card-header bg-transparent fw-bold border-bottom-0 pt-3">
+                                <i id="icon-frontal" class="bi bi-circle me-1"></i> Frontal
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('admin.personalizacion.valores.subirVista') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="valorId" id="inputValorIdFrontal">
+                                    <input type="hidden" name="tipo" value="frontal">
+                                    <input type="file" name="archivo" class="form-control form-control-sm mb-2" required accept="image/png">
+                                    <button type="submit" class="btn btn-sm btn-outline-dark w-100">Subir</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- PERFIL --}}
+                    <div class="col-md-4">
+                        <div id="card-perfil" class="card h-100 border shadow-sm transition-all">
+                            <div class="card-header bg-transparent fw-bold border-bottom-0 pt-3">
+                                <i id="icon-perfil" class="bi bi-arrow-right-circle me-1"></i> Perfil
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('admin.personalizacion.valores.subirVista') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="valorId" id="inputValorIdPerfil">
+                                    <input type="hidden" name="tipo" value="perfil">
+                                    <input type="file" name="archivo" class="form-control form-control-sm mb-2" required accept="image/png">
+                                    <button type="submit" class="btn btn-sm btn-outline-dark w-100">Subir</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('scripts')
+<script>
+    const modalVistas = document.getElementById('modalVistas');
+    
+    // Función auxiliar para verificar si una imagen existe
+    function verificarImagen(url, cardId, iconId) {
+        const img = new Image();
+        // Agregamos timestamp para evitar caché y ver el estado real recién subido
+        img.src = url + '?t=' + new Date().getTime();
+        
+        img.onload = function() {
+            // SI EXISTE: Poner verde
+            const card = document.getElementById(cardId);
+            const icon = document.getElementById(iconId);
+            
+            card.classList.remove('border');
+            card.classList.add('border-success', 'bg-success-subtle');
+            
+            icon.classList.remove('bi-circle', 'bi-arrow-up-circle', 'bi-arrow-right-circle');
+            icon.classList.add('bi-check-circle-fill', 'text-success');
+        };
+        
+        img.onerror = function() {
+            // SI NO EXISTE: Resetear a estado normal
+            const card = document.getElementById(cardId);
+            const icon = document.getElementById(iconId);
+            
+            card.classList.remove('border-success', 'bg-success-subtle');
+            card.classList.add('border');
+            
+            // Restaurar íconos originales (simple lógica de reset)
+            if(iconId.includes('superior')) icon.className = 'bi bi-arrow-up-circle me-1';
+            if(iconId.includes('frontal')) icon.className = 'bi bi-circle me-1';
+            if(iconId.includes('perfil')) icon.className = 'bi bi-arrow-right-circle me-1';
+        }
+    }
+
+    if (modalVistas) {
+        modalVistas.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-valor-id');
+            const nombre = button.getAttribute('data-valor-nombre');
+            
+            // Datos para construir la URL
+            const catSlug = button.getAttribute('data-cat-slug');
+            const opcId = button.getAttribute('data-opc-id');
+
+            // 1. Setear Textos e Inputs
+            document.getElementById('lblValorNombre').textContent = nombre;
+            document.getElementById('inputValorIdSuperior').value = id;
+            document.getElementById('inputValorIdFrontal').value = id;
+            document.getElementById('inputValorIdPerfil').value = id;
+
+            // 2. Construir URLs base de las imágenes
+            // Formato: /assets/img/personalizacion/{slug}/opciones/{opcId}/{valId}_{tipo}.png
+            const baseUrl = `http://localhost:8080/assets/img/personalizacion/${catSlug}/opciones/${opcId}/`;
+
+            // 3. Verificar cada vista visualmente
+            verificarImagen(`${baseUrl}${id}_superior.png`, 'card-superior', 'icon-superior');
+            verificarImagen(`${baseUrl}${id}_frontal.png`, 'card-frontal', 'icon-frontal');
+            verificarImagen(`${baseUrl}${id}_perfil.png`, 'card-perfil', 'icon-perfil');
+        });
+    }
+</script>
+
+<style>
+    .transition-all { transition: all 0.3s ease; }
+    .bg-success-subtle { background-color: #d1e7dd; }
+</style>
+@endpush
