@@ -58,7 +58,8 @@
                     Inicio
                 </a>
                 <a href="{{ route('personalizar.index') }}"
-                   class="header-minimal__nav-link">Personalizar
+                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'personalizar') ? 'header-minimal__nav-link--active' : '' }}">
+                    Personalizar
                 </a>
                 {{--<a href="{{ url('/inspiracion') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'inspiracion') ? 'header-minimal__nav-link--active' : '' }}">
@@ -70,22 +71,34 @@
                 </a>
 
             @elseif($isAdmin)
-                {{-- MENÚ PARA ADMINISTRADOR --}}
+                {{-- MENÚ PARA ADMINISTRADOR CORREGIDO --}}
                 <a href="{{ url('/admin/dashboard') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
-                    Dashboard
+                class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
+                Dashboard
                 </a>
-                <a href="{{ route('admin.usuarios.index') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'usuarios') ? 'header-minimal__nav-link--active' : '' }}">
-                    Usuarios
+
+                <a href="{{ url('/admin/usuarios') }}" 
+                class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/usuarios') || Str::startsWith($currentRoute, 'usuarios') ? 'header-minimal__nav-link--active' : '' }}">
+                Usuarios
                 </a>
-                <a href="{{ route('admin.mensajes.index') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/contactos') ? 'header-minimal__nav-link--active' : '' }}">
-                    Contactos
+
+                <a href="{{ url('/admin/mensajes') }}" 
+                class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/contactos') || Str::startsWith($currentRoute, 'admin/mensajes') ? 'header-minimal__nav-link--active' : '' }}">
+                Contactos
                 </a>
-                <a href="{{ route('admin.pedidos.index') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
-                    Pedidos
+
+                <a href="{{ url('/admin/pedidos') }}" 
+                class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/pedidos') || Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                Pedidos
+                </a>
+
+                                <a href="{{ route('admin.personalizacion.categorias.index') }}" 
+                class="header-minimal__nav-link {{ Str::contains($currentRoute, 'personalizacion') ? 'header-minimal__nav-link--active' : '' }}">
+                Gestión Joyas
+                </a>
+
+                <a href="{{ url('/personalizar') }}" target="_blank" class="header-minimal__nav-link fw-bold" style="color: var(--header-primary);">
+                <i class="bi me-1"></i> Vista Publica
                 </a>
 
             @elseif($isDesigner)
