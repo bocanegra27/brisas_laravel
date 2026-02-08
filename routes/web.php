@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
 use App\Http\Controllers\Admin\PedidoController;
 use App\Http\Controllers\PersonalizarController;
-use App\Http\Controllers\ImagenProxyController; // <--- Asegúrate que esto esté aquí
+use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\PersonalizacionAdminController;
@@ -23,9 +23,20 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Personalización de joyas
 Route::controller(PersonalizarController::class)->prefix('personalizar')->group(function () {
+    // 1. Ruta raíz (Mantiene la compatibilidad con el menú header)
+    // Esta ruta llamará a la función index() del controlador que redirige a /personalizar/anillos
     Route::get('/', 'index')->name('personalizar.index');
-    Route::post('/guardar', 'guardar')->name('personalizar.guardar');
+
+    // 2. Ruta para guardar el diseño (POST)
+    // Apunta a la raíz del grupo (/personalizar) con método POST
+    Route::post('/', 'guardar')->name('personalizar.guardar');
+
+    // 3. Ruta para obtener detalles (AJAX/API interna)
     Route::get('/{id}/detalles', 'obtenerDetalles')->name('personalizar.detalles');
+
+    // 4. NUEVA RUTA DINÁMICA: Atrapa /personalizar/anillos, /personalizar/pulseras, etc.
+    // IMPORTANTE: Debe ir al final del grupo para no bloquear las rutas anteriores
+    Route::get('/{slug}', 'show')->name('personalizar.show');
 });
 
 // Formulario de contacto
@@ -36,13 +47,8 @@ Route::post('/contacto', [ContactoController::class, 'store'])->name('contacto.s
 // PROXY DE IMÁGENES (PUENTE A SPRING BOOT)
 // ============================================
 Route::controller(ImagenProxyController::class)->prefix('imagen')->group(function () {
-    // Visor de anillos 3D/2D
     Route::get('/vista-anillo', 'vistaAnillo')->name('imagen.anillo');
-    
-    // Iconos de las opciones (materiales, formas)
     Route::get('/icono-opcion', 'iconoOpcion')->name('imagen.icono');
-    
-    // Utilidad para limpiar caché si las imágenes fallan
     Route::get('/limpiar-cache', 'limpiarCache')->name('imagen.limpiar-cache');
 });
 
@@ -115,9 +121,9 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
         Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
         
-        // Manejo de estados (Patch y Post por seguridad/compatibilidad)
+        // Manejo de estados
         Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
-        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial'); // Alias para formularios POST
+        Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial');
         
         Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
         Route::post('/{id}/subir-producto-final', 'subirProductoFinal')->name('admin.pedidos.subir-producto-final');
@@ -134,24 +140,20 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
              ->name('admin.pedidos.ver-archivo');
     });
 
-    // MÓDULO: PERSONALIZACIÓN
-    // Gestión del catálogo dinámico (Categorías -> Opciones -> Valores)
+    // MÓDULO: GESTIÓN DE PERSONALIZACIÓN (CATÁLOGO)
     Route::prefix('personalizacion')->group(function () {
-        
         Route::controller(PersonalizacionAdminController::class)->group(function () {
-            // 1. Gestión de Categorías (Anillos, Pulseras, etc.)
+            // 1. Categorías
             Route::get('/categorias', 'indexCategorias')->name('admin.personalizacion.categorias.index');
             Route::post('/categorias', 'storeCategoria')->name('admin.personalizacion.categorias.store');
             Route::delete('/categorias/{id}','eliminarCategoria')->name('admin.personalizacion.categorias.eliminar');
             
-            // 2. Gestión de Opciones (Forma, Metal, Tipo de Cierre, etc.)
-            // Filtra por ?catId={id}
+            // 2. Opciones
             Route::get('/opciones', 'indexOpciones')->name('admin.personalizacion.opciones.index');
             Route::post('/opciones', 'storeOpcion')->name('admin.personalizacion.opciones.store');
             Route::delete('/opciones/{id}', 'eliminarOpcion')->name('admin.personalizacion.opciones.eliminar');
             
-            // 3. Gestión de Valores e Imágenes (Oro, Plata, Cuero, etc.)
-            // Filtra por ?opcId={id}
+            // 3. Valores e Imágenes
             Route::get('/valores', 'indexValores')->name('admin.personalizacion.valores.index');
             Route::post('/valores', 'storeValor')->name('admin.personalizacion.valores.store');
             Route::delete('/valores/{id}', 'eliminarValor')->name('admin.personalizacion.valores.eliminar');
@@ -175,7 +177,7 @@ Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->grou
 });
 
 // ============================================
-// PERFIL DE USUARIO (COMÚN PARA TODOS)
+// PERFIL DE USUARIO
 // ============================================
 Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function () {
     Route::get('/', [ProfileController::class, 'index'])->name('perfil.index');

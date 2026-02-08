@@ -50,19 +50,6 @@
 
                         <h5 class="fw-bold text-dark mb-1">{{ $valor['nombre'] }}</h5>
                         <small class="text-muted mb-3">ID: {{ $valor['id'] }}</small>
-
-                        {{-- Botón GESTIONAR VISTAS --}}
-                        {{-- AGREGAMOS DATOS EXTRA AQUÍ PARA LA RUTA DE LA IMAGEN --}}
-                        <button type="button" 
-                                class="btn btn-outline-info btn-sm w-100 mb-2" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#modalVistas"
-                                data-valor-id="{{ $valor['id'] }}"
-                                data-valor-nombre="{{ $valor['nombre'] }}"
-                                data-cat-slug="{{ $catSlug }}"
-                                data-opc-id="{{ $opcId }}">
-                            <i class="bi bi-layers me-1"></i> Gestionar Vistas
-                        </button>
                     </div>
 
                     <div class="card-footer bg-white border-0 pt-0 pb-3 px-3">

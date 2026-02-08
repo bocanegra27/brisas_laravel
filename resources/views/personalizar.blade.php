@@ -1,250 +1,131 @@
 @extends('layouts.app')
 
-@section('title', 'Personaliza tu Joya - Brisas Gems')
+@section('title', 'Diseña tu ' . ($categoria['nombre'] ?? 'Joya'))
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/personalizar.css') }}" />
+<style>
+    /* Estilos sutiles sin relleno azul */
+    .option-btn {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: white;
+        transition: all 0.2s;
+        font-weight: 500;
+        color: #555;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+    .option-btn:hover {
+        border-color: #aaa;
+        background-color: #f8f9fa;
+    }
+    /* Estilo Activo: Borde oscuro elegante */
+    .option-btn.active {
+        border-color: #222;
+        background-color: white;
+        color: #000;
+        font-weight: 600;
+        border-width: 2px;
+    }
+    .preview-container {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        min-height: 450px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 @endpush
 
 @section('content')
-<div class="personalizar-container">
+<div class="personalizar-container animate-in">
     <div class="container my-5">
+
+        {{-- Menú de Categorías --}}
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8">
+                <ul class="nav nav-pills justify-content-center bg-white p-2 rounded shadow-sm border">
+                    @foreach($categorias as $cat)
+                        <li class="nav-item">
+                            <a class="nav-link {{ $cat['slug'] === $categoria['slug'] ? 'active bg-dark' : 'text-dark' }} fw-bold px-4" 
+                               href="{{ route('personalizar.show', ['slug' => $cat['slug']]) }}">
+                                {{ $cat['nombre'] }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
         
-        <!-- Header de personalización -->
-        <div class="personalizar-header text-center mb-5 animate-in">
-            <h1>Diseña tu Joya Perfecta</h1>
-            <p class="text-muted">Personaliza cada detalle y crea una pieza única</p>
+        <div class="text-center mb-5">
+            <h1 class="display-6 fw-bold">Personalizador de {{ $categoria['nombre'] }}</h1>
         </div>
 
-        <!-- Mensajes flash -->
-        @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show animate-in" role="alert">
-            <i class="bi bi-check-circle me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
-
-        @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show animate-in" role="alert">
-            <i class="bi bi-exclamation-circle me-2"></i>
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        @endif
-
-        @if($errors->any())
-        <div class="alert alert-danger animate-in">
-            <ul class="mb-0">
-                @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
-
-        <!-- Contenido principal -->
-        <div class="row g-4">
-            
-            <!-- Columna izquierda: Vista previa -->
-            <div class="col-lg-6">
-                <div class="preview-section card shadow-sm animate-in animate-delay-1">
-                    <div class="card-body">
-                        <h5 class="card-title text-center mb-4">Vista Previa</h5>
-                        
-                        <!-- Loading spinner -->
-                        <div class="loading-spinner" id="loading-preview" style="display: none;">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Cargando...</span>
+        <div class="row g-5">
+            {{-- IZQUIERDA: VISUALIZADOR --}}
+            <div class="col-lg-7">
+                <div class="sticky-top" style="top: 20px; z-index: 10;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="preview-container">
+                                <div id="loading-preview" class="spinner-border text-primary position-absolute" role="status" style="z-index: 20; display:none;"></div>
+                                <img id="vista-principal" src="" alt="Vista previa" class="img-fluid" style="max-height: 450px; opacity: 0; transition: opacity 0.3s;">
+                                <div id="error-imagen" class="text-center position-absolute text-danger" style="display: none;">
+                                    <i class="bi bi-card-image fs-1"></i>
+                                    <p class="mt-2 fw-bold mb-0">Vista no disponible</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Imagen principal - AHORA USA PROXY -->
-                        <div class="preview-image-container">
-                            <img 
-                                id="vista-principal" 
-                                src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=superior') }}" 
-                                alt="Vista previa de la joya" 
-                                class="img-fluid preview-image">
-                        </div>
-                        
-                        <!-- Controles de vista -->
-                        <div class="view-controls d-flex justify-content-center align-items-center gap-3 mt-4">
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="btn-vista-anterior">
-                                <i class="bi bi-chevron-left"></i>
-                            </button>
-                            <span class="badge bg-primary px-3 py-2" id="current-view-label">Vista Superior</span>
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="btn-vista-siguiente">
-                                <i class="bi bi-chevron-right"></i>
-                            </button>
-                        </div>
-                        
-                        <!-- Miniaturas de vistas - AHORA USAN PROXY -->
-                        <div class="view-thumbnails d-flex justify-content-center gap-2 mt-3">
-                            <button type="button" class="thumbnail-btn" data-view="frontal">
-                                <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=frontal') }}" 
-                                     alt="Vista Frontal" class="img-thumbnail">
-                                <span class="thumbnail-label">Frontal</span>
-                            </button>
-                            <button type="button" class="thumbnail-btn active" data-view="superior">
-                                <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=superior') }}" 
-                                     alt="Vista Superior" class="img-thumbnail">
-                                <span class="thumbnail-label">Superior</span>
-                            </button>
-                            <button type="button" class="thumbnail-btn" data-view="perfil">
-                                <img src="{{ url('/imagen/vista-anillo?gema=diamante&forma=redonda&material=oro-amarillo&vista=perfil') }}" 
-                                     alt="Vista Perfil" class="img-thumbnail">
-                                <span class="thumbnail-label">Perfil</span>
-                            </button>
+                            
+                            {{-- Controles de Vista --}}
+                            <div class="d-flex justify-content-center gap-2 py-3 bg-white border-top">
+                                <button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('anterior')"><i class="bi bi-chevron-left"></i></button>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-dark btn-sm active" data-vista="superior" onclick="setVista('superior')">Superior</button>
+                                    <button type="button" class="btn btn-outline-dark btn-sm" data-vista="frontal" onclick="setVista('frontal')">Frontal</button>
+                                    <button type="button" class="btn btn-outline-dark btn-sm" data-vista="perfil" onclick="setVista('perfil')">Perfil</button>
+                                </div>
+                                <button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('siguiente')"><i class="bi bi-chevron-right"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Columna derecha: Opciones -->
-            <div class="col-lg-6">
-                <div class="options-section card shadow-sm animate-in animate-delay-2">
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('personalizar.guardar') }}" id="form-personalizar">
-                            @csrf
+            {{-- DERECHA: OPCIONES --}}
+            <div class="col-lg-5">
+                <form method="POST" action="{{ route('personalizar.guardar') }}" id="form-personalizar">
+                    @csrf
+                    <input type="hidden" name="catId" value="{{ $categoria['id'] }}">
+                    <div id="data-categoria" data-slug="{{ $categoria['slug'] }}"></div>
 
-                            <!-- Forma de la gema -->
-                            @if(isset($valores['forma']) && !empty($valores['forma']))
-                            <div class="option-group mb-4">
-                                <h5 class="option-title">
-                                    <i class="bi bi-gem me-2"></i>Forma de la Gema
-                                </h5>
-                                <div class="options-grid">
-                                    @foreach($valores['forma'] as $index => $valor)
+                    @foreach($opciones as $opcion)
+                        <div class="mb-4 option-group">
+                            <h6 class="fw-bold text-uppercase text-muted small border-bottom pb-2 mb-3">{{ $opcion['nombre'] }}</h6>
+                            <div class="options-grid">
+                                @foreach($opcion['valores'] as $index => $valor)
                                     <button type="button" 
                                             class="option-btn {{ $index === 0 ? 'active' : '' }}" 
-                                            data-category="forma"
-                                            data-value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valor['nombre'])) }}">
-                                        @if(!empty($valor['imagen']))
-                                        <img src="{{ url('/imagen/icono-opcion?categoria=forma&archivo=' . urlencode($valor['imagen'])) }}" 
-                                             alt="{{ $valor['nombre'] }}" 
-                                             class="option-icon">
-                                        @endif
-                                        <span class="option-label">{{ $valor['nombre'] }}</span>
+                                            data-opcion-id="{{ $opcion['id'] }}"
+                                            data-valor-id="{{ $valor['id'] }}"
+                                            data-valor-slug="{{ \Illuminate\Support\Str::slug($valor['nombre']) }}"
+                                            data-valor-nombre="{{ $valor['nombre'] }}"
+                                            onclick="seleccionarValor(this)">
+                                        {{ $valor['nombre'] }}
                                     </button>
-                                    @endforeach
-                                </div>
-                                <input type="hidden" name="forma" id="input-forma" value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valores['forma'][0]['nombre'] ?? '')) }}">
+                                @endforeach
                             </div>
-                            @endif
+                            <input type="hidden" name="opciones[{{ $opcion['id'] }}]" id="input-opcion-{{ $opcion['id'] }}" value="{{ $opcion['valores'][0]['id'] ?? '' }}">
+                        </div>
+                    @endforeach
 
-                            <!-- Gema central -->
-                            @if(isset($valores['gema']) && !empty($valores['gema']))
-                            <div class="option-group mb-4">
-                                <h5 class="option-title">
-                                    <i class="bi bi-star me-2"></i>Gema Central
-                                </h5>
-                                <div class="options-grid">
-                                    @foreach($valores['gema'] as $index => $valor)
-                                    <button type="button" 
-                                            class="option-btn {{ $index === 0 ? 'active' : '' }}" 
-                                            data-category="gema"
-                                            data-value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valor['nombre'])) }}">
-                                        @if(!empty($valor['imagen']))
-                                        <img src="{{ url('/imagen/icono-opcion?categoria=gema&archivo=' . urlencode($valor['imagen'])) }}" 
-                                             alt="{{ $valor['nombre'] }}" 
-                                             class="option-icon">
-                                        @endif
-                                        <span class="option-label">{{ $valor['nombre'] }}</span>
-                                    </button>
-                                    @endforeach
-                                </div>
-                                <input type="hidden" name="gema" id="input-gema" value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valores['gema'][0]['nombre'] ?? '')) }}">
-                            </div>
-                            @endif
-
-                            <!-- Material -->
-                            @if(isset($valores['material']) && !empty($valores['material']))
-                            <div class="option-group mb-4">
-                                <h5 class="option-title">
-                                    <i class="bi bi-palette me-2"></i>Material
-                                </h5>
-                                <div class="options-grid">
-                                    @foreach($valores['material'] as $index => $valor)
-                                    <button type="button" 
-                                            class="option-btn {{ $index === 0 ? 'active' : '' }}" 
-                                            data-category="material"
-                                            data-value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valor['nombre'])) }}">
-                                        @if(!empty($valor['imagen']))
-                                        <img src="{{ url('/imagen/icono-opcion?categoria=material&archivo=' . urlencode($valor['imagen'])) }}" 
-                                             alt="{{ $valor['nombre'] }}" 
-                                             class="option-icon">
-                                        @endif
-                                        <span class="option-label">{{ $valor['nombre'] }}</span>
-                                    </button>
-                                    @endforeach
-                                </div>
-                                <input type="hidden" name="material" id="input-material" value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valores['material'][0]['nombre'] ?? '')) }}">
-                            </div>
-                            @endif
-
-                            <!-- Tamaño y Talla -->
-                            <div class="row g-3 mb-4">
-                                <!-- Tamaño -->
-                                @if(isset($valores['tamano']) && !empty($valores['tamano']))
-                                <div class="col-md-6">
-                                    <div class="option-group">
-                                        <h5 class="option-title">
-                                            <i class="bi bi-rulers me-2"></i>Tamaño
-                                        </h5>
-                                        <select class="form-select" name="tamano" id="select-tamano">
-                                            @foreach($valores['tamano'] as $valor)
-                                            <option value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valor['nombre'])) }}">
-                                                {{ $valor['nombre'] }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                @endif
-
-                                <!-- Talla -->
-                                @if(isset($valores['talla']) && !empty($valores['talla']))
-                                <div class="col-md-6">
-                                    <div class="option-group">
-                                        <h5 class="option-title">
-                                            <i class="bi bi-circle me-2"></i>Talla
-                                        </h5>
-                                        <select class="form-select" name="talla" id="select-talla">
-                                            @foreach($valores['talla'] as $valor)
-                                            <option value="{{ strtolower(str_replace([' ', 'á', 'é', 'í', 'ó', 'ú'], ['-', 'a', 'e', 'i', 'o', 'u'], $valor['nombre'])) }}">
-                                                {{ $valor['nombre'] }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                @endif
-                            </div>
-
-                            <!-- Resumen -->
-                            <div class="summary-box mb-4">
-                                <h6 class="mb-3">
-                                    <i class="bi bi-card-checklist me-2"></i>Resumen de tu Personalización
-                                </h6>
-                                <div id="summary-content" class="summary-content">
-                                    <p class="mb-1"><strong>Forma:</strong> <span id="summary-forma">-</span></p>
-                                    <p class="mb-1"><strong>Gema:</strong> <span id="summary-gema">-</span></p>
-                                    <p class="mb-1"><strong>Material:</strong> <span id="summary-material">-</span></p>
-                                    <p class="mb-1"><strong>Tamaño:</strong> <span id="summary-tamano">-</span></p>
-                                    <p class="mb-0"><strong>Talla:</strong> <span id="summary-talla">-</span></p>
-                                </div>
-                            </div>
-
-                            <!-- Botón guardar -->
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg" id="btn-guardar">
-                                    <i class="bi bi-save me-2"></i>Guardar Personalización
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold text-uppercase mt-4">Guardar Diseño</button>
+                </form>
             </div>
         </div>
     </div>
@@ -253,103 +134,85 @@
 
 @push('scripts')
 <script>
-    // ============================================
-    // GESTOR DE SESIONES ANÓNIMAS
-    // Este código DEBE estar aquí para que Blade procese la URL de la API.
-    // ============================================
-    (function() {
-        'use strict';
+    // ESTADO GLOBAL ÚNICO
+    let estado = {
+        vista: 'superior',
+        slugsSeleccionados: []
+    };
 
-        const STORAGE_TOKEN = 'anonymous_token'; // Usaremos esta como clave central en el registro
-        const STORAGE_SESION_ID = 'anonymous_sesion_id'; // Esta es secundaria
+    document.addEventListener('DOMContentLoaded', () => {
+        recalcularEstado();
+    });
 
-        /**
-         * Obtiene o crea una sesión anónima
-         */
-        async function obtenerOCrearSesion() {
-            // Verificar si ya existe en localStorage
-            let token = localStorage.getItem(STORAGE_TOKEN);
-            let sesionId = localStorage.getItem(STORAGE_SESION_ID);
+    function seleccionarValor(boton) {
+        const grupo = boton.closest('.option-group');
+        grupo.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+        boton.classList.add('active');
 
-            if (token && sesionId) {
-                console.log('✅ Sesión existente encontrada:', sesionId);
-                return { token, sesionId: parseInt(sesionId) };
+        // Actualizar input para el form
+        const opcId = boton.dataset.opcionId;
+        document.getElementById('input-opcion-' + opcId).value = boton.dataset.valorId;
+
+        recalcularEstado();
+    }
+
+    function recalcularEstado() {
+        estado.slugsSeleccionados = [];
+        const exclusiones = ['talla', 'tamaño'];
+
+        document.querySelectorAll('.option-group').forEach(grupo => {
+            const titulo = grupo.querySelector('h6').innerText.toLowerCase();
+            const esEfectivo = !exclusiones.some(p => titulo.includes(p));
+
+            if (esEfectivo) {
+                const activo = grupo.querySelector('.option-btn.active');
+                if (activo) estado.slugsSeleccionados.push(activo.dataset.valorSlug);
             }
+        });
+        actualizarImagen();
+    }
 
-            // Si no existe, crear nueva sesión
-            console.log('🔄 Creando nueva sesión anónima...');
+    function setVista(v) {
+        estado.vista = v;
+        document.querySelectorAll('[data-vista]').forEach(b => b.classList.toggle('active', b.dataset.vista === v));
+        actualizarImagen();
+    }
 
-            try {
-                // Aquí es donde Blade inserta la URL de la API:
-                const API_URL = '{{ config("services.spring_api.url") }}/sesiones-anonimas';
-                
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                });
+    function cambiarVista(dir) {
+        const vistas = ['superior', 'frontal', 'perfil'];
+        let i = vistas.indexOf(estado.vista);
+        i = (dir === 'siguiente') ? (i + 1) % 3 : (i - 1 + 3) % 3;
+        setVista(vistas[i]);
+    }
 
-                if (!response.ok) {
-                    throw new Error('Error al crear sesión');
-                }
+    function actualizarImagen() {
+        const img = document.getElementById('vista-principal');
+        const loader = document.getElementById('loading-preview');
+        const error = document.getElementById('error-imagen');
+        
+        const catSlug = document.getElementById('data-categoria').dataset.slug;
+        const baseUrl = `http://localhost:8080/assets/img/personalizacion/${catSlug}`;
+        const rutaOpciones = estado.slugsSeleccionados.join('/');
+        const urlFinal = `${baseUrl}/${rutaOpciones}/${estado.vista}.jpg`;
 
-                const data = await response.json();
+        console.log("Cargando:", urlFinal);
 
-                // Guardar en localStorage
-                localStorage.setItem(STORAGE_TOKEN, data.sesToken);
-                localStorage.setItem(STORAGE_SESION_ID, data.sesId);
+        loader.style.display = 'block';
+        img.style.opacity = '0.3';
+        error.style.display = 'none';
 
-                console.log('✅ Nueva sesión creada:', data.sesId);
-
-                return {
-                    token: data.sesToken,
-                    sesionId: data.sesId
-                };
-
-            } catch (error) {
-                console.error('❌ Error al crear sesión:', error);
-                return null;
-            }
-        }
-
-        /**
-         * Inicializar sesión al cargar la página
-         */
-        async function inicializarSesion() {
-            // ✅ Verificar PRIMERO si hay usuario autenticado
-            const isAuthenticated = @json(session()->has('user_id'));
-            
-            if (isAuthenticated) {
-                console.log('✅ Usuario autenticado detectado - NO se usará sesionId');
-                return; // Salir sin agregar sesionId
-            }
-            
-            // Solo crear sesión si NO está autenticado
-            const sesion = await obtenerOCrearSesion();
-
-            if (sesion) {
-                const form = document.getElementById('form-personalizar');
-                if (form) {
-                    let inputSesion = form.querySelector('input[name="sesionId"]');
-                    if (!inputSesion) {
-                        inputSesion = document.createElement('input');
-                        inputSesion.type = 'hidden';
-                        inputSesion.name = 'sesionId';
-                        form.appendChild(inputSesion);
-                    }
-                    inputSesion.value = sesion.sesionId;
-
-                    console.log('✅ sesionId agregado al formulario:', sesion.sesionId);
-                }
-            }
-        }
-
-        // Ejecutar al cargar la página
-        document.addEventListener('DOMContentLoaded', inicializarSesion);
-    })();
+        const preload = new Image();
+        preload.onload = () => {
+            img.src = urlFinal;
+            img.style.opacity = '1';
+            loader.style.display = 'none';
+        };
+        preload.onerror = () => {
+            loader.style.display = 'none';
+            img.style.opacity = '0';
+            error.style.display = 'block';
+        };
+        preload.src = urlFinal;
+    }
 </script>
-
-<script src="{{ asset('assets/js/personalizar.js') }}"></script>
 @endpush
