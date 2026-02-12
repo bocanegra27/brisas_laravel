@@ -66,17 +66,8 @@
         </div>
         @endif
 
-        {{-- Tabla de pedidos --}}
-        <div class="card pedidos-table-card animate-in animate-delay-5">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-3">
-                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Lista de Pedidos</h5>
-                    </div>
-                    <div class="col-md-9">
-                        <div class="row g-3">
-                            {{-- Busqueda por codigo --}}
-                            <div class="col-md-5">
+        {{-- Tabla de pedidos (componente maestro) --}}
+        @include('components.pedidos.tabla-listado', ['pedidos' => $pedidos, 'filtros' => $filtros, 'estados' => $estados, 'pageSize' => $pageSize, 'estadoMapeo' => $estadoMapeo])
                                 <div class="search-box">
                                     <i class="bi bi-search"></i>
                                     <input type="text" id="searchCodigo" class="form-control" 
