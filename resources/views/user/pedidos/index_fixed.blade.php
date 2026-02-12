@@ -9,6 +9,51 @@
     <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
 
+    {{-- Estilos para la galería de productos --}}
+    <style>
+        .galeria-item {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .galeria-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .galeria-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .galeria-item:hover .galeria-overlay {
+            opacity: 1;
+        }
+        
+        .galeria-overlay i {
+            color: white;
+            font-size: 24px;
+        }
+        
+        .img-thumbnail-gallery {
+            transition: transform 0.3s ease;
+        }
+        
+        .img-thumbnail-gallery:hover {
+            transform: scale(1.05);
+        }
+    </style>
+
     {{-- Estilos para Model Viewer --}}
     <style>
         model-viewer {
@@ -36,6 +81,31 @@
             background: white;
             border-radius: 4px;
             cursor: pointer;
+        }
+        
+        /* Modal más ancho para mejor visualización */
+        .modal-detalle-pedido {
+            max-width: 95vw !important;
+            width: 95vw !important;
+        }
+        
+        .modal-detalle-pedido .modal-content {
+            height: 95vh !important;
+            max-height: 95vh !important;
+        }
+        
+        .modal-detalle-pedido .modal-body {
+            height: calc(95vh - 140px) !important;
+            overflow-y: auto !important;
+            padding: 15px !important;
+        }
+        
+        /* Ajustes para pantallas grandes */
+        @media (min-width: 1400px) {
+            .modal-detalle-pedido {
+                max-width: 1400px !important;
+                width: 1400px !important;
+            }
         }
         
         .viewer-controls button:hover {
@@ -305,7 +375,7 @@
 
 {{-- Modal para ver detalles y línea de tiempo --}}
 <div class="modal fade" id="detallesModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl modal-detalle-pedido">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalles del Pedido</h5>
@@ -417,6 +487,11 @@ function renderDetalles(pedido) {
                         </div>
                         ${item.hisComentarios ? `<p class="mb-1">${item.hisComentarios}</p>` : ''}
                         ${item.usuarioResponsable ? `<small class="text-muted">Por: ${item.usuarioResponsable}</small>` : ''}
+                        ${item.hisImagen ? `<div class="timeline-image-link mt-2">
+                            <a href="/api/archivos/proxy/${item.hisImagen}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-image"></i> Ver Evidencia
+                            </a>
+                        </div>` : ''}
                     </div>
                 </div>
             `;
@@ -570,11 +645,10 @@ function renderDetalles(pedido) {
                 
                 galeriaHtml += `
                     <div class="col-6 col-md-4 col-lg-3 mb-3">
-                        <div class="galeria-item position-relative">
+                        <div class="galeria-item position-relative" onclick="openImageModal('${imageUrl}')" style="cursor: pointer;">
                             <img src="${imageUrl}" 
                                  class="img-fluid rounded border shadow-sm img-thumbnail-gallery" 
-                                 style="aspect-ratio: 1/1; object-fit: cover; cursor: pointer;"
-                                 onclick="openImageModal('${imageUrl}')"
+                                 style="aspect-ratio: 1/1; object-fit: cover; pointer-events: none;"
                                  onerror="console.error('Error cargando imagen:', '${fotoPath}'); this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmMWY1ZjkiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIxODAiIHI9IjYwIiBmaWxsPSIjY2JkNWUxIi8+PHBhdGggZD0iTTE0MCAyNjAgTDI2MCAyNjAgTDIwMCAzMjAgWiIgZmlsbD0iI2NiZDVlMSIvPjx0ZXh0IHg9IjIwMCIgeT0iMzYwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM2NDc0OGIiPkltYWdlbiBubyBkaXNwb25pYmxlPC90ZXh0Pjwvc3ZnPg==';"
                                  onload="console.log('Foto cargada exitosamente:', this.src);"
                                  alt="Foto del producto ${index + 1}">
@@ -611,40 +685,59 @@ function renderDetalles(pedido) {
     
     return `
         <div class="pedido-detalle">
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h6>Código del Pedido</h6>
-                    <p class="fs-5 fw-bold text-primary">${pedido.pedCodigo || 'N/A'}</p>
+            <!-- Información básica compacta -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <h6 class="small text-muted mb-1">Código</h6>
+                    <p class="fs-5 fw-bold text-primary mb-0">${pedido.pedCodigo || 'N/A'}</p>
                 </div>
-                <div class="col-md-6">
-                    <h6>Estado Actual</h6>
-                    <span class="estado-badge estado-${pedido.estadoNombre ? pedido.estadoNombre.toLowerCase().replace(/\s+/g, '_') : 'desconocido'}">
+                <div class="col-md-4">
+                    <h6 class="small text-muted mb-1">Estado</h6>
+                    <span class="estado-badge estado-${pedido.estadoNombre ? pedido.estadoNombre.toLowerCase().replace(/\s+/g, '_') : 'desconocido'} mb-0">
                         ${pedido.estadoNombre || 'N/A'}
                     </span>
                 </div>
+                <div class="col-md-4">
+                    <h6 class="small text-muted mb-1">Fecha</h6>
+                    <p class="mb-0">${new Date(pedido.pedFechaCreacion).toLocaleDateString('es-ES')}</p>
+                </div>
             </div>
             
-            <div class="row mb-4">
+            ${pedido.pedComentarios ? `
+            <div class="row mb-3">
                 <div class="col-12">
-                    <h6>Comentarios</h6>
-                    <p>${pedido.pedComentarios || 'Sin comentarios'}</p>
+                    <h6 class="small text-muted mb-1">Comentarios</h6>
+                    <p class="small mb-0">${pedido.pedComentarios}</p>
                 </div>
             </div>
+            ` : ''}
             
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h6>Fecha de Creación</h6>
-                    <p>${new Date(pedido.pedFechaCreacion).toLocaleDateString('es-ES')}</p>
+            <!-- Grid 2x2 para contenido principal -->
+            <div class="row g-3">
+                <!-- Render (arriba izquierda) -->
+                <div class="col-lg-6">
+                    <div class="h-100">
+                        ${renderHtml}
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h6>Última Actualización</h6>
-                    <p>${pedido.pedFechaActualizacion ? new Date(pedido.pedFechaActualizacion).toLocaleDateString('es-ES') : 'No disponible'}</p>
+                
+                <!-- Línea de tiempo (arriba derecha) -->
+                <div class="col-lg-6">
+                    <div class="h-100 overflow-auto" style="max-height: 400px;">
+                        ${historialHtml}
+                    </div>
+                </div>
+                
+                <!-- Galería (abajo izquierda) -->
+                <div class="col-lg-6">
+                    ${galeriaHtml}
+                </div>
+                
+                <!-- Espacio reservado para balance -->
+                <div class="col-lg-6">
+                    <!-- Contenido adicional si es necesario -->
                 </div>
             </div>
-            
-            ${renderHtml}
-            ${galeriaHtml}
-            ${historialHtml}
         </div>
     `;
 }
