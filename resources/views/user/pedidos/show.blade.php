@@ -288,8 +288,13 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <small><strong>Datos completos del pedido:</strong></small>
-                    <pre class="small bg-light p-2 rounded" style="max-height: 200px; overflow-y: auto;">{{ json_encode($pedido, JSON_PRETTY_PRINT) }}</pre>
+                    <button type="button" class="btn btn-sm btn-outline-info" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                        <i class="bi bi-code-slash me-1"></i>Mostrar/Ocultar JSON
+                    </button>
+                    <div style="display: none;">
+                        <small><strong>Datos completos del pedido:</strong></small>
+                        <pre class="small bg-light p-2 rounded mt-2" style="max-height: 200px; overflow-y: auto; font-size: 11px;">{{ json_encode($pedido, JSON_PRETTY_PRINT) }}</pre>
+                    </div>
                 </div>
             </div>
         </div>
@@ -310,7 +315,7 @@
                         </p>
                         <p class="mb-2">
                             <strong>Estado:</strong> 
-                            <span class="estado-badge estado-{{ Str::slug($pedido['estadoNombre'] ?? 'desconocido', '_') }} fs-6">
+                            <span class="estado-badge estado-{{ Str::slug($pedido['estadoNombre'] ?? 'desconocido', '_') }} fs-6 ms-2">
                                 {{ $pedido['estadoNombre'] ?? 'Desconocido' }}
                             </span>
                         </p>
@@ -529,7 +534,19 @@
                                 <div class="timeline-header">
                                     <strong>{{ $item['estadoNombre'] ?? 'Estado actualizado' }}</strong>
                                     <small class="text-muted ms-2">
-                                        {{ date('d/m/Y H:i', strtotime($item['hisFechaCambio'] ?? 'now')) }}
+                                        @php
+                                            $fecha = null;
+                                            if (!empty($item['hisFechaCambio'])) {
+                                                try {
+                                                    $fecha = new DateTime($item['hisFechaCambio']);
+                                                    echo $fecha->format('d/m/Y H:i');
+                                                } catch (Exception $e) {
+                                                    echo 'Fecha no disponible';
+                                                }
+                                            } else {
+                                                echo 'Fecha no registrada';
+                                            }
+                                        @endphp
                                     </small>
                                 </div>
                                 @if($item['hisComentarios'] ?? null)

@@ -9,17 +9,20 @@
     <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
 
-    {{-- Estilos para la galería de productos --}}
+    {{-- Estilos mejorados para la galería de productos --}}
     <style>
         .galeria-item {
             position: relative;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
         .galeria-item:hover {
-            transform: scale(1.05);
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         .galeria-overlay {
@@ -28,12 +31,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(2px);
         }
         
         .galeria-item:hover .galeria-overlay {
@@ -42,15 +46,326 @@
         
         .galeria-overlay i {
             color: white;
-            font-size: 24px;
+            font-size: 28px;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .galeria-item:hover .galeria-overlay i {
+            transform: scale(1);
         }
         
         .img-thumbnail-gallery {
-            transition: transform 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
         }
         
         .img-thumbnail-gallery:hover {
             transform: scale(1.05);
+        }
+        
+        /* Mejoras visuales para la sección de galería */
+        .galeria-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        
+        .galeria-section h6 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .galeria-section h6 i {
+            color: #3b82f6;
+        }
+    </style>
+
+    {{-- Mejoras visuales para la sección de render --}}
+    <style>
+        .render-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        
+        .render-section h6 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .render-section h6 i {
+            color: #10b981;
+        }
+        
+        .render-container {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+    {{-- Mejoras visuales para la línea de tiempo --}}
+    <style>
+        .timeline {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        
+        .timeline h6 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .timeline h6::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+            padding-left: 40px;
+        }
+        
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+        
+        .timeline-marker i {
+            color: white;
+            font-size: 12px;
+        }
+        
+        .timeline-content {
+            background: #ffffff;
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-content:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-header strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .timeline-image-link {
+            margin-top: 12px;
+        }
+        
+        .timeline-image-link .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+        
+        .timeline-image-link .btn:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+
+    {{-- Mejoras para la información básica --}}
+    <style>
+        .pedido-detalle {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+        
+        .pedido-detalle .small.text-muted {
+            color: #6b7280 !important;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Estados de pedidos más coloridos y atractivos */
+        .estado-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .estado-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .estado-badge:hover::before {
+            left: 100%;
+        }
+        
+        .estado-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Estados específicos con colores vibrantes */
+        .estado-cotizacion_pendiente {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            border: 1px solid #f59e0b;
+        }
+        
+        .estado-pago_diseno_pendiente {
+            background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+            color: white;
+            border: 1px solid #f97316;
+        }
+        
+        .estado-diseno_en_proceso {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: white;
+            border: 1px solid #3b82f6;
+        }
+        
+        .estado-diseno_aprobado {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            color: white;
+            border: 1px solid #10b981;
+        }
+        
+        .estado-tallado_produccion {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            color: white;
+            border: 1px solid #8b5cf6;
+        }
+        
+        .estado-engaste {
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            color: white;
+            border: 1px solid #ec4899;
+        }
+        
+        .estado-pulido {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            border: 1px solid #f59e0b;
+        }
+        
+        .estado-inspeccion_calidad {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            border: 1px solid #0891b2;
+        }
+        
+        .estado-finalizado_listo_entrega {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: 1px solid #059669;
+            animation: pulse-success 2s infinite;
+        }
+        
+        .estado-cancelado {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: 1px solid #dc2626;
+        }
+        
+        .estado-desconocido {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+            border: 1px solid #4b5563;
+        }
+        
+        @keyframes pulse-success {
+            0%, 100% {
+                box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.6);
+            }
+        }
+        
+        /* Indicador de estado activo en línea de tiempo */
+        .timeline-item.active .timeline-marker {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+            animation: pulse-marker 2s infinite;
+        }
+        
+        @keyframes pulse-marker {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
         }
     </style>
 
@@ -149,6 +464,7 @@
             font-size: 24px;
         }
 
+        /* Mejoras para el modal fullscreen de imágenes */
         .modal-fullscreen {
             display: none;
             position: fixed;
@@ -157,10 +473,17 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.95);
+            background-color: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
             cursor: pointer;
+            animation: fadeIn 0.3s ease;
         }
-
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
         .modal-fullscreen img {
             position: absolute;
             top: 50%;
@@ -169,8 +492,22 @@
             max-width: 90%;
             max-height: 90%;
             object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
         }
-
+        
+        @keyframes zoomIn {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        
         .modal-fullscreen-close {
             position: absolute;
             top: 20px;
@@ -178,12 +515,22 @@
             color: white;
             font-size: 40px;
             font-weight: bold;
-            cursor: pointer;
+            transition: all 0.3s ease;
             z-index: 10000;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
         }
-
+        
         .modal-fullscreen-close:hover {
-            color: #ccc;
+            color: #f3f4f6;
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
         }
     </style>
 @endpush
@@ -467,13 +814,25 @@ function renderDetalles(pedido) {
         `;
         
         pedido.historial.forEach((item, index) => {
-            const fecha = new Date(item.hisFecha).toLocaleDateString('es-ES', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            // Manejo robusto de fechas
+            let fecha = 'Fecha no disponible';
+            if (item.hisFechaCambio) {
+                try {
+                    const dateObj = new Date(item.hisFechaCambio);
+                    if (!isNaN(dateObj.getTime())) {
+                        fecha = dateObj.toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Error al procesar fecha:', item.hisFechaCambio, error);
+                    fecha = 'Fecha inválida';
+                }
+            }
             
             historialHtml += `
                 <div class="timeline-item">
@@ -693,9 +1052,11 @@ function renderDetalles(pedido) {
                 </div>
                 <div class="col-md-4">
                     <h6 class="small text-muted mb-1">Estado</h6>
-                    <span class="estado-badge estado-${pedido.estadoNombre ? pedido.estadoNombre.toLowerCase().replace(/\s+/g, '_') : 'desconocido'} mb-0">
-                        ${pedido.estadoNombre || 'N/A'}
-                    </span>
+                    <div class="mt-2">
+                        <span class="estado-badge estado-${pedido.estadoNombre ? pedido.estadoNombre.toLowerCase().replace(/\s+/g, '_') : 'desconocido'}">
+                            ${pedido.estadoNombre || 'N/A'}
+                        </span>
+                    </div>
                 </div>
                 <div class="col-md-4">
                     <h6 class="small text-muted mb-1">Fecha</h6>
