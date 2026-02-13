@@ -139,7 +139,7 @@
                 <div class="sticky-top" style="top: 20px; z-index: 10;">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-0">
-<div class="preview-container d-flex justify-content-center align-items-center" 
+                    <div class="preview-container d-flex justify-content-center align-items-center" 
                      style="background: radial-gradient(circle, #ffffff 0%, #f8fafc 100%); min-height: 450px; position: relative;">
                     
                     <div id="loading-preview" class="spinner-border text-primary position-absolute" role="status" style="z-index: 20; display:none;"></div>
@@ -174,6 +174,7 @@
                 <form method="POST" action="{{ route('personalizar.guardar') }}" id="form-personalizar">
                     @csrf
                     <input type="hidden" name="catId" value="{{ $categoria['id'] }}">
+                    <input type="hidden" name="sesionId" id="input-sesion-anonima" value="">
                     <div id="data-categoria" data-slug="{{ $categoria['slug'] }}"></div>
 
                     @foreach($opciones as $opcion)
@@ -221,9 +222,15 @@
         grupo.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
         boton.classList.add('active');
 
-        // Actualizar input para el form
+        // ESTA PARTE ES CRÍTICA: Actualizar el input hidden que lee PHP
         const opcId = boton.dataset.opcionId;
-        document.getElementById('input-opcion-' + opcId).value = boton.dataset.valorId;
+        const inputOculto = document.getElementById('input-opcion-' + opcId);
+        
+        if (inputOculto) {
+            inputOculto.value = boton.dataset.valorId;
+        } else {
+            console.error("No se encontró el input input-opcion-" + opcId);
+        }
 
         recalcularEstado();
     }
@@ -263,7 +270,7 @@
         const error = document.getElementById('error-imagen');
         
         const catSlug = document.getElementById('data-categoria').dataset.slug;
-        const baseUrl = `http://localhost:8080/assets/img/personalizacion/${catSlug}`;
+        const baseUrl = `http://localhost:8080/uploads/personalizacion/${catSlug}`;
         const rutaOpciones = estado.slugsSeleccionados.join('/');
         const urlFinal = `${baseUrl}/${rutaOpciones}/${estado.vista}.jpg`;
 

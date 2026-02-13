@@ -61,9 +61,8 @@ class PersonalizarController extends Controller
                 return redirect()->route('home')->with('error', 'Error de conexión.');
             }
         }
-    /**
-     * Guardar el diseño
-     */
+
+
     public function guardar(Request $request)
     {
         try {
@@ -72,29 +71,45 @@ class PersonalizarController extends Controller
                 'opciones' => 'required|array',
             ]);
 
+            // 1. CONVERSIÓN CRÍTICA: Forzamos que los IDs sean enteros (int)
+            // Esto soluciona el problema de "String vs Integer" que rechaza Java
+            $valoresSeleccionados = collect($request->input('opciones'))
+                ->filter() // Quita valores nulos o vacíos
+                ->map(fn($val) => (int) $val) // Convierte a número
+                ->values() // Reindexa el array
+                ->toArray();
+
+            if (empty($valoresSeleccionados)) {
+                return back()->with('error', 'Por favor selecciona las opciones de tu joya.');
+            }
+
             $data = [
+                'catId' => (int) $request->input('catId'),
                 'fecha' => now()->format('Y-m-d\TH:i:s'),
-                'valoresSeleccionados' => array_values($request->input('opciones'))
+                'valoresSeleccionados' => $valoresSeleccionados
             ];
 
-            if (Session::has('user_id')) {
-                $data['usuarioClienteId'] = (int) Session::get('user_id');
+            // 2. Manejo de Usuario vs Sesión
+            if (session()->has('user_id')) {
+                $data['usuarioClienteId'] = (int) session('user_id');
             } elseif ($request->has('sesionId')) {
                 $data['sesionId'] = (int) $request->input('sesionId');
             }
 
+            // 3. Petición al API
             $response = $this->apiService->post('/personalizaciones', $data);
 
+            // 4. Verificación de éxito (Ahora $response['id'] será 9 como en Postman)
             if ($response && isset($response['id'])) {
                 return redirect()->route('contacto.create', ['personalizacionId' => $response['id']])
-                    ->with('success', 'Diseño guardado correctamente.');
+                    ->with('success', '¡Diseño guardado! Cuéntanos más para darte una cotización.');
             }
 
-            return back()->with('error', 'No se pudo guardar el diseño.');
+            return back()->with('error', 'No se pudo procesar el diseño en el servidor.');
 
         } catch (\Exception $e) {
-            Log::error('Error guardando: ' . $e->getMessage());
-            return back()->with('error', 'Error inesperado.');
+            Log::error('Error en PersonalizarController@guardar: ' . $e->getMessage());
+            return back()->with('error', 'Ocurrió un error inesperado al guardar.');
         }
     }
 }
