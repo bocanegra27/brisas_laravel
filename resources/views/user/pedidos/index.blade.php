@@ -552,7 +552,7 @@
     </style>
 @endpush
 
-
+@section('content')
 <div class="container-fluid py-5">
     {{-- Header con Stats Pills --}}
     <div class="dashboard-header animate-in">
@@ -1208,3 +1208,4 @@ function debounce(func, wait) {
 }
 </script>
 @endpush
+@endsection
