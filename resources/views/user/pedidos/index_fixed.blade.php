@@ -535,7 +535,7 @@
     </style>
 @endpush
 
-<div class="container-fluid py-5">
+<div class="container-fluid py-5" style="margin-top: 100px;">
     {{-- Header con Stats Pills --}}
     <div class="dashboard-header animate-in">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -569,8 +569,8 @@
                     </div>
                 </div>
             </div>
-            <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
+            <a href="{{ url('/') }}" class="btn btn-secondary">
+                <i class="bi bi-house me-2"></i>Volver al Inicio
             </a>
         </div>
     </div>
@@ -588,7 +588,10 @@
         <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    @@endif
+
+    {{-- Separador visual --}}
+    <div class="my-4"></div>
 
     {{-- Tabla de pedidos --}}
     <div class="card shadow-sm animate-in">

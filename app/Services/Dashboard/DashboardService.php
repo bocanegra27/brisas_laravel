@@ -173,27 +173,6 @@ class DashboardService
     }
 
     /**
-     * Obtiene estadísticas del dashboard de usuario
-     * 
-     * @return array
-     */
-    public function getUserStats(): array
-    {
-        try {
-            // TODO: Implementar cuando tengas los endpoints específicos del usuario
-            Log::warning('DashboardService: getUserStats no implementado aún');
-            return $this->getDefaultUserStats();
-
-        } catch (\Exception $e) {
-            Log::error('DashboardService: Error obteniendo user stats', [
-                'error' => $e->getMessage()
-            ]);
-            
-            return $this->getDefaultUserStats();
-        }
-    }
-
-    /**
      * Valores por defecto para admin (cuando el API falla)
      * 
      * @return array
@@ -245,20 +224,6 @@ class DashboardService
             'rendersPendientes' => 0,
             'comunicacionesPendientes' => 0,
             'pedidosAsignados' => 0
-        ];
-    }
-
-    /**
-     * Valores por defecto para usuario (cuando el API falla)
-     * 
-     * @return array
-     */
-    private function getDefaultUserStats(): array
-    {
-        return [
-            'misPedidosActivos' => 0,
-            'misPersonalizaciones' => 0,
-            'pedidosCompletados' => 0
         ];
     }
 }

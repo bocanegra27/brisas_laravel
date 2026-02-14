@@ -58,8 +58,30 @@ class AuthController extends Controller
         );
 
         if ($result) {
-            // Login exitoso - redirigir a dashboard según rol
-            return redirect($result['dashboardUrl'] ?? '/dashboard')
+            // Login exitoso - determinar redirección según rol del usuario
+            $userRole = Session::get('user_role', 'ROLE_USUARIO');
+            
+            switch ($userRole) {
+                case 'ROLE_ADMINISTRADOR':
+                    $redirectUrl = '/admin/dashboard';
+                    break;
+                case 'ROLE_DISEÑADOR':
+                    $redirectUrl = '/designer/dashboard';
+                    break;
+                case 'ROLE_USUARIO':
+                default:
+                    $redirectUrl = '/user/pedidos';
+                    break;
+            }
+            
+            // Log para depuración
+            Log::info('AuthController: Redirigiendo usuario (lógica local)', [
+                'user_role' => $userRole,
+                'redirect_url' => $redirectUrl,
+                'api_dashboard_url' => $result['dashboardUrl'] ?? 'null'
+            ]);
+            
+            return redirect($redirectUrl)
                 ->with('success', $result['message'] ?? 'Bienvenido');
         }
 

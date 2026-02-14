@@ -587,8 +587,8 @@
                     </div>
                 </div>
             </div>
-            <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
+            <a href="{{ url('/') }}" class="btn btn-secondary">
+                <i class="bi bi-house me-2"></i>Volver al Inicio
             </a>
         </div>
     </div>
@@ -607,6 +607,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     @endif
+
+    {{-- Separador visual --}}
+    <div class="my-4"></div>
 
     {{-- Tabla de pedidos --}}
     <div class="card shadow-sm animate-in">

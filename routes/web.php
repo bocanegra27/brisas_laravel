@@ -178,7 +178,10 @@ Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer
 // ROL: USUARIO (CLIENTE)
 // ============================================
 Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
+    // AGREGAR ESTA RUTA:
+    Route::get('/pedidos', [UserPedidoController::class, 'index'])->name('user.pedidos.index');
+    Route::get('/pedidos/{id}', [UserPedidoController::class, 'show'])->name('user.pedidos.show');
+    Route::get('/pedidos/{id}/detalles', [UserPedidoController::class, 'detalles'])->name('user.pedidos.detalles');
 });
 
 // ============================================
@@ -190,15 +193,6 @@ Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function 
     Route::patch('/password', [ProfileController::class, 'updatePassword'])->name('perfil.password');
 });
 
-// Para USUARIO (cliente) - agregar después de línea 177
-Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
-    
-    // AGREGAR ESTA RUTA:
-    Route::get('/pedidos', [UserPedidoController::class, 'index'])->name('user.pedidos.index');
-    Route::get('/pedidos/{id}', [UserPedidoController::class, 'show'])->name('user.pedidos.show');
-    Route::get('/pedidos/{id}/detalles', [UserPedidoController::class, 'detalles'])->name('user.pedidos.detalles');
-});
 
 // Para DISEÑADOR - agregar después de línea 170  
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {

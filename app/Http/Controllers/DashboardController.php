@@ -27,9 +27,10 @@ class DashboardController extends Controller
             case 'ROLE_DISEÑADOR':
                 return $this->designerDashboard();
             case 'ROLE_USUARIO':
-                return $this->userDashboard();
+                // Redirigir directamente a mis pedidos
+                return redirect()->route('user.pedidos.index');
             default:
-                return $this->userDashboard();
+                return redirect()->route('user.pedidos.index');
         }
     }
 
@@ -43,11 +44,5 @@ class DashboardController extends Controller
     {
         $data = $this->dashboardService->getDesignerStats();
         return view('dashboard.designer', compact('data'));
-    }
-
-    public function userDashboard()
-    {
-        $data = $this->dashboardService->getUserStats();
-        return view('dashboard.user', compact('data'));
     }
 }
