@@ -22,7 +22,7 @@
     } elseif ($isDesigner) {
         $logoUrl = '/designer/dashboard';
     } elseif ($isUser) {
-        $logoUrl = '/user/dashboard';
+        $logoUrl = '/'; // Redirigir a Inicio como en el menú de navegación
     } else {
         $logoUrl = '/';
     }
