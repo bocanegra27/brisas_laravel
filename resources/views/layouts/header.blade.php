@@ -116,8 +116,8 @@
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/renders') ? 'header-minimal__nav-link--active' : '' }}">
                     Renders
                 </a> --}}
-                <a href="{{ url('/pedidos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                <a href="{{ url('/designer/pedidos') }}" 
+                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/pedidos') ? 'header-minimal__nav-link--active' : '' }}">
                     Pedidos
                 </a>
                 {{-- <a href="{{ url('/designer/comunicacion') }}" 
