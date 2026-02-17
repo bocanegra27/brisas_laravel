@@ -391,6 +391,7 @@
 // Variables globales
 const pedidoId = {{ $pedido['pedId'] ?? 0 }};
 const estadoActualId = {{ $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0) }};
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // Función para obtener información del estado
 function getEstadoInfo(estadoId) {
@@ -407,6 +408,78 @@ function getEstadoInfo(estadoId) {
         10: { nombre: 'Cancelado', icono: 'bi-x-circle' }
     };
     return estados[estadoId] || { nombre: 'Desconocido', icono: 'bi-question-circle' };
+}
+
+// 1. ACTUALIZACIÓN DE ESTADO (CON SOPORTE PARA ARCHIVOS)
+// ===============================================
+
+function actualizarEstadoPedido(event, pedidoId) {
+    event.preventDefault();
+    
+    // Obtenemos el formulario y creamos el FormData para incluir el archivo
+    const form = document.getElementById('formCambiarEstado');
+    const formData = new FormData(form);
+    
+    // Agregamos manualmente los datos que antes sacabas por ID (por seguridad)
+    const estadoId = document.getElementById('nuevoEstadoSelect').value;
+    const comentarios = document.getElementById('comentariosEstado').value;
+    
+    // Nota: FormData ya incluye automáticamente el archivo si el input tiene name="his_imagen"
+    
+    Swal.fire({
+        title: 'Actualizando...',
+        text: 'Registrando cambio y subiendo evidencia si existe',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    fetch(`/designer/pedidos/${pedidoId}/actualizar-estado-historial`, { 
+        method: 'POST', // Cambiamos a POST porque PATCH con Multipart suele dar problemas
+        headers: {
+            // IMPORTANTE: NO pongas Content-Type, el navegador lo pondrá automáticamente con el "boundary"
+            'X-CSRF-TOKEN': csrfToken 
+        },
+        body: formData // Enviamos el objeto FormData directamente
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `Error HTTP ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Éxito',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#009688'
+            }).then(() => {
+                window.location.reload(); 
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: data.message || 'No se pudo actualizar el estado',
+                icon: 'error',
+                confirmButtonColor: '#d33'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error completo:', error);
+        Swal.fire({
+            title: 'Error de conexión',
+            text: error.message || 'No se pudo conectar con el servidor',
+            icon: 'error',
+            confirmButtonColor: '#d33'
+        });
+    });
 }
 
 // Actualizar estado

@@ -32,7 +32,13 @@ class PedidoController extends Controller
         try {
             $designerId = Session::get('user_id');
             
+            // 🔥 DEBUG SIMPLE Y CLARO
+            error_log("=== DESIGNER PEDIDOS DEBUG ===");
+            error_log("Designer ID: " . $designerId);
+            error_log("JWT Token: " . (Session::get('jwt_token') ? 'EXISTS' : 'NULL'));
+            
             if (!$designerId) {
+                error_log("ERROR: No designer ID found");
                 return redirect()->route('login')
                     ->with('error', 'Debes iniciar sesión para ver tus pedidos asignados.');
             }
@@ -42,20 +48,12 @@ class PedidoController extends Controller
             $size = $request->get('size', 10);
             $estadoId = $request->get('estadoId');
 
-            // Construir query params
-            $params = [
-                'page' => $page,
-                'size' => $size,
-                'empleadoId' => $designerId // Filtrar por diseñador/empleado
-            ];
-
-            if ($estadoId !== null && $estadoId !== '') {
-                $params['estadoId'] = $estadoId;
-            }
-
-            // Construir URL con query params
-            $queryString = http_build_query($params);
-            $endpoint = '/pedidos?' . $queryString;
+            // 🔥 CORRECCIÓN: Designer ve SOLO sus pedidos asignados
+            // Endpoint específico: /api/pedidos/empleado/{designerId}
+            $endpoint = "/pedidos/empleado/{$designerId}";
+            
+            error_log("Endpoint: " . $endpoint);
+            error_log("Designer ID: " . $designerId . " (viendo SOLO sus pedidos asignados)");
 
             // Llamada al API
             $response = $this->apiService->get($endpoint, [
@@ -64,9 +62,26 @@ class PedidoController extends Controller
                 ]
             ]);
 
+            error_log("API Response Type: " . gettype($response));
+            error_log("API Response Count: " . (is_array($response) ? count($response) : 'NOT_ARRAY'));
+            
+            // 🔥 DEBUG DEL PRIMER PEDIDO
+            if (is_array($response) && count($response) > 0) {
+                $primerPedido = $response[0];
+                error_log("=== PRIMER PEDIDO RAW ===");
+                error_log("Keys: " . json_encode(array_keys($primerPedido)));
+                
+                // Verificar campos específicos
+                $camposCriticos = ['pedId', 'pedCodigo', 'estId', 'estadoNombre', 'nombreCliente', 'nombreEmpleado'];
+                foreach ($camposCriticos as $campo) {
+                    $valor = $primerPedido[$campo] ?? 'MISSING';
+                    error_log("{$campo}: {$valor}");
+                }
+            }
+
             // Verificar respuesta
             if ($response === null) {
-                Log::error('Designer\\PedidoController: Error al obtener pedidos del API');
+                error_log("ERROR: API returned null");
                 return view('designer.pedidos.index')->with([
                     'pedidos' => [],
                     'totalElements' => 0,
@@ -81,77 +96,84 @@ class PedidoController extends Controller
                 ])->with('error', 'Error al cargar tus pedidos asignados.');
             }
 
-            // Procesar respuesta
-            $pedidos = [];
-            $totalElements = 0;
-            $totalPages = 0;
-            $currentPage = 0;
-            $pageSize = $size;
-
-            if (isset($response['content']) && is_array($response['content'])) {
-                // Respuesta paginada de Spring Boot
-                $pedidos = $response['content'];
-                $totalElements = $response['totalElements'] ?? count($pedidos);
-                $totalPages = $response['totalPages'] ?? 1;
-                $currentPage = $response['pageable']['pageNumber'] ?? 0;
-                $pageSize = $response['pageable']['pageSize'] ?? $size;
-            } elseif (is_array($response)) {
-                // Array simple de pedidos
-                $pedidos = $response;
-                $totalElements = count($pedidos);
-                $totalPages = (int) ceil($totalElements / $size);
-                $currentPage = $page;
-                $pageSize = $size;
+            // 🔥 FILTRADO LOCAL: Si se solicitó filtro por estado, aplicarlo después de obtener los pedidos
+            $pedidosFiltrados = $response;
+            if ($estadoId !== null && $estadoId !== '' && is_array($response)) {
+                $pedidosFiltrados = array_filter($response, function($pedido) use ($estadoId) {
+                    return isset($pedido['estId']) && $pedido['estId'] == $estadoId;
+                });
+                error_log("Filtered by estado {$estadoId}: " . count($pedidosFiltrados) . " pedidos");
             }
 
-            // Enriquecer pedidos con información procesada
-            $pedidos = array_map(function($pedido) {
-                return $this->enriquecerPedido($pedido);
-            }, $pedidos);
+            // 🔥 MAPEO DE CAMPOS: Mantener nombres originales que el componente espera
+            $pedidosMapeados = array_map(function($pedido) {
+                return [
+                    // Mantener nombres originales para compatibilidad con componente
+                    'pedId' => $pedido['pedId'] ?? null,
+                    'pedCodigo' => $pedido['pedCodigo'] ?? null,
+                    'pedFechaCreacion' => $pedido['pedFechaCreacion'] ?? null,
+                    'pedComentarios' => $pedido['pedComentarios'] ?? null,
+                    'estId' => $pedido['estId'] ?? null,
+                    'estadoNombre' => $pedido['estadoNombre'] ?? null,
+                    'usuIdEmpleado' => $pedido['usuIdEmpleado'] ?? null,
+                    'nombreEmpleado' => $pedido['nombreEmpleado'] ?? 'No asignado',
+                    'usuIdCliente' => $pedido['usuIdCliente'] ?? null,
+                    'nombreCliente' => $pedido['nombreCliente'] ?? 'No especificado',
+                    'perId' => $pedido['perId'] ?? null,
+                    'renderPath' => $pedido['renderPath'] ?? null,
+                    'fotosFinales' => $pedido['fotosFinales'] ?? [],
+                    'pedIdentificadorCliente' => $pedido['pedIdentificadorCliente'] ?? null,
+                    'conId' => $pedido['conId'] ?? null,
+                    'sesionId' => $pedido['sesionId'] ?? null,
+                    // También incluir snake_case por si acaso
+                    'ped_id' => $pedido['pedId'] ?? null,
+                    'ped_codigo' => $pedido['pedCodigo'] ?? null,
+                    'ped_fecha_creacion' => $pedido['pedFechaCreacion'] ?? null,
+                    'ped_comentarios' => $pedido['pedComentarios'] ?? null,
+                    'est_id' => $pedido['estId'] ?? null,
+                    'estado_nombre' => $pedido['estadoNombre'] ?? null,
+                    'usu_id_empleado' => $pedido['usuIdEmpleado'] ?? null,
+                    'nombre_empleado' => $pedido['nombreEmpleado'] ?? 'No asignado',
+                    'usu_id_cliente' => $pedido['usuIdCliente'] ?? null,
+                    'nombre_cliente' => $pedido['nombreCliente'] ?? 'No especificado',
+                ];
+            }, $pedidosFiltrados);
 
-            // Obtener estadísticas
-            $stats = $this->getEstadisticas();
+            error_log("Final pedidos count (mapeados): " . count($pedidosMapeados));
             
-            // Obtener lista de estados disponibles
-            $estados = $this->getEstadosDisponibles();
-            $estadoMapeo = $this->getEstadoMapeo();
+            // 🔥 DEBUG: Verificar primer pedido mapeado
+            if (count($pedidosMapeados) > 0) {
+                error_log("=== PRIMER PEDIDO MAPEADO ===");
+                error_log("Datos: " . json_encode($pedidosMapeados[0]));
+            }
 
-            // Preparar datos para la vista
-            $data = [
-                'pedidos' => $pedidos,
-                'totalElements' => $totalElements,
-                'totalPages' => $totalPages,
-                'currentPage' => $currentPage,
-                'pageSize' => $pageSize,
-                'stats' => $stats,
-                'estados' => $estados,
-                'estadoMapeo' => $estadoMapeo,
+            return view('designer.pedidos.index')->with([
+                'pedidos' => $pedidosMapeados,
+                'totalElements' => count($pedidosMapeados),
+                'totalPages' => 1, // Simplificado ya que el backend no maneja paginación en este endpoint
+                'currentPage' => 0,
+                'pageSize' => $size,
+                'estados' => $this->getEstadosDisponibles(),
+                'estadoMapeo' => $this->getEstadoMapeo(),
                 'filtros' => [
                     'estadoId' => $estadoId
                 ]
-            ];
-
-            return view('designer.pedidos.index', $data);
-
-        } catch (\Exception $e) {
-            Log::error('Designer\\PedidoController@index: Excepción', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
 
+        } catch (\Exception $e) {
+            error_log("EXCEPTION: " . $e->getMessage());
             return view('designer.pedidos.index')->with([
                 'pedidos' => [],
                 'totalElements' => 0,
                 'totalPages' => 0,
                 'currentPage' => 0,
                 'pageSize' => 10,
-                'stats' => $this->getEstadisticasVacias(),
                 'estados' => $this->getEstadosDisponibles(),
                 'estadoMapeo' => $this->getEstadoMapeo(),
                 'filtros' => [
                     'estadoId' => null
                 ]
-            ])->with('error', 'Error al cargar tus pedidos asignados. Por favor, intenta nuevamente.');
+            ])->with('error', 'Error al cargar tus pedidos: ' . $e->getMessage());
         }
     }
 

@@ -78,7 +78,7 @@
                             </button>
                         @elseif(Session::get('user_role') === 'ROLE_DISEÑADOR')
                             {{-- Diseñador: solo Gestionar --}}
-                            <a href="{{ route('designer.pedidos.index', ['id' => $pedido['pedId']]) }}" class="btn-action btn-gestionar btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Gestionar pedido">
+                            <a href="{{ route('designer.pedidos.gestionar', ['id' => $pedido['pedId']]) }}" class="btn-action btn-gestionar btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Gestionar pedido">
                                 <i class="bi bi-gear-fill"></i>
                             </a>
                         @elseif(Session::get('user_role') === 'ROLE_USUARIO')
