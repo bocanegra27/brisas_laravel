@@ -172,6 +172,19 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
 // ============================================
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
+    
+    // Rutas de pedidos para diseñador
+    Route::get('/pedidos', [App\Http\Controllers\Designer\PedidoController::class, 'index'])->name('designer.pedidos.index');
+    Route::get('/pedidos/{id}/test', [App\Http\Controllers\Designer\PedidoController::class, 'testBackend'])->name('designer.pedidos.test');
+    Route::get('/pedidos/{id}/gestionar', [App\Http\Controllers\Designer\PedidoController::class, 'gestionar'])->name('designer.pedidos.gestionar');
+    Route::get('/pedidos/{id}/detalles', [App\Http\Controllers\Designer\PedidoController::class, 'detalles'])->name('designer.pedidos.detalles');
+    Route::post('/pedidos/{id}/actualizar-estado-historial', [App\Http\Controllers\Designer\PedidoController::class, 'actualizarEstadoConHistorial'])->name('designer.pedidos.actualizar-estado');
+    Route::post('/pedidos/{id}/subir-diseno', [App\Http\Controllers\Designer\PedidoController::class, 'subirDiseno'])->name('designer.pedidos.subir-diseno');
+    Route::post('/pedidos/{id}/subir-producto-final', [App\Http\Controllers\Designer\PedidoController::class, 'subirProductoFinal'])->name('designer.pedidos.subir-producto-final');
+    Route::get('/pedidos/{id}/historial', [App\Http\Controllers\Designer\PedidoController::class, 'obtenerHistorial'])->name('designer.pedidos.historial');
+    Route::get('/pedidos/ver-archivo/{path}', [App\Http\Controllers\Designer\PedidoController::class, 'verArchivo'])
+         ->where('path', '.*')
+         ->name('designer.pedidos.ver-archivo');
 });
 
 // ============================================
@@ -194,15 +207,6 @@ Route::middleware(['auth.custom', 'no.back'])->prefix('perfil')->group(function 
 });
 
 
-// Para DISEÑADOR - agregar después de línea 170  
-Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
-    
-    // AGREGAR ESTA RUTA:
-    Route::get('/pedidos', [DesignerPedidoController::class, 'index'])->name('designer.pedidos.index');
-    Route::get('/pedidos/{id}/detalles', [DesignerPedidoController::class, 'detalles'])->name('designer.pedidos.detalles');
-    Route::get('/pedidos/{id}/gestionar', [DesignerPedidoController::class, 'gestionar'])->name('designer.pedidos.gestionar');
-});
 
 // Ruta de depuración para verificar respuestas de la API
 Route::get('/debug-pedido/{id}', function($id) {

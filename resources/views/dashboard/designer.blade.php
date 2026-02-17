@@ -81,7 +81,7 @@
         </div>
 
         <div class="col animate-in animate-delay-4">
-            <a href="{{ url('/pedidos') }}" class="stat-card">
+            <a href="{{ url('/designer/pedidos') }}" class="stat-card">
                 <div class="card">
                     <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; border-radius: 50%; opacity: 0.08; z-index: 0; background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);"></div>
                     <div class="card-body text-center">
@@ -151,7 +151,7 @@
         </div>
 
         <div class="col-md-6 animate-in animate-delay-4">
-            <a href="{{ url('/pedidos') }}" class="action-card">
+            <a href="{{ url('/designer/pedidos') }}" class="action-card">
                 <div class="d-flex align-items-start gap-3">
                     <div class="icon-wrapper bg-success-gradient" style="width: 60px; height: 60px; border-radius: 12px; flex-shrink: 0;">
                         <i class="bi bi-list-check text-white" style="font-size: 1.75rem;"></i>

@@ -39,7 +39,7 @@ class ApiService
 
             // Agregar Authorization header si está en las opciones
             if (isset($options['headers']['Authorization'])) {
-                $request->withHeaders([
+                $request = $request->withHeaders([
                     'Authorization' => $options['headers']['Authorization']
                 ]);
             }
