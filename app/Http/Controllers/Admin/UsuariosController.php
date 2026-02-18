@@ -446,4 +446,44 @@ class UsuariosController
             ];
         }
     }
+
+    /**
+     * Obtener usuarios por rol específico
+     * GET /usuarios/rol/{rol}
+     */
+    public function porRol($rol)
+    {
+        try {
+            Log::info('UsuariosController@porRol: Iniciando búsqueda', ['rol' => $rol]);
+            
+            $response = $this->apiService->get("/usuarios/rol/{$rol}", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
+                ]
+            ]);
+
+            Log::info('UsuariosController@porRol: Respuesta de API', [
+                'rol' => $rol,
+                'response' => $response,
+                'response_type' => gettype($response)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'usuarios' => $response
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('UsuariosController@porRol: Excepción', [
+                'rol' => $rol,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener usuarios por rol: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

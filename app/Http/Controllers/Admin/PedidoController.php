@@ -189,9 +189,13 @@ public function gestionar($id)
             $estados[$estado['id']] = $estado['nombre']; 
         }
 
+        // Agregar el mapeo de estados para la vista gestionar
+        $estadoMapeo = $this->getEstadoMapeo();
+
         return view('admin.pedidos.gestionar', [
             'pedido' => $pedido,
             'estados' => $estados,
+            'estadoMapeo' => $estadoMapeo,
         ]);
 
     } catch (\Exception $e) {
@@ -576,6 +580,77 @@ private function enriquecerPedido(array $pedido): array
         }
         
         return $data; // Devolver sin cambios si el tipo no coincide
+    }
+
+    /**
+     * Cambiar estado de pedido (para tabla)
+     * PATCH /admin/pedidos/{id}/estado
+     */
+    public function cambiarEstado(Request $request, $id)
+    {
+        try {
+            Log::info('PedidoController@cambiarEstado: Iniciando cambio de estado', [
+                'pedido_id' => $id,
+                'request_data' => $request->all()
+            ]);
+
+            $validated = $request->validate([
+                // puede venir como string desde JS, por eso validamos y casteamos
+                'nuevoEstadoId' => 'required|min:1|max:10',
+                'comentarios' => 'nullable|string'
+            ]);
+
+            $nuevoEstadoId = (int) $validated['nuevoEstadoId'];
+
+            Log::info('PedidoController@cambiarEstado: Datos validados', [
+                'pedido_id' => $id,
+                'nuevoEstadoId' => $nuevoEstadoId
+            ]);
+
+            $data = [
+                // Spring espera { nuevoEstadoId, comentarios, responsableId(opcional) }
+                'nuevoEstadoId' => $nuevoEstadoId,
+                'comentarios' => $validated['comentarios'] ?? null,
+            ];
+
+            // Llamar a la API para actualizar el estado
+            $response = $this->apiService->patch("/pedidos/{$id}/estado", $data, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
+                ]
+            ]);
+
+            Log::info('PedidoController@cambiarEstado: Respuesta de API', [
+                'pedido_id' => $id,
+                'response' => $response,
+                'response_type' => gettype($response)
+            ]);
+
+            if ($response === null) {
+                Log::error('PedidoController@cambiarEstado: Respuesta nula de API', [
+                    'pedido_id' => $id
+                ]);
+                throw new \Exception('Error al comunicarse con la API');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente',
+                'pedido' => $response
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PedidoController@cambiarEstado: Excepción', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

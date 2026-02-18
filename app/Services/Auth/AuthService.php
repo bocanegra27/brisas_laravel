@@ -71,7 +71,7 @@ class AuthService
                     $dashboardUrl = '/admin/dashboard';
                     break;
                 case 'ROLE_DISEÑADOR':
-                    $dashboardUrl = '/designer/dashboard';
+                    $dashboardUrl = '/designer/pedidos';
                     break;
                 case 'ROLE_USUARIO':
                     $dashboardUrl = '/user/pedidos'; // Redirigir a mis pedidos

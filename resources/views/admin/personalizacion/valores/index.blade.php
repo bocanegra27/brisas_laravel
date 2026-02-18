@@ -3,24 +3,25 @@
 @section('title', 'Gestión de Valores')
 
 @section('content')
-<div class="container mt-4 animate-in">
-    
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <div class="mb-1">
-                <a href="{{ route('admin.personalizacion.opciones.index', ['catId' => $opcion['catId'] ?? '']) }}" class="text-decoration-none text-muted small">
-                    <i class="bi bi-arrow-left"></i> Volver a Opciones
-                </a>
+<div class="container-fluid py-5">
+    {{-- Header con Stats Pills --}}
+    <div class="dashboard-header animate-in">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1><i class="bi bi-list-nested me-3"></i>Gestión de Valores</h1>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    <a href="{{ route('admin.personalizacion.opciones.index', ['catId' => $opcion['catId'] ?? '']) }}" class="text-decoration-none text-muted small">
+                        <i class="bi bi-arrow-left"></i> Volver a Opciones
+                    </a>
+                    <span class="text-muted">|</span>
+                    <span class="text-muted">Valores para <span class="text-primary">{{ $opcion['nombre'] }}</span></span>
+                </div>
+                <p class="text-muted mb-0">Agrega las opciones disponibles para cada característica (Ej: Oro, Plata, 18K).</p>
             </div>
-            <h2 class="mb-0">
-                <i class="bi bi-list-nested me-2 text-primary"></i>
-                Valores para <span class="text-primary">{{ $opcion['nombre'] }}</span>
-            </h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearValor">
+                <i class="bi bi-plus-lg me-2"></i>Nuevo Valor
+            </button>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearValor">
-            <i class="bi bi-plus-lg me-2"></i>Nuevo Valor
-        </button>
     </div>
 
     {{-- Feedback --}}

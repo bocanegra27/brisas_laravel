@@ -6,6 +6,8 @@
 {{-- Bootstrap Icons ya está incluido en app.blade.php --}}
 {{-- Dashboard shared CSS --}}
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/css/utilities.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/css/admin-dashboard.css') }}" />
 @endpush
 
 @section('content')

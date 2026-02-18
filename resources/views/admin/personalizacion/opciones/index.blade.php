@@ -3,25 +3,25 @@
 @section('title', 'Gestión de Opciones')
 
 @section('content')
-<div class="container mt-4 animate-in">
-    
-    {{-- Breadcrumb / Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <div class="mb-1">
-                <a href="{{ route('admin.personalizacion.categorias.index') }}" class="text-decoration-none text-muted small">
-                    <i class="bi bi-arrow-left"></i> Volver a Categorías
-                </a>
+<div class="container-fluid py-5">
+    {{-- Header con Stats Pills --}}
+    <div class="dashboard-header animate-in">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1><i class="bi bi-list-check me-3"></i>Gestión de Opciones</h1>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    <a href="{{ route('admin.personalizacion.categorias.index') }}" class="text-decoration-none text-muted small">
+                        <i class="bi bi-arrow-left"></i> Volver a Categorías
+                    </a>
+                    <span class="text-muted">|</span>
+                    <span class="text-muted">Opciones para <span class="text-primary">{{ $categoria['nombre'] ?? 'Categoría' }}</span></span>
+                </div>
+                <p class="text-muted mb-0">Define qué características puede personalizar el cliente (Ej: Material, Talla).</p>
             </div>
-            <h2 class="mb-0">
-                <i class="bi bi-list-check me-2 text-primary"></i>
-                Opciones para <span class="text-primary">{{ $categoria['nombre'] ?? 'Categoría' }}</span>
-            </h2>
-            <p class="text-muted mb-0">Define qué características puede personalizar el cliente (Ej: Material, Talla).</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearOpcion">
+                <i class="bi bi-plus-lg me-2"></i>Nueva Opción
+            </button>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearOpcion">
-            <i class="bi bi-plus-lg me-2"></i>Nueva Opción
-        </button>
     </div>
 
     {{-- Feedback --}}

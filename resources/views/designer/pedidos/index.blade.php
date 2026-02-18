@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pedidos-estados.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
 @endpush
 
@@ -45,9 +46,6 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('designer.dashboard') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Volver al Dashboard
-                </a>
             </div>
         </div>
 

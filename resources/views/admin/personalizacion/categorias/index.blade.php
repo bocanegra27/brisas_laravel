@@ -3,16 +3,18 @@
 @section('title', 'Gestión de Categorías')
 
 @section('content')
-<div class="container mt-4 animate-in">
-    {{-- Header de la Sección --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-collection me-2 text-primary"></i>Categorías de Productos</h2>
-            <p class="text-muted mb-0">Gestiona los tipos de joyas disponibles en el personalizador.</p>
+<div class="container-fluid py-5">
+    {{-- Header con Stats Pills --}}
+    <div class="dashboard-header animate-in">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1><i class="bi bi-collection me-3"></i>Gestión de Categorías</h1>
+                <p class="text-muted mb-0 mt-2">Gestiona los tipos de joyas disponibles en el personalizador.</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearCategoria">
+                <i class="bi bi-plus-lg me-2"></i>Nueva Categoría
+            </button>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearCategoria">
-            <i class="bi bi-plus-lg me-2"></i>Nueva Categoría
-        </button>
     </div>
 
     {{-- Mensajes de Feedback --}}
