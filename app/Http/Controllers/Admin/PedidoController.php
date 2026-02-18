@@ -662,23 +662,33 @@ private function enriquecerPedido(array $pedido): array
             $token = Session::get('jwt_token');
             $headers = ['headers' => ['Authorization' => 'Bearer ' . $token]];
 
-            // Obtener conteo por estados clave
-            $responsePendientes = $this->apiService->get('/pedidos/count?estadoId=1', $headers);
-            $responseConfirmados = $this->apiService->get('/pedidos/count?estadoId=2', $headers);
-            $responseProduccion = $this->apiService->get('/pedidos/count?estadoId=5', $headers);
-            $responseEntregados = $this->apiService->get('/pedidos/count?estadoId=9', $headers);
+            // Obtener total real y conteo por estados (1..10)
+            $responseTotal = $this->apiService->get('/pedidos/count', $headers);
+            $total = $responseTotal['count'] ?? null;
 
-            $pendientes = $responsePendientes['count'] ?? 0;
-            $confirmados = $responseConfirmados['count'] ?? 0;
-            $produccion = $responseProduccion['count'] ?? 0;
-            $entregados = $responseEntregados['count'] ?? 0;
+            $porEstado = [];
+            for ($estadoId = 1; $estadoId <= 10; $estadoId++) {
+                $resp = $this->apiService->get("/pedidos/count?estadoId={$estadoId}", $headers);
+                $porEstado[$estadoId] = (int) ($resp['count'] ?? 0);
+            }
+
+            if ($total === null) {
+                $total = array_sum($porEstado);
+            }
+
+            // Mantener claves legacy usadas por la vista actual
+            $pendientes = $porEstado[1] ?? 0;
+            $confirmados = $porEstado[2] ?? 0;
+            $produccion = $porEstado[5] ?? 0;
+            $entregados = $porEstado[9] ?? 0;
 
             return [
-                'total' => $pendientes + $confirmados + $produccion + $entregados,
+                'total' => $total,
                 'pendientes' => $pendientes,
                 'confirmados' => $confirmados,
                 'produccion' => $produccion,
-                'entregados' => $entregados
+                'entregados' => $entregados,
+                'porEstado' => $porEstado,
             ];
 
         } catch (\Exception $e) {
@@ -775,7 +785,19 @@ private function enriquecerPedido(array $pedido): array
             'pendientes' => 0,
             'confirmados' => 0,
             'produccion' => 0,
-            'entregados' => 0
+            'entregados' => 0,
+            'porEstado' => [
+                1 => 0,
+                2 => 0,
+                3 => 0,
+                4 => 0,
+                5 => 0,
+                6 => 0,
+                7 => 0,
+                8 => 0,
+                9 => 0,
+                10 => 0,
+            ],
         ];
     }
 

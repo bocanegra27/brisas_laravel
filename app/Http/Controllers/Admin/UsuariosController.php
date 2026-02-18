@@ -412,26 +412,42 @@ class UsuariosController
     public function getEstadisticas(): array
     {
         try {
-            $responseActivos = $this->apiService->get('/usuarios/count?activo=true', [
+            $headers = [
                 'headers' => [
                     'Authorization' => 'Bearer ' . Session::get('jwt_token')
                 ]
-            ]);
+            ];
 
-            $responseInactivos = $this->apiService->get('/usuarios/count?activo=false', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
-                ]
-            ]);
+            $responseTotal = $this->apiService->get('/usuarios/count', $headers) ?? [];
+            $responseActivos = $this->apiService->get('/usuarios/count?activo=true', $headers) ?? [];
+            $responseInactivos = $this->apiService->get('/usuarios/count?activo=false', $headers) ?? [];
+
+            // Conteo por rol: Spring expone /api/usuarios?rolId=X (paginado).
+            // Pedimos size=1 y usamos totalElements para evitar traer toda la lista.
+            $responseRol1 = $this->apiService->get('/usuarios?rolId=1&page=0&size=1', $headers) ?? [];
+            $responseRol2 = $this->apiService->get('/usuarios?rolId=2&page=0&size=1', $headers) ?? [];
+            $responseRol3 = $this->apiService->get('/usuarios?rolId=3&page=0&size=1', $headers) ?? [];
 
             // ✅ Extraer del objeto JSON retornado por Spring Boot
+            $total = $responseTotal['count'] ?? null;
             $activos = $responseActivos['count'] ?? 0;
             $inactivos = $responseInactivos['count'] ?? 0;
 
+            $porRol = [
+                1 => (int) ($responseRol1['totalElements'] ?? 0),
+                2 => (int) ($responseRol2['totalElements'] ?? 0),
+                3 => (int) ($responseRol3['totalElements'] ?? 0),
+            ];
+
+            if ($total === null) {
+                $total = $activos + $inactivos;
+            }
+
             return [
-                'total' => $activos + $inactivos,
+                'total' => $total,
                 'activos' => $activos,
-                'inactivos' => $inactivos
+                'inactivos' => $inactivos,
+                'porRol' => $porRol,
             ];
 
         } catch (\Exception $e) {
@@ -442,7 +458,12 @@ class UsuariosController
             return [
                 'total' => 0,
                 'activos' => 0,
-                'inactivos' => 0
+                'inactivos' => 0,
+                'porRol' => [
+                    1 => 0,
+                    2 => 0,
+                    3 => 0,
+                ],
             ];
         }
     }
