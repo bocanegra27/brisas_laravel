@@ -23,6 +23,42 @@ class PedidoController extends Controller
         $this->apiService = $apiService;
     }
 
+    private function buildStatsFromPedidos(array $pedidos): array
+    {
+        $porEstado = [];
+        foreach ($this->getEstadosDisponibles() as $estado) {
+            $estadoId = (int) ($estado['id'] ?? 0);
+            if ($estadoId > 0) {
+                $porEstado[$estadoId] = 0;
+            }
+        }
+
+        foreach ($pedidos as $pedido) {
+            $estadoId = (int) ($pedido['estId'] ?? $pedido['est_id'] ?? 0);
+            if ($estadoId > 0) {
+                $porEstado[$estadoId] = (int) (($porEstado[$estadoId] ?? 0) + 1);
+            }
+        }
+
+        $total = array_sum($porEstado);
+        $finalizados = (int) ($porEstado[9] ?? 0);
+        $cancelados = (int) ($porEstado[10] ?? 0);
+        $totalActivos = $total - $finalizados - $cancelados;
+
+        return [
+            'total' => $total,
+            'totalActivos' => $totalActivos,
+            'finalizados' => $finalizados,
+            'cancelados' => $cancelados,
+            'porEstado' => $porEstado,
+
+            'pendientes' => (int) ($porEstado[1] ?? 0),
+            'confirmados' => (int) ($porEstado[2] ?? 0),
+            'produccion' => (int) ($porEstado[5] ?? 0),
+            'entregados' => (int) ($porEstado[9] ?? 0)
+        ];
+    }
+
     /**
      * Mostrar listado de pedidos asignados al diseñador autenticado
      * GET /designer/pedidos
@@ -82,6 +118,7 @@ class PedidoController extends Controller
             // Verificar respuesta
             if ($response === null) {
                 error_log("ERROR: API returned null");
+                $stats = $this->getEstadisticasVacias();
                 return view('designer.pedidos.index')->with([
                     'pedidos' => [],
                     'totalElements' => 0,
@@ -90,11 +127,14 @@ class PedidoController extends Controller
                     'pageSize' => $size,
                     'estados' => $this->getEstadosDisponibles(),
                     'estadoMapeo' => $this->getEstadoMapeo(),
+                    'stats' => $stats,
                     'filtros' => [
                         'estadoId' => $estadoId
                     ]
                 ])->with('error', 'Error al cargar tus pedidos asignados.');
             }
+
+            $stats = $this->buildStatsFromPedidos(is_array($response) ? $response : []);
 
             // 🔥 FILTRADO LOCAL: Si se solicitó filtro por estado, aplicarlo después de obtener los pedidos
             $pedidosFiltrados = $response;
@@ -155,6 +195,7 @@ class PedidoController extends Controller
                 'pageSize' => $size,
                 'estados' => $this->getEstadosDisponibles(),
                 'estadoMapeo' => $this->getEstadoMapeo(),
+                'stats' => $stats,
                 'filtros' => [
                     'estadoId' => $estadoId
                 ]
@@ -162,6 +203,7 @@ class PedidoController extends Controller
 
         } catch (\Exception $e) {
             error_log("EXCEPTION: " . $e->getMessage());
+            $stats = $this->getEstadisticasVacias();
             return view('designer.pedidos.index')->with([
                 'pedidos' => [],
                 'totalElements' => 0,
@@ -170,6 +212,7 @@ class PedidoController extends Controller
                 'pageSize' => 10,
                 'estados' => $this->getEstadosDisponibles(),
                 'estadoMapeo' => $this->getEstadoMapeo(),
+                'stats' => $stats,
                 'filtros' => [
                     'estadoId' => null
                 ]
@@ -468,9 +511,12 @@ class PedidoController extends Controller
                 $estados[$estado['id']] = $estado['nombre']; 
             }
 
+            $estadoMapeo = $this->getEstadoMapeo();
+
             return view('designer.pedidos.gestionar', [
                 'pedido' => $pedido,
                 'estados' => $estados,
+                'estadoMapeo' => $estadoMapeo,
             ]);
 
         } catch (\Exception $e) {
@@ -765,23 +811,33 @@ class PedidoController extends Controller
             $token = Session::get('jwt_token');
             $headers = ['headers' => ['Authorization' => 'Bearer ' . $token]];
 
-            // Obtener conteo por estados clave para los pedidos del diseñador
-            $responsePendientes = $this->apiService->get("/pedidos/count?estadoId=1&empleadoId={$designerId}", $headers);
-            $responseConfirmados = $this->apiService->get("/pedidos/count?estadoId=2&empleadoId={$designerId}", $headers);
-            $responseProduccion = $this->apiService->get("/pedidos/count?estadoId=5&empleadoId={$designerId}", $headers);
-            $responseEntregados = $this->apiService->get("/pedidos/count?estadoId=9&empleadoId={$designerId}", $headers);
+            $porEstado = [];
+            foreach ($this->getEstadosDisponibles() as $estado) {
+                $estadoId = (int) ($estado['id'] ?? 0);
+                if ($estadoId <= 0) {
+                    continue;
+                }
 
-            $pendientes = $responsePendientes['count'] ?? 0;
-            $confirmados = $responseConfirmados['count'] ?? 0;
-            $produccion = $responseProduccion['count'] ?? 0;
-            $entregados = $responseEntregados['count'] ?? 0;
+                $response = $this->apiService->get("/pedidos/count?estadoId={$estadoId}&empleadoId={$designerId}", $headers);
+                $porEstado[$estadoId] = (int) ($response['count'] ?? 0);
+            }
+
+            $total = array_sum($porEstado);
+            $finalizados = (int) ($porEstado[9] ?? 0);
+            $cancelados = (int) ($porEstado[10] ?? 0);
+            $totalActivos = $total - $finalizados - $cancelados;
 
             return [
-                'total' => $pendientes + $confirmados + $produccion + $entregados,
-                'pendientes' => $pendientes,
-                'confirmados' => $confirmados,
-                'produccion' => $produccion,
-                'entregados' => $entregados
+                'total' => $total,
+                'totalActivos' => $totalActivos,
+                'finalizados' => $finalizados,
+                'cancelados' => $cancelados,
+                'porEstado' => $porEstado,
+
+                'pendientes' => (int) ($porEstado[1] ?? 0),
+                'confirmados' => (int) ($porEstado[2] ?? 0),
+                'produccion' => (int) ($porEstado[5] ?? 0),
+                'entregados' => (int) ($porEstado[9] ?? 0)
             ];
 
         } catch (\Exception $e) {
@@ -800,6 +856,10 @@ class PedidoController extends Controller
     {
         return [
             'total' => 0,
+            'totalActivos' => 0,
+            'finalizados' => 0,
+            'cancelados' => 0,
+            'porEstado' => [],
             'pendientes' => 0,
             'confirmados' => 0,
             'produccion' => 0,

@@ -95,6 +95,26 @@
   border: 1px solid rgba(107, 114, 128, 0.2);
 }
 
+.estado-color.badge-pendiente { color: #d97706; }
+.estado-color.badge-confirmado { color: #16a34a; }
+.estado-color.badge-diseno { color: #8b5cf6; }
+.estado-color.badge-aprobado { color: #3b82f6; }
+.estado-color.badge-produccion { color: #0891b2; }
+.estado-color.badge-calidad { color: #059669; }
+.estado-color.badge-listo { color: #15803d; }
+.estado-color.badge-camino { color: #ea580c; }
+.estado-color.badge-entregado { color: #14532d; }
+.estado-color.badge-cancelado { color: #dc2626; }
+.estado-color.badge-secondary { color: #6b7280; }
+
+.pill-stat i.estado-color {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Hover sutil */
 .badge-estado:hover {
   transform: translateY(-1px);

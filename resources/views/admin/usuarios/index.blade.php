@@ -33,6 +33,21 @@
                             <span class="pill-label">Inactivos:</span>
                             <strong class="pill-value">{{ $stats['inactivos'] ?? 0 }}</strong>
                         </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-person-fill" style="color: #2563eb;"></i>
+                            <span class="pill-label">Usuarios:</span>
+                            <strong class="pill-value">{{ $stats['porRol'][1] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-shield-fill-check" style="color: #16a34a;"></i>
+                            <span class="pill-label">Admins:</span>
+                            <strong class="pill-value">{{ $stats['porRol'][2] ?? 0 }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-palette-fill" style="color: #8b5cf6;"></i>
+                            <span class="pill-label">Diseñadores:</span>
+                            <strong class="pill-value">{{ $stats['porRol'][3] ?? 0 }}</strong>
+                        </div>
                     </div>
                 </div>
                 <a href="{{ route('admin.usuarios.crear') }}" class="btn btn-create">

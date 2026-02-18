@@ -25,26 +25,38 @@
                             <span class="pill-label">Total:</span>
                             <strong class="pill-value">{{ $stats['total'] ?? 0 }}</strong>
                         </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-clock-fill" style="color: #f59e0b;"></i>
-                            <span class="pill-label">Pendientes:</span>
-                            <strong class="pill-value">{{ $stats['pendientes'] ?? 0 }}</strong>
-                        </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-check-circle-fill text-success"></i>
-                            <span class="pill-label">Confirmados:</span>
-                            <strong class="pill-value">{{ $stats['confirmados'] ?? 0 }}</strong>
-                        </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-gear-fill" style="color: #3b82f6;"></i>
-                            <span class="pill-label">Producción:</span>
-                            <strong class="pill-value">{{ $stats['produccion'] ?? 0 }}</strong>
-                        </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-box-seam-fill" style="color: #10b981;"></i>
-                            <span class="pill-label">Entregados:</span>
-                            <strong class="pill-value">{{ $stats['entregados'] ?? 0 }}</strong>
-                        </div>
+                        @php
+                            $estadoPillConfig = [
+                                1 => ['icon' => 'bi-clock-fill', 'color' => '#f59e0b'],
+                                2 => ['icon' => 'bi-credit-card-fill', 'color' => '#22c55e'],
+                                3 => ['icon' => 'bi-palette-fill', 'color' => '#8b5cf6'],
+                                4 => ['icon' => 'bi-check2-circle', 'color' => '#3b82f6'],
+                                5 => ['icon' => 'bi-gear-fill', 'color' => '#06b6d4'],
+                                6 => ['icon' => 'bi-gem', 'color' => '#10b981'],
+                                7 => ['icon' => 'bi-stars', 'color' => '#16a34a'],
+                                8 => ['icon' => 'bi-truck', 'color' => '#fb923c'],
+                                9 => ['icon' => 'bi-box-seam-fill', 'color' => '#15803d'],
+                                10 => ['icon' => 'bi-x-circle-fill', 'color' => '#ef4444'],
+                            ];
+                        @endphp
+
+                        @foreach(($estados ?? []) as $estado)
+                            @php
+                                $estadoId = $estado['id'] ?? null;
+                                $estadoNombre = $estado['nombre'] ?? null;
+                                $conf = $estadoId ? ($estadoPillConfig[$estadoId] ?? null) : null;
+                                $icon = $conf['icon'] ?? 'bi-info-circle';
+                                $color = $conf['color'] ?? '#6b7280';
+                                $count = $estadoId ? ($stats['porEstado'][$estadoId] ?? 0) : 0;
+                            @endphp
+                            @if($estadoId && $estadoNombre)
+                                <div class="pill-stat">
+                                    <i class="bi {{ $icon }}" style="color: {{ $color }};"></i>
+                                    <span class="pill-label">{{ $estadoNombre }}:</span>
+                                    <strong class="pill-value">{{ $count }}</strong>
+                                </div>
+                            @endif
+                        @endforeach
                     </div>
                 </div>
                 <div>

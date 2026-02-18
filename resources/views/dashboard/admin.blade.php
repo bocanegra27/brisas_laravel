@@ -41,7 +41,7 @@
                             <i class="bi bi-people text-success"></i>
                         </div>
                         <p class="card-text">Usuarios</p>
-                        <h2 class="display-4 text-success">{{ ($data['totalUsuariosActivos'] ?? 0) + ($data['totalUsuariosInactivos'] ?? 0) }}</h2>
+                        <h2 class="display-4 text-success">{{ $data['totalUsuarios'] ?? (($data['totalUsuariosActivos'] ?? 0) + ($data['totalUsuariosInactivos'] ?? 0)) }}</h2>
                         <div class="d-flex justify-content-center gap-2 mt-2">
                             <span class="badge badge-success">{{ $data['totalUsuariosActivos'] ?? 0 }} Activos</span>
                         </div>
@@ -77,9 +77,7 @@
                             <i class="bi bi-box-seam text-secondary"></i>
                         </div>
                         <p class="card-text">Producción</p>
-                        <h2 class="display-4 text-secondary">
-                            {{ ($data['pedidosEnDiseño'] ?? 0) + ($data['pedidosEnTallado'] ?? 0) + ($data['pedidosEnEngaste'] ?? 0) + ($data['pedidosEnPulido'] ?? 0) }}
-                        </h2>
+                        <h2 class="display-4 text-secondary">{{ $data['totalPedidosActivos'] ?? 0 }}</h2>
                         <span class="trend up"><i class="bi bi-arrow-up"></i> Activos</span>
                     </div>
                 </div>

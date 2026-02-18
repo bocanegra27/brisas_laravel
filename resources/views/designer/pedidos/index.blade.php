@@ -24,26 +24,44 @@
                             <span class="pill-label">Total:</span>
                             <strong class="pill-value">{{ $stats['total'] ?? 0 }}</strong>
                         </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-clock-fill" style="color: #f59e0b;"></i>
-                            <span class="pill-label">Pendientes:</span>
-                            <strong class="pill-value">{{ $stats['pendientes'] ?? 0 }}</strong>
-                        </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-check-circle-fill text-success"></i>
-                            <span class="pill-label">Confirmados:</span>
-                            <strong class="pill-value">{{ $stats['confirmados'] ?? 0 }}</strong>
-                        </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-gear-fill" style="color: #3b82f6;"></i>
-                            <span class="pill-label">Producción:</span>
-                            <strong class="pill-value">{{ $stats['produccion'] ?? 0 }}</strong>
-                        </div>
-                        <div class="pill-stat">
-                            <i class="bi bi-box-seam-fill" style="color: #10b981;"></i>
-                            <span class="pill-label">Entregados:</span>
-                            <strong class="pill-value">{{ $stats['entregados'] ?? 0 }}</strong>
-                        </div>
+                        @foreach(($estados ?? []) as $estado)
+                            @php
+                                $estadoId = (int) ($estado['id'] ?? 0);
+                                $estadoNombre = $estado['nombre'] ?? 'Estado';
+                                $count = (int) ($stats['porEstado'][$estadoId] ?? 0);
+                                $badgeClass = match($estadoId) {
+                                    1 => 'badge-pendiente',
+                                    2 => 'badge-confirmado',
+                                    3 => 'badge-diseno',
+                                    4 => 'badge-aprobado',
+                                    5 => 'badge-produccion',
+                                    6 => 'badge-calidad',
+                                    7 => 'badge-listo',
+                                    8 => 'badge-camino',
+                                    9 => 'badge-entregado',
+                                    10 => 'badge-cancelado',
+                                    default => 'badge-secondary'
+                                };
+                                $icon = match($estadoId) {
+                                    1 => 'bi-clock-fill',
+                                    2 => 'bi-credit-card-fill',
+                                    3 => 'bi-palette-fill',
+                                    4 => 'bi-check2-circle',
+                                    5 => 'bi-gear-fill',
+                                    6 => 'bi-gem',
+                                    7 => 'bi-stars',
+                                    8 => 'bi-truck',
+                                    9 => 'bi-box-seam-fill',
+                                    10 => 'bi-x-circle-fill',
+                                    default => 'bi-info-circle'
+                                };
+                            @endphp
+                            <div class="pill-stat">
+                                <i class="bi {{ $icon }} estado-color {{ $badgeClass }}"></i>
+                                <span class="pill-label">{{ $estadoNombre }}:</span>
+                                <strong class="pill-value">{{ $count }}</strong>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

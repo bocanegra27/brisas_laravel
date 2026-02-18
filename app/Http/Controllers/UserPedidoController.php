@@ -21,6 +21,42 @@ class UserPedidoController extends Controller
         $this->apiService = $apiService;
     }
 
+    private function buildStatsFromPedidos(array $pedidos): array
+    {
+        $porEstado = [];
+        foreach ($this->getEstadosDisponibles() as $estado) {
+            $estadoId = (int) ($estado['id'] ?? 0);
+            if ($estadoId > 0) {
+                $porEstado[$estadoId] = 0;
+            }
+        }
+
+        foreach ($pedidos as $pedido) {
+            $estadoId = (int) ($pedido['estId'] ?? $pedido['est_id'] ?? ($pedido['estado']['estId'] ?? 0));
+            if ($estadoId > 0) {
+                $porEstado[$estadoId] = (int) (($porEstado[$estadoId] ?? 0) + 1);
+            }
+        }
+
+        $total = array_sum($porEstado);
+        $finalizados = (int) ($porEstado[9] ?? 0);
+        $cancelados = (int) ($porEstado[10] ?? 0);
+        $totalActivos = $total - $finalizados - $cancelados;
+
+        return [
+            'total' => $total,
+            'totalActivos' => $totalActivos,
+            'finalizados' => $finalizados,
+            'cancelados' => $cancelados,
+            'porEstado' => $porEstado,
+
+            'pendientes' => (int) ($porEstado[1] ?? 0),
+            'confirmados' => (int) ($porEstado[2] ?? 0),
+            'produccion' => (int) ($porEstado[5] ?? 0),
+            'entregados' => (int) ($porEstado[9] ?? 0)
+        ];
+    }
+
     public function show($id)
     {
         try {
@@ -75,6 +111,8 @@ class UserPedidoController extends Controller
                 $pedidos = $response;
             }
 
+            $stats = $this->buildStatsFromPedidos($pedidos);
+
             // Preparar datos para la vista
             $data = [
                 'pedidos' => $pedidos,
@@ -82,6 +120,7 @@ class UserPedidoController extends Controller
                 'totalPages' => count($pedidos) > 0 ? 1 : 0,
                 'currentPage' => 0,
                 'pageSize' => 10,
+                'stats' => $stats,
                 'estados' => $this->getEstadosDisponibles(),
                 'estadoMapeo' => $this->getEstadoMapeo(),
                 'filtros' => [
@@ -103,6 +142,7 @@ class UserPedidoController extends Controller
                 'totalPages' => 0,
                 'currentPage' => 0,
                 'pageSize' => 10,
+                'stats' => $this->buildStatsFromPedidos([]),
                 'estados' => $this->getEstadosDisponibles(),
                 'estadoMapeo' => $this->getEstadoMapeo(),
                 'filtros' => [
