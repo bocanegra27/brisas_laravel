@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/gestionar-pedido.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/gestionar-pedido-estados.css') }}">
 
 {{-- NUEVO: Estilos para Model Viewer --}}
 <style>
@@ -66,7 +67,10 @@
                 <div class="col-lg-4 text-lg-end">
                     @php
                         $estadoId = $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1);
-                        $estadoNombre = $pedido['estado']['estNombre'] ?? ($pedido['estadoNombre'] ?? 'Desconocido');
+                        $estadoCrudo = $pedido['estado']['estNombre'] ?? ($pedido['estadoNombre'] ?? 'desconocido');
+                        
+                        // Usar el mismo mapeo que la tabla
+                        $estadoLimpio = $estadoMapeo[$estadoCrudo] ?? $estadoCrudo;
                         
                         $badgeClass = match($estadoId) {
                             1 => 'badge-pendiente',
@@ -84,7 +88,7 @@
                     @endphp
                     <div class="estado-actual-badge {{ $badgeClass }}">
                         <span class="label">Estado Actual</span>
-                        <span class="estado">{{ $estadoNombre }}</span>
+                        <span class="estado">{{ $estadoLimpio }}</span>
                     </div>
                 </div>
             </div>

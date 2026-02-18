@@ -68,7 +68,7 @@ class AuthController extends Controller
                     $redirectUrl = '/admin/dashboard';
                     break;
                 case 'ROLE_DISEÑADOR':
-                    $redirectUrl = '/designer/dashboard';
+                    $redirectUrl = '/designer/pedidos';
                     break;
                 case 'ROLE_USUARIO':
                 default:

@@ -152,27 +152,6 @@ class DashboardService
     }
 
     /**
-     * Obtiene estadísticas del dashboard de diseñador
-     * 
-     * @return array
-     */
-    public function getDesignerStats(): array
-    {
-        try {
-            // TODO: Implementar cuando tengas los endpoints específicos del diseñador
-            Log::warning('DashboardService: getDesignerStats no implementado aún');
-            return $this->getDefaultDesignerStats();
-
-        } catch (\Exception $e) {
-            Log::error('DashboardService: Error obteniendo designer stats', [
-                'error' => $e->getMessage()
-            ]);
-            
-            return $this->getDefaultDesignerStats();
-        }
-    }
-
-    /**
      * Valores por defecto para admin (cuando el API falla)
      * 
      * @return array
@@ -209,21 +188,6 @@ class DashboardService
             // Totales
             'totalPedidosActivos' => 0,
             'totalPedidos' => 0,
-        ];
-    }
-
-    /**
-     * Valores por defecto para diseñador (cuando el API falla)
-     * 
-     * @return array
-     */
-    private function getDefaultDesignerStats(): array
-    {
-        return [
-            'disenosActivos' => 0,
-            'rendersPendientes' => 0,
-            'comunicacionesPendientes' => 0,
-            'pedidosAsignados' => 0
         ];
     }
 }

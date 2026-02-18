@@ -60,8 +60,26 @@
                     @php
                         $estadoCrudo = $pedido['estadoNombre'] ?? ($pedido['estado']['estNombre'] ?? 'desconocido');
                         $estadoLimpio = $estadoMapeo[$estadoCrudo] ?? $estadoCrudo;
+                        
+                        // ID numérico del estado para mapeo de colores (igual que en gestionar.blade.php)
+                        $estadoId = $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1);
+                        
+                        // Clase CSS por estado ID para usar la misma paleta que gestionar.blade.php
+                        $badgeClass = match($estadoId) {
+                            1 => 'badge-pendiente',        // Cotización Pendiente - Amarillo
+                            2 => 'badge-confirmado',       // Pago Diseño Pendiente - Rojo
+                            3 => 'badge-diseno',           // Diseño en Proceso - Azul
+                            4 => 'badge-aprobado',         // Diseño Aprobado - Verde Claro
+                            5 => 'badge-produccion',       // Tallado - Púrpura
+                            6 => 'badge-calidad',          // Engaste - Cyan
+                            7 => 'badge-listo',            // Pulido - Verde Oscuro
+                            8 => 'badge-camino',           // Inspección - Naranja
+                            9 => 'badge-entregado',        // Finalizado - Verde Intenso
+                            10 => 'badge-cancelado',       // Cancelado - Gris
+                            default => 'badge-secondary'    // Default - Gris Claro
+                        };
                     @endphp
-                    <span class="text-secondary fw-medium">{{ $estadoLimpio }}</span>
+                    <span class="badge-estado {{ $badgeClass }}">{{ $estadoLimpio }}</span>
                 </td>
                 <td>
                     <div class="action-buttons d-flex gap-2 align-items-center">

@@ -104,6 +104,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         Route::put('/{id}', 'update')->name('admin.usuarios.update');
         Route::patch('/{id}/toggle-activo', 'toggleActivo')->name('admin.usuarios.toggle-activo');
         Route::delete('/{id}', 'eliminar')->name('admin.usuarios.eliminar');
+        Route::get('/rol/{rol}', 'porRol')->name('admin.usuarios.por-rol');
     });
     
     // MÓDULO: MENSAJES/CONTACTOS
@@ -129,6 +130,7 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
         // Manejo de estados
         Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
         Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial');
+        Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.pedidos.cambiar-estado');
         
         Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
         Route::post('/{id}/subir-producto-final', 'subirProductoFinal')->name('admin.pedidos.subir-producto-final');
@@ -171,8 +173,6 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
 // ROL: DISEÑADOR
 // ============================================
 Route::middleware(['auth.custom', 'role:designer', 'no.back'])->prefix('designer')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'designerDashboard'])->name('designer.dashboard');
-    
     // Rutas de pedidos para diseñador
     Route::get('/pedidos', [App\Http\Controllers\Designer\PedidoController::class, 'index'])->name('designer.pedidos.index');
     Route::get('/pedidos/{id}/test', [App\Http\Controllers\Designer\PedidoController::class, 'testBackend'])->name('designer.pedidos.test');
