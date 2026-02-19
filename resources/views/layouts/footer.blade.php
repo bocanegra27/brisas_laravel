@@ -92,26 +92,65 @@
                 
                 <nav aria-label="Enlaces rápidos del footer">
                     <ul class="footer-minimal__nav">
-                        <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/') }}" class="footer-minimal__nav-link">
-                                Inicio
-                            </a>
-                        </li>
-                        <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/inspiracion') }}" class="footer-minimal__nav-link">
-                                Inspiración
-                            </a>
-                        </li>
-                        <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/personalizar') }}" class="footer-minimal__nav-link">
-                                Personalización
-                            </a>
-                        </li>
-                        <li class="footer-minimal__nav-item">
-                            <a href="{{ url('/contacto') }}" class="footer-minimal__nav-link">
-                                Contacto
-                            </a>
-                        </li>
+                        @php
+                            $isAuthenticated = Session::has('jwt_token');
+                            $userRole = Session::get('user_role', null);
+                            
+                            $isAdmin = ($userRole === 'ROLE_ADMINISTRADOR');
+                            $isDesigner = ($userRole === 'ROLE_DISEÑADOR');
+                            $isUser = ($userRole === 'ROLE_USUARIO');
+                        @endphp
+
+                        @if(!$isAuthenticated)
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/') }}" class="footer-minimal__nav-link">Inicio</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ route('personalizar.index') }}" class="footer-minimal__nav-link">Personalizar</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/contacto') }}" class="footer-minimal__nav-link">Contacto</a>
+                            </li>
+
+                        @elseif($isAdmin)
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/admin/dashboard') }}" class="footer-minimal__nav-link">Dashboard</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/admin/usuarios') }}" class="footer-minimal__nav-link">Usuarios</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/admin/mensajes') }}" class="footer-minimal__nav-link">Contactos</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/admin/pedidos') }}" class="footer-minimal__nav-link">Pedidos</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ route('admin.personalizacion.categorias.index') }}" class="footer-minimal__nav-link">Gestión Joyas</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/personalizar') }}" target="_blank" class="footer-minimal__nav-link">Vista Publica</a>
+                            </li>
+
+                        @elseif($isDesigner)
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/designer/pedidos') }}" class="footer-minimal__nav-link">Pedidos</a>
+                            </li>
+
+                        @elseif($isUser)
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/') }}" class="footer-minimal__nav-link">Inicio</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/personalizar') }}" class="footer-minimal__nav-link">Personalizar</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/contacto') }}" class="footer-minimal__nav-link">Contacto</a>
+                            </li>
+                            <li class="footer-minimal__nav-item">
+                                <a href="{{ url('/mis-pedidos') }}" class="footer-minimal__nav-link">Mis Pedidos</a>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
             </div>
