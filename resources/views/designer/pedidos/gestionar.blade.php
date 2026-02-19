@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/pedidos.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/gestionar-pedido.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/gestionar-pedido-estados.css') }}">
 
 {{-- NUEVO: Estilos para Model Viewer --}}
 <style>
@@ -52,7 +51,7 @@
             <div class="row align-items-center">
                 <div class="col-lg-8">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <a href="{{ route('admin.pedidos.index') }}" class="btn-back">
+                        <a href="{{ route('designer.pedidos.index') }}" class="btn-back">
                             <i class="bi bi-arrow-left"></i>
                         </a>
                         <div>
@@ -68,8 +67,6 @@
                     @php
                         $estadoId = $pedido['estado']['estId'] ?? ($pedido['estId'] ?? 1);
                         $estadoCrudo = $pedido['estado']['estNombre'] ?? ($pedido['estadoNombre'] ?? 'desconocido');
-                        
-                        // Usar el mismo mapeo que la tabla
                         $estadoLimpio = $estadoMapeo[$estadoCrudo] ?? $estadoCrudo;
                         
                         $badgeClass = match($estadoId) {
@@ -87,7 +84,6 @@
                         };
                     @endphp
                     <div class="estado-actual-badge {{ $badgeClass }}">
-                        <span class="label">Estado Actual</span>
                         <span class="estado">{{ $estadoLimpio }}</span>
                     </div>
                 </div>
@@ -97,12 +93,12 @@
         <div class="row g-4 mt-2">
             
             {{-- ===========================================================
-                COLUMNA IZQUIERDA: ACCIONES Y CLIENTE (4 col)
+                COLUMNA IZQUIERDA: ACCIONES Y ARCHIVOS (4 col) - IGUAL QUE ADMIN
                 =========================================================== --}}
             <div class="col-lg-4">
                 
                 {{-- [FASE 1] CARD: CAMBIAR ESTADO (Prioridad #1 por Usabilidad) --}}
-                <div class="info-card animate-in border-primary shadow-sm">
+                <div class="info-card animate-in border-primary shadow-sm mb-4">
                     <h5 class="card-title text-primary">
                         <i class="bi bi-arrow-left-right me-2"></i>Actualizar Estado
                     </h5>
@@ -141,7 +137,7 @@
                     </div>
                 </div>
 
-                {{-- [FASE 2] CARD: RENDER 3D VINCULADO (ESTACIÓN DE DISEÑO) --}}
+                {{-- [FASE 2] CARD: RENDER 3D VINCULADO (ESTACIÓN DE DISEÑO) - IGUAL QUE ADMIN --}}
                 <div class="info-card animate-in animate-delay-1 mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title mb-0">
@@ -169,7 +165,7 @@
                                     @if($esModelo3D)
                                         {{-- 🔥 VISOR 3D INTERACTIVO --}}
                                         <model-viewer
-                                            src="{{ route('admin.pedidos.ver-archivo', ['path' => $renderPath]) }}"
+                                            src="/designer/pedidos/ver-archivo/{{ $renderPath }}"
                                             alt="Modelo 3D del diseño"
                                             auto-rotate
                                             camera-controls
@@ -198,7 +194,7 @@
                                             <button onclick="capturarScreenshot()" title="Captura de pantalla">
                                                 <i class="bi bi-camera"></i> Captura
                                             </button>
-                                            <button onclick="window.open('{{ route('admin.pedidos.ver-archivo', ['path' => $renderPath]) }}', '_blank')" 
+                                            <button onclick="window.open('/designer/pedidos/ver-archivo/{{ $renderPath }}', '_blank')" 
                                                     title="Descargar modelo">
                                                 <i class="bi bi-download"></i> Descargar
                                             </button>
@@ -208,8 +204,8 @@
                                             <i class="bi bi-box"></i> Modelo 3D interactivo
                                         </p>
                                     @else
-                                        {{-- 🔥 IMAGEN ESTÁTICA (tu código actual) --}}
-                                        <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $renderPath]) }}" 
+                                        {{-- 🔥 IMAGEN ESTÁTICA --}}
+                                        <img src="/designer/pedidos/ver-archivo/{{ $renderPath }}" 
                                             class="img-fluid rounded shadow-sm" 
                                             style="max-height: 250px; cursor: pointer;" 
                                             onclick="window.open(this.src, '_blank')"
@@ -234,7 +230,7 @@
 
                                 @if($rol !== 'ROLE_USUARIO' && $estadoActualId == 3)
                                     <h6 class="small fw-bold mb-3">Subir Propuesta de Diseño:</h6>
-                                    <form id="formSubirRender" action="{{ route('admin.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
+                                    <form id="formSubirRender" action="{{ route('designer.pedidos.subir-diseno', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="mb-3">
                                             <input type="file" 
@@ -262,7 +258,7 @@
                     </div>
                 </div>
 
-                {{-- CARD: GALERÍA DE PRODUCTO TERMINADO (Visible desde estado 5 en adelante) --}}
+                {{-- CARD: GALERÍA DE PRODUCTO TERMINADO - IGUAL QUE ADMIN --}}
                 <div class="info-card animate-in animate-delay-2 mb-4">
                     <h5 class="card-title text-success">
                         <i class="bi bi-camera-fill me-2"></i>Galería de Producto Real
@@ -270,7 +266,7 @@
                     <div class="card-content">
                         {{-- Subida de archivos (Solo para admin/disañador) --}}
                         @if(Session::get('user_role') !== 'ROLE_USUARIO')
-                            <form id="formFotoFinal" action="{{ route('admin.pedidos.subir-producto-final', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
+                            <form id="formFotoFinal" action="{{ route('designer.pedidos.subir-producto-final', $pedido['pedId']) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="input-group mb-3">
                                     <input type="file" name="producto_foto" class="form-control form-control-sm" accept="image/*" required>
@@ -281,10 +277,10 @@
                         
                         {{-- Galería Multiphoto --}}
                         <div class="row g-2 mt-2" id="galeriaFotosFinales">
-                            @if(isset($pedido['fotosFinales']) && count($pedido['fotosFinales']) > 0)
+                            @if(isset($pedido['fotosFinales']) && is_array($pedido['fotosFinales']) && count($pedido['fotosFinales']) > 0)
                                 @foreach($pedido['fotosFinales'] as $foto)
                                     <div class="col-4 position-relative">
-                                        <img src="{{ route('admin.pedidos.ver-archivo', ['path' => $foto['fotImagenFinal']]) }}" 
+                                        <img src="/designer/pedidos/ver-archivo/{{ $foto['fpfRuta'] ?? $foto['fotImagenFinal'] ?? 'default' }}" 
                                             class="img-fluid rounded border shadow-sm img-thumbnail-gallery" 
                                             style="aspect-ratio: 1/1; object-fit: cover; cursor: pointer;"
                                             onclick="window.open(this.src)">
@@ -299,7 +295,7 @@
                     </div>
                 </div>
 
-                {{-- CARD: INFORMACIÓN DEL CLIENTE --}}
+                {{-- CARD: INFORMACIÓN DEL CLIENTE - IGUAL QUE ADMIN --}}
                 <div class="info-card animate-in animate-delay-1">
                     <h5 class="card-title">
                         <i class="bi bi-person-circle me-2"></i>Información del Cliente
@@ -363,41 +359,10 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- CARD: PERSONALIZACIÓN VINCULADA (Referencia Original) --}}
-                @php $perId = $pedido['personalizacion']['perId'] ?? ($pedido['perId'] ?? null); @endphp
-                @if($perId)
-                <div class="info-card animate-in animate-delay-2">
-                    <h5 class="card-title">
-                        <i class="bi bi-gem me-2"></i>Referencia de Diseño
-                    </h5>
-                    <div class="card-content">
-                        <div class="personalizacion-link">
-                            <button onclick="verDetallesPersonalizacion({{ $perId }})" class="btn-ver-personalizacion w-100">
-                                <i class="bi bi-eye-fill me-2"></i>Ver Selección Inicial
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                {{-- CARD: CONTACTO ORIGEN (Si existe) --}}
-                @if(isset($pedido['conId']) && $pedido['conId'])
-                <div class="info-card animate-in animate-delay-3">
-                    <h5 class="card-title">
-                        <i class="bi bi-chat-dots-fill me-2"></i>Mensaje Origen
-                    </h5>
-                    <div class="card-content">
-                        <button onclick="verMensajeOrigen({{ $pedido['conId'] }})" class="btn-ver-mensaje w-100">
-                            <i class="bi bi-envelope-open-fill me-2"></i>Ver Mensaje Original
-                        </button>
-                    </div>
-                </div>
-                @endif
             </div>
 
             {{-- ===========================================================
-                COLUMNA DERECHA: SEGUIMIENTO Y RESULTADOS (8 col)
+                COLUMNA DERECHA: SEGUIMIENTO Y RESULTADOS (8 col) - IGUAL QUE ADMIN
                 =========================================================== --}}
             <div class="col-lg-8">
                 
@@ -417,402 +382,404 @@
         </div>
     </div>
 </div>
-
-{{-- Modal para ver personalizacion --}}
-<div class="modal fade" id="modalPersonalizacion" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-gem me-2"></i>Detalles de Personalización
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="modalPersonalizacionContent">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 @endsection
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <script>
-    // ===============================================
-    // Configuración Global y Mapeos
-    // ===============================================
+// Variables globales
+const pedidoId = {{ $pedido['pedId'] ?? 0 }};
+const estadoActualId = {{ $pedido['estId'] ?? ($pedido['estado']['estId'] ?? 0) }};
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Mapeo de Estados
-    const ESTADOS_MAP = {
-        1: { nombre: '1. Cotización Pendiente', icono: 'bi-clock-fill', clase: 'pendiente' },
-        2: { nombre: '2. Pago Diseño Pendiente', icono: 'bi-check-circle-fill', clase: 'confirmado' },
-        3: { nombre: '3. Diseño en Proceso', icono: 'bi-palette-fill', clase: 'diseno' },
-        4: { nombre: '4. Diseño Aprobado', icono: 'bi-hand-thumbs-up-fill', clase: 'aprobado' },
-        5: { nombre: '5. Tallado (Producción)', icono: 'bi-gear-fill', clase: 'produccion' },
-        6: { nombre: '6. Engaste', icono: 'bi-gem', clase: 'produccion' },
-        7: { nombre: '7. Pulido', icono: 'bi-sparkle', clase: 'produccion' },
-        8: { nombre: '8. Inspección de Calidad', icono: 'bi-shield-check-fill', clase: 'calidad' },
-        9: { nombre: '9. Finalizado (Entrega)', icono: 'bi-gift-fill', clase: 'finalizado' },
-        10: { nombre: '10. Cancelado', icono: 'bi-x-circle-fill', clase: 'cancelado' }
+// Función para obtener información del estado
+function getEstadoInfo(estadoId) {
+    const estados = {
+        1: { nombre: 'Pendiente', icono: 'bi-clock' },
+        2: { nombre: 'En Diseño', icono: 'bi-palette' },
+        3: { nombre: 'Diseño Completado', icono: 'bi-check-circle' },
+        4: { nombre: 'Aprobado', icono: 'bi-check2-circle' },
+        5: { nombre: 'En Producción', icono: 'bi-gear' },
+        6: { nombre: 'Engaste', icono: 'bi-gem' },
+        7: { nombre: 'Pulido', icono: 'bi-shine' },
+        8: { nombre: 'Control de Calidad', icono: 'bi-clipboard-check' },
+        9: { nombre: 'Finalizado', icono: 'bi-trophy' },
+        10: { nombre: 'Cancelado', icono: 'bi-x-circle' }
     };
+    return estados[estadoId] || { nombre: 'Desconocido', icono: 'bi-question-circle' };
+}
+
+// 1. ACTUALIZACIÓN DE ESTADO (CON SOPORTE PARA ARCHIVOS)
+// ===============================================
+
+function actualizarEstadoPedido(event, pedidoId) {
+    event.preventDefault();
     
-    // Variables globales
-    const pedidoId = {{ $pedido['pedId'] ?? 0 }};
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    // Obtenemos el formulario y creamos el FormData para incluir el archivo
+    const form = document.getElementById('formCambiarEstado');
+    const formData = new FormData(form);
     
-    // Inicializar al cargar la página
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Cargando historial para pedido ID:', pedidoId);
-        
-        if (pedidoId && pedidoId > 0) {
-            cargarHistorialPedido(pedidoId);
-        } else {
-            console.error('ID de pedido inválido:', pedidoId);
-            document.getElementById('historialTimeline').innerHTML = 
-                '<p class="text-danger text-center py-4">Error: ID de pedido no válido.</p>';
+    // Agregamos manualmente los datos que antes sacabas por ID (por seguridad)
+    const estadoId = document.getElementById('nuevoEstadoSelect').value;
+    const comentarios = document.getElementById('comentariosEstado').value;
+    
+    // Nota: FormData ya incluye automáticamente el archivo si el input tiene name="his_imagen"
+    
+    Swal.fire({
+        title: 'Actualizando...',
+        text: 'Registrando cambio y subiendo evidencia si existe',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
         }
     });
-
-    // ===============================================
-    // 1. ACTUALIZACIÓN DE ESTADO (CON SOPORTE PARA ARCHIVOS)
-    // ===============================================
-
-    function actualizarEstadoPedido(event, pedidoId) {
-        event.preventDefault();
-        
-        // Obtenemos el formulario y creamos el FormData para incluir el archivo
-        const form = document.getElementById('formCambiarEstado');
-        const formData = new FormData(form);
-        
-        // Agregamos manualmente los datos que antes sacabas por ID (por seguridad)
-        const estadoId = document.getElementById('nuevoEstadoSelect').value;
-        const comentarios = document.getElementById('comentariosEstado').value;
-        
-        // Nota: FormData ya incluye automáticamente el archivo si el input tiene name="his_imagen"
-        
-        Swal.fire({
-            title: 'Actualizando...',
-            text: 'Registrando cambio y subiendo evidencia si existe',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-        
-        fetch(`/admin/pedidos/${pedidoId}/estado-historial`, { 
-            method: 'POST', // Cambiamos a POST porque PATCH con Multipart suele dar problemas
-            headers: {
-                // IMPORTANTE: NO pongas Content-Type, el navegador lo pondrá automáticamente con el "boundary"
-                'X-CSRF-TOKEN': csrfToken 
-            },
-            body: formData // Enviamos el objeto FormData directamente
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    throw new Error(errorData.message || `Error HTTP ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    title: 'Éxito',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonColor: '#009688'
-                }).then(() => {
-                    window.location.reload(); 
-                });
-            } else {
-                throw new Error(data.message || 'Error al actualizar (API).');
-            }
-        })
-        .catch(error => {
+    
+    fetch(`/designer/pedidos/${pedidoId}/actualizar-estado-historial`, { 
+        method: 'POST', // Cambiamos a POST porque PATCH con Multipart suele dar problemas
+        headers: {
+            // IMPORTANTE: NO pongas Content-Type, el navegador lo pondrá automáticamente con el "boundary"
+            'X-CSRF-TOKEN': csrfToken 
+        },
+        body: formData // Enviamos el objeto FormData directamente
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `Error HTTP ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Éxito',
+                text: data.message,
+                icon: 'success',
+                confirmButtonColor: '#009688'
+            }).then(() => {
+                window.location.reload(); 
+            });
+        } else {
             Swal.fire({
                 title: 'Error',
-                text: error.message,
+                text: data.message || 'No se pudo actualizar el estado',
                 icon: 'error',
-                confirmButtonColor: '#ef4444'
+                confirmButtonColor: '#d33'
             });
-        });
-        
-        return false;
-    }
-
-    // ===============================================
-    // 2. CARGA DEL TIMELINE
-    // ===============================================
-
-    function cargarHistorialPedido(id) {
-        // Validación
-        if (!id || id === 0) {
-            console.error("ID de pedido no válido:", id);
-            document.getElementById('historialTimeline').innerHTML = 
-                '<p class="text-danger text-center py-4">Error: ID de pedido no válido.</p>';
-            return; 
         }
-        
-        // Construir la URL correctamente usando template string
-        const url = `/admin/pedidos/${id}/historial`;
-        
-        console.log('Fetching historial desde:', url);
-
-        fetch(url, {
-            method: 'GET',
-            headers: { 
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            } 
-        })
-        .then(response => {
-            console.log('Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Datos recibidos:', data);
-            
-            const container = document.getElementById('historialTimeline');
-            container.innerHTML = '';
-
-            if (data.success && data.historial && data.historial.length > 0) {
-                renderizarTimeline(container, data.historial);
-            } else {
-                container.innerHTML = `
-                    <div class="text-center py-4 text-muted">
-                        <i class="bi bi-info-circle display-6 d-block mb-2"></i>
-                        Aún no hay registros en el historial de este pedido.
-                    </div>
-                `;
-            }
-        })
-        .catch(error => {
-            console.error('Error cargando historial:', error);
-            document.getElementById('historialTimeline').innerHTML = 
-                `<p class="text-danger text-center py-4">Error: ${error.message}</p>`;
+    })
+    .catch(error => {
+        console.error('Error completo:', error);
+        Swal.fire({
+            title: 'Error de conexión',
+            text: error.message || 'No se pudo conectar con el servidor',
+            icon: 'error',
+            confirmButtonColor: '#d33'
         });
+    });
+}
+
+// Actualizar estado
+document.getElementById('formCambiarEstado').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Actualizando...';
+    
+    fetch(`/designer/pedidos/${pedidoId}/actualizar-estado-historial`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', 'Estado actualizado correctamente');
+            // Recargar la página para mostrar los cambios
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('danger', data.message || 'Error al actualizar el estado');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', 'Error al actualizar el estado');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+});
+
+// ===============================================
+// 2. LÍNEA DE TIEMPO (HISTORIAL)
+// ===============================================
+
+function cargarHistorialPedido(pedidoId) {
+    const container = document.getElementById('historialTimeline');
+    const loading = document.getElementById('timelineLoading');
+    
+    // Mostrar loading
+    if (loading) {
+        loading.style.display = 'block';
     }
     
-    function renderizarTimeline(container, historial) {
-        let html = '<div class="timeline-vertical">';
+    fetch(`/designer/pedidos/${pedidoId}/historial`, {
+        headers: {
+            'Authorization': 'Bearer ' + (localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token') || ''),
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (loading) {
+            loading.style.display = 'none';
+        }
         
-        historial.forEach((item, index) => {
-            const info = ESTADOS_MAP[item.estId] || { 
-                nombre: 'Desconocido', 
-                icono: 'bi-question-circle', 
-                clase: 'secundario' 
-            };
-            
-            const fecha = new Date(item.hisFechaCambio).toLocaleString('es-CO', { 
-                day: '2-digit', 
-                month: 'short', 
-                year: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            const esActual = index === 0 && item.estId !== 10;
-            
-            let claseItem = 'timeline-item-completed';
-            if (item.estId === 10) {
-                claseItem = 'timeline-item-cancelado';
-            } else if (esActual) {
-                 claseItem = 'timeline-item-active';
-            }
-            
-            html += `
-                <div class="timeline-item ${claseItem}">
-                    <div class="timeline-marker">
-                        <i class="bi ${info.icono}"></i>
-                    </div>
-                    <div class="timeline-content">
-                        <h6 class="timeline-title">
-                            ${info.nombre}
-                            ${esActual ? '<span class="timeline-badge active">ESTADO ACTUAL</span>' : ''}
-                            ${item.estId === 10 ? '<span class="timeline-badge cancelado">CANCELADO</span>' : ''}
-                        </h6>
-                        <span class="timeline-date">${fecha}</span>
-                        <p class="timeline-comment mt-1">${item.hisComentarios || 'Cambio registrado sin notas.'}</p>
-                        <p class="timeline-responsible small text-muted">Responsable: ${item.responsableNombre || 'Sistema'}</p>
-                        
-                        ${item.hisImagen ? `<div class="timeline-image-link mt-2">
-                            <a href="/admin/pedidos/ver-archivo/${item.hisImagen}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-image"></i> Ver Evidencia
-                            </a>
-                        </div>` : ''}
-                    </div>
+        if (data.success && data.historial) {
+            renderizarTimeline(container, data.historial);
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No se pudo cargar el historial
                 </div>
             `;
-        });
-        
-        html += '</div>';
-        container.innerHTML = html;
-    }
-
-    // ===============================================
-    // 3. FUNCIONES AUXILIARES
-    // ===============================================
-
-    function verDetallesPersonalizacion(perId) {
-        const modal = new bootstrap.Modal(document.getElementById('modalPersonalizacion'));
-        modal.show();
-        
-        const modalContent = document.getElementById('modalPersonalizacionContent');
-        modalContent.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>';
-        
-        fetch(`/api/personalizaciones/${perId}/detalles`, {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token') || '')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            let html = '<div class="row g-3">';
-            if (data.detalles) {
-                 data.detalles.forEach(detalle => {
-                    html += `
-                        <div class="col-md-6">
-                            <div class="detalle-personalizacion">
-                                <strong>${detalle.valNombre}:</strong>
-                                <span>${detalle.opcionNombre}</span>
-                            </div>
-                        </div>
-                    `;
-                 });
-            }
-            html += '</div>';
-            modalContent.innerHTML = html;
-        })
-        .catch(error => {
-             modalContent.innerHTML = '<p class="text-danger">Error al cargar la personalización</p>';
-        });
-    }
-
-    function verMensajeOrigen(conId) {
-        window.location.href = `/admin/mensajes?highlight=${conId}`;
-    }
-
-    // ===============================================
-    // NUEVO: MANEJO DE SUBIDA DE RENDER (FASE 2)
-    // ===============================================
-    document.getElementById('formSubirRender')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        Swal.fire({
-            title: 'Subiendo Diseño...',
-            text: 'Enviando render al servidor y actualizando historial',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
-        fetch(this.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json' // Forzamos a Laravel a responder JSON si hay error
-            },
-            body: formData
-        })
-        .then(async response => {
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Error en el servidor');
-            return data;
-        })
-        .then(data => {
-            Swal.fire({
-                icon: 'success',
-                title: '¡Diseño Cargado!',
-                text: 'El render ha sido vinculado al pedido correctamente.',
-                confirmButtonColor: '#009688'
-            }).then(() => {
-                window.location.reload();
-            });
-        })
-        .catch(error => {
-            console.error('Error Fase 2:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al subir',
-                text: error.message,
-                footer: 'Verifica que el archivo no supere los 10MB y que el servidor Java esté activo.'
-            });
-        });
-    });
-
-    function resetearCamara() {
-        const viewer = document.querySelector('model-viewer');
-        if (viewer) {
-            viewer.resetTurntableRotation();
-            viewer.cameraOrbit = 'auto auto auto';
         }
-    }
+    })
+    .catch(error => {
+        console.error('Error al cargar historial:', error);
+        if (loading) {
+            loading.style.display = 'none';
+        }
+        container.innerHTML = `
+            <div class="text-center py-4 text-danger">
+                <i class="bi bi-wifi-off me-2"></i>
+                Error de conexión al cargar historial
+            </div>
+        `;
+    });
+}
+
+function renderizarTimeline(container, historial) {
+    let html = '<div class="timeline-vertical">';
     
-    function capturarScreenshot() {
-        const viewer = document.querySelector('model-viewer');
-        if (viewer) {
-            viewer.toBlob().then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'render-3d.png';
-                a.click();
-            });
-        }
-    }
-
-        document.getElementById('formFotoFinal')?.addEventListener('submit', function(e) {
-        e.preventDefault();
+    historial.forEach((item, index) => {
+        const info = getEstadoInfo(item.estId);
         
-        const formData = new FormData(this);
-        
-        Swal.fire({
-            title: 'Subiendo Producto Final...',
-            text: 'Cargando evidencia fotográfica del trabajo terminado.',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
+        const fecha = new Date(item.hisFechaCambio).toLocaleString('es-CO', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
         });
+        
+        const esActual = index === 0 && item.estId !== 10;
+        
+        let claseItem = 'timeline-item-completed';
+        if (item.estId === 10) {
+            claseItem = 'timeline-item-cancelado';
+        } else if (esActual) {
+            claseItem = 'timeline-item-active';
+        }
+        
+        html += `
+            <div class="timeline-item ${claseItem}">
+                <div class="timeline-marker">
+                    <i class="bi ${info.icono}"></i>
+                </div>
+                <div class="timeline-content">
+                    <h6 class="timeline-title">
+                        ${info.nombre}
+                        ${esActual ? '<span class="timeline-badge active">ESTADO ACTUAL</span>' : ''}
+                        ${item.estId === 10 ? '<span class="timeline-badge cancelado">CANCELADO</span>' : ''}
+                    </h6>
+                    <span class="timeline-date">${fecha}</span>
+                    <p class="timeline-comment mt-1">${item.hisComentarios || 'Cambio registrado sin notas.'}</p>
+                    <p class="timeline-responsible small text-muted">Responsable: ${item.responsableNombre || 'Sistema'}</p>
+                    
+                    ${item.hisImagen ? `<div class="timeline-image-link mt-2">
+                        <a href="/designer/pedidos/ver-archivo/${item.hisImagen}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-image"></i> Ver Evidencia
+                        </a>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
 
-        fetch(this.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: formData
-        })
-        .then(async response => {
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Error en el servidor');
-            return data;
-        })
-        .then(data => {
-            Swal.fire({
-                icon: 'success',
-                title: '¡Producto Registrado!',
-                text: data.message,
-                confirmButtonColor: '#009688'
-            }).then(() => {
-                window.location.reload(); // Recarga para ver la foto en la galería
-            });
-        })
-        .catch(error => {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al subir',
-                text: error.message
-            });
+// ===============================================
+// 3. FUNCIONES AUXILIARES
+// ===============================================
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertAdjacentHTML('afterbegin', alertHtml);
+}
+
+// ===============================================
+// NUEVO: MANEJO DE SUBIDA DE ARCHIVOS
+// ===============================================
+
+// Subir Render 3D
+document.getElementById('formSubirRender')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    Swal.fire({
+        title: 'Subiendo Diseño...',
+        text: 'Enviando render al servidor y actualizando historial',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error en el servidor');
+        return data;
+    })
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Diseño Cargado!',
+            text: 'El render ha sido vinculado al pedido correctamente.',
+            confirmButtonColor: '#009688'
+        }).then(() => {
+            window.location.reload();
+        });
+    })
+    .catch(error => {
+        console.error('Error al subir diseño:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al subir',
+            text: error.message,
+            footer: 'Verifica que el archivo no supere los 10MB y que el servidor Java esté activo.'
         });
     });
+});
+
+// Subir Foto Producto Final
+document.getElementById('formFotoFinal')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    Swal.fire({
+        title: 'Subiendo Producto Final...',
+        text: 'Cargando evidencia fotográfica del trabajo terminado.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Error en el servidor');
+        return data;
+    })
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Producto Registrado!',
+            text: data.message,
+            confirmButtonColor: '#009688'
+        }).then(() => {
+            window.location.reload(); // Recarga para ver la foto en la galería
+        });
+    })
+    .catch(error => {
+        console.error('Error al subir foto:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al subir',
+            text: error.message
+        });
+    });
+});
+
+// ===============================================
+// FUNCIONES PARA VISOR 3D (IGUAL QUE ADMIN)
+// ===============================================}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Cargando historial para pedido ID:', pedidoId);
+    
+    if (pedidoId && pedidoId > 0) {
+        cargarHistorialPedido(pedidoId);
+    } else {
+        console.error('ID de pedido inválido:', pedidoId);
+        const container = document.getElementById('historialTimeline');
+        if (container) {
+            container.innerHTML = 
+                '<p class="text-danger text-center py-4">Error: ID de pedido no válido.</p>';
+        }
+    }
+});
+
+// ===============================================
+// FUNCIONES PARA VISOR 3D (IGUAL QUE ADMIN)
+// ===============================================
+
+function resetearCamara() {
+    const viewer = document.querySelector('model-viewer');
+    if (viewer) {
+        viewer.resetTurntableRotation();
+        viewer.cameraOrbit = 'auto auto auto';
+    }
+}
+
+function capturarScreenshot() {
+    const viewer = document.querySelector('model-viewer');
+    if (viewer) {
+        viewer.toBlob().then(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'render-3d.png';
+            a.click();
+        });
+    }
+}
 </script>
 @endpush

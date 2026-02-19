@@ -189,9 +189,13 @@ public function gestionar($id)
             $estados[$estado['id']] = $estado['nombre']; 
         }
 
+        // Agregar el mapeo de estados para la vista gestionar
+        $estadoMapeo = $this->getEstadoMapeo();
+
         return view('admin.pedidos.gestionar', [
             'pedido' => $pedido,
             'estados' => $estados,
+            'estadoMapeo' => $estadoMapeo,
         ]);
 
     } catch (\Exception $e) {
@@ -579,6 +583,77 @@ private function enriquecerPedido(array $pedido): array
     }
 
     /**
+     * Cambiar estado de pedido (para tabla)
+     * PATCH /admin/pedidos/{id}/estado
+     */
+    public function cambiarEstado(Request $request, $id)
+    {
+        try {
+            Log::info('PedidoController@cambiarEstado: Iniciando cambio de estado', [
+                'pedido_id' => $id,
+                'request_data' => $request->all()
+            ]);
+
+            $validated = $request->validate([
+                // puede venir como string desde JS, por eso validamos y casteamos
+                'nuevoEstadoId' => 'required|min:1|max:10',
+                'comentarios' => 'nullable|string'
+            ]);
+
+            $nuevoEstadoId = (int) $validated['nuevoEstadoId'];
+
+            Log::info('PedidoController@cambiarEstado: Datos validados', [
+                'pedido_id' => $id,
+                'nuevoEstadoId' => $nuevoEstadoId
+            ]);
+
+            $data = [
+                // Spring espera { nuevoEstadoId, comentarios, responsableId(opcional) }
+                'nuevoEstadoId' => $nuevoEstadoId,
+                'comentarios' => $validated['comentarios'] ?? null,
+            ];
+
+            // Llamar a la API para actualizar el estado
+            $response = $this->apiService->patch("/pedidos/{$id}/estado", $data, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . Session::get('jwt_token')
+                ]
+            ]);
+
+            Log::info('PedidoController@cambiarEstado: Respuesta de API', [
+                'pedido_id' => $id,
+                'response' => $response,
+                'response_type' => gettype($response)
+            ]);
+
+            if ($response === null) {
+                Log::error('PedidoController@cambiarEstado: Respuesta nula de API', [
+                    'pedido_id' => $id
+                ]);
+                throw new \Exception('Error al comunicarse con la API');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente',
+                'pedido' => $response
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PedidoController@cambiarEstado: Excepción', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Obtener estadisticas de pedidos
      */
     private function getEstadisticas(): array
@@ -587,23 +662,33 @@ private function enriquecerPedido(array $pedido): array
             $token = Session::get('jwt_token');
             $headers = ['headers' => ['Authorization' => 'Bearer ' . $token]];
 
-            // Obtener conteo por estados clave
-            $responsePendientes = $this->apiService->get('/pedidos/count?estadoId=1', $headers);
-            $responseConfirmados = $this->apiService->get('/pedidos/count?estadoId=2', $headers);
-            $responseProduccion = $this->apiService->get('/pedidos/count?estadoId=5', $headers);
-            $responseEntregados = $this->apiService->get('/pedidos/count?estadoId=9', $headers);
+            // Obtener total real y conteo por estados (1..10)
+            $responseTotal = $this->apiService->get('/pedidos/count', $headers);
+            $total = $responseTotal['count'] ?? null;
 
-            $pendientes = $responsePendientes['count'] ?? 0;
-            $confirmados = $responseConfirmados['count'] ?? 0;
-            $produccion = $responseProduccion['count'] ?? 0;
-            $entregados = $responseEntregados['count'] ?? 0;
+            $porEstado = [];
+            for ($estadoId = 1; $estadoId <= 10; $estadoId++) {
+                $resp = $this->apiService->get("/pedidos/count?estadoId={$estadoId}", $headers);
+                $porEstado[$estadoId] = (int) ($resp['count'] ?? 0);
+            }
+
+            if ($total === null) {
+                $total = array_sum($porEstado);
+            }
+
+            // Mantener claves legacy usadas por la vista actual
+            $pendientes = $porEstado[1] ?? 0;
+            $confirmados = $porEstado[2] ?? 0;
+            $produccion = $porEstado[5] ?? 0;
+            $entregados = $porEstado[9] ?? 0;
 
             return [
-                'total' => $pendientes + $confirmados + $produccion + $entregados,
+                'total' => $total,
                 'pendientes' => $pendientes,
                 'confirmados' => $confirmados,
                 'produccion' => $produccion,
-                'entregados' => $entregados
+                'entregados' => $entregados,
+                'porEstado' => $porEstado,
             ];
 
         } catch (\Exception $e) {
@@ -700,7 +785,19 @@ private function enriquecerPedido(array $pedido): array
             'pendientes' => 0,
             'confirmados' => 0,
             'produccion' => 0,
-            'entregados' => 0
+            'entregados' => 0,
+            'porEstado' => [
+                1 => 0,
+                2 => 0,
+                3 => 0,
+                4 => 0,
+                5 => 0,
+                6 => 0,
+                7 => 0,
+                8 => 0,
+                9 => 0,
+                10 => 0,
+            ],
         ];
     }
 

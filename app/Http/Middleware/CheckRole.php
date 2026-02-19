@@ -105,9 +105,9 @@ class CheckRole
     {
         return match($role) {
             'ROLE_ADMINISTRADOR' => '/admin/dashboard',
-            'ROLE_DISEÑADOR' => '/designer/dashboard',
-            'ROLE_USUARIO' => '/user/dashboard',
-            default => '/dashboard'
+            'ROLE_DISEÑADOR' => '/designer/pedidos',
+            'ROLE_USUARIO' => '/user/pedidos', // Redirigir a mis pedidos
+            default => '/user/pedidos'
         };
     }
 }

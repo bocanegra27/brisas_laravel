@@ -1,0 +1,141 @@
+/* ============================================
+   COLORES DE ESTADOS - VISTA GESTIONAR PEDIDO
+   Brisas Gems - Paleta de colores por estado
+   ============================================ */
+
+/* ===== ESTADO ACTUAL BADGE CON COLORES ESPECIFICOS ===== */
+
+/* 1. Cotización Pendiente */
+.estado-actual-badge.badge-pendiente {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.estado-actual-badge.badge-pendiente .label {
+  color: rgba(217, 119, 6, 0.8);
+}
+
+/* 2. Pago Diseño Pendiente */
+.estado-actual-badge.badge-confirmado {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.estado-actual-badge.badge-confirmado .label {
+  color: rgba(22, 163, 74, 0.8);
+}
+
+/* 3. Diseño en Proceso */
+.estado-actual-badge.badge-diseno {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.estado-actual-badge.badge-diseno .label {
+  color: rgba(139, 92, 246, 0.8);
+}
+
+/* 4. Diseño Aprobado */
+.estado-actual-badge.badge-aprobado {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.estado-actual-badge.badge-aprobado .label {
+  color: rgba(59, 130, 246, 0.8);
+}
+
+/* 5. Tallado (Producción) */
+.estado-actual-badge.badge-produccion {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0891b2;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.estado-actual-badge.badge-produccion .label {
+  color: rgba(8, 145, 178, 0.8);
+}
+
+/* 6. Calidad/Engaste */
+.estado-actual-badge.badge-calidad {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.estado-actual-badge.badge-calidad .label {
+  color: rgba(5, 150, 105, 0.8);
+}
+
+/* 7. Listo/Pulido */
+.estado-actual-badge.badge-listo {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.estado-actual-badge.badge-listo .label {
+  color: rgba(21, 128, 61, 0.8);
+}
+
+/* 8. En Camino */
+.estado-actual-badge.badge-camino {
+  background: rgba(251, 146, 60, 0.1);
+  color: #ea580c;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.estado-actual-badge.badge-camino .label {
+  color: rgba(234, 88, 12, 0.8);
+}
+
+/* 9. Entregado */
+.estado-actual-badge.badge-entregado {
+  background: rgba(34, 197, 94, 0.2);
+  color: #14532d;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.estado-actual-badge.badge-entregado .label {
+  color: rgba(20, 83, 45, 0.8);
+}
+
+/* 10. Cancelado */
+.estado-actual-badge.badge-cancelado {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.estado-actual-badge.badge-cancelado .label {
+  color: rgba(220, 38, 38, 0.8);
+}
+
+/* 11. Default/Secundario */
+.estado-actual-badge.badge-secondary {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.estado-actual-badge.badge-secondary .label {
+  color: #6b7280;
+}
+
+/* ===== HOVER EFFECT ===== */
+.estado-actual-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+  .estado-actual-badge {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}

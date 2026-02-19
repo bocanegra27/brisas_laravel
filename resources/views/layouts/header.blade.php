@@ -20,9 +20,9 @@
     if ($isAdmin) {
         $logoUrl = '/admin/dashboard';
     } elseif ($isDesigner) {
-        $logoUrl = '/designer/dashboard';
+        $logoUrl = '/designer/pedidos';
     } elseif ($isUser) {
-        $logoUrl = '/user/dashboard';
+        $logoUrl = '/'; // Redirigir a Inicio como en el menú de navegación
     } else {
         $logoUrl = '/';
     }
@@ -103,9 +103,9 @@
 
             @elseif($isDesigner)
                 {{-- MENÚ PARA DISEÑADOR --}}
-                <a href="{{ url('/designer/dashboard') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/dashboard') ? 'header-minimal__nav-link--active' : '' }}">
-                    Dashboard
+                <a href="{{ url('/designer/pedidos') }}" 
+                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/pedidos') ? 'header-minimal__nav-link--active' : '' }}">
+                    Pedidos
                 </a>
                 {{-- Rutas pendientes de implementar --}}
                 {{-- <a href="{{ url('/designer/disenos') }}" 
@@ -116,10 +116,6 @@
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/renders') ? 'header-minimal__nav-link--active' : '' }}">
                     Renders
                 </a> --}}
-                <a href="{{ url('/pedidos') }}" 
-                   class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'pedidos') ? 'header-minimal__nav-link--active' : '' }}">
-                    Pedidos
-                </a>
                 {{-- <a href="{{ url('/designer/comunicacion') }}" 
                    class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'designer/comunicacion') ? 'header-minimal__nav-link--active' : '' }}">
                     Comunicación
