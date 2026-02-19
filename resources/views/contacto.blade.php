@@ -295,12 +295,14 @@ textarea.form-control {
                         
                         <!-- Resumen de personalización (si existe) -->
                         @if($resumen)
-                        <div class="resumen-box">
-                            <h5>
-                                <i class="bi bi-gem"></i>
-                                Tu Personalización
+                        <div class="resumen-box mb-4 p-3 rounded" style="background-color: #f8f9fa; border-left: 4px solid #009688;">
+                            <h5 class="text-primary mb-3">
+                                <i class="bi bi-file-text me-2"></i>Resumen de tu Diseño
                             </h5>
-                            <div class="resumen-content">{{ $resumen }}</div>
+                            {{-- 'e()' escapa el HTML, 'nl2br' convierte saltos de línea en <br> --}}
+                            <div class="resumen-content text-muted" style="font-family: monospace; white-space: pre-wrap;">
+                                {{ $resumen }}
+                            </div>
                         </div>
                         @endif
 

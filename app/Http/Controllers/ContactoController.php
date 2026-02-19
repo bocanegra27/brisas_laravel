@@ -177,19 +177,34 @@ class ContactoController extends Controller
         }
     }
 
-    /**
-     * Construir resumen legible de personalización
+/**
+     * Construir resumen de texto plano
      */
-    private function construirResumen(array $detalles): string
+    private function construirResumen(array $data): string
     {
-        $lineas = [];
-        
-        foreach ($detalles as $detalle) {
-            $lineas[] = "• {$detalle['valNombre']}: {$detalle['opcionNombre']}";
+        // 1. Título con la Categoría (Ej: "Joya: Anillos")
+        $categoria = $data['catNombre'] ?? 'Joya Personalizada';
+        $texto = "Estoy interesado en cotizar el siguiente producto:\n";
+        $texto .= "------------------------------------------\n";
+        $texto .= "CATEGORÍA: " . mb_strtoupper($categoria) . "\n";
+        $texto .= "------------------------------------------\n";
+
+        // 2. Iterar los detalles
+        if (!empty($data['detalles'])) {
+            foreach ($data['detalles'] as $detalle) {
+                $opcion = $detalle['opcionNombre'] ?? 'Opción';
+                $valor  = $detalle['valNombre'] ?? 'Selección';
+                
+                // Formato: "• Material: Oro 18k"
+                $texto .= "• {$opcion}: {$valor}\n";
+            }
+        } else {
+            $texto .= "(Sin detalles seleccionados)\n";
         }
         
-        $intro = "Me interesa una joya con estas características:\n\n";
-        
-        return $intro . implode("\n", $lineas);
+        $texto .= "------------------------------------------\n";
+        $texto .= "\nQuedo atento a su respuesta.";
+
+        return $texto;
     }
 }
