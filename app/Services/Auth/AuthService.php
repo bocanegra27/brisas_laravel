@@ -62,13 +62,39 @@ class AuthService
             Session::put('user_name', $response['userName'] ?? 'Usuario');
             Session::put('user_email', $response['email'] ?? $email);
             Session::put('user_id', $response['userId'] ?? null);
-            Session::put('dashboard_url', $response['dashboardUrl'] ?? '/dashboard');
+            // Determinar URL de redirección según rol
+            $userRole = $response['userRole'] ?? 'ROLE_USUARIO';
+            $dashboardUrl = '/dashboard'; // default
+            
+            switch ($userRole) {
+                case 'ROLE_ADMINISTRADOR':
+                    $dashboardUrl = '/admin/dashboard';
+                    break;
+                case 'ROLE_DISEÑADOR':
+                    $dashboardUrl = '/designer/pedidos';
+                    break;
+                case 'ROLE_USUARIO':
+                    $dashboardUrl = '/user/pedidos'; // Redirigir a mis pedidos
+                    break;
+            }
+            
+            Session::put('dashboard_url', $dashboardUrl);
+            
+            // Log para depuración
+            Log::info('AuthService: URL de redirección configurada', [
+                'user_role' => $userRole,
+                'dashboard_url' => $dashboardUrl,
+                'api_response_dashboard_url' => $response['dashboardUrl'] ?? 'null'
+            ]);
 
             Log::info('AuthService: Login exitoso', [
                 'user_id' => $response['userId'] ?? null,
                 'role' => $response['userRole'] ?? 'ROLE_USUARIO',
                 'email' => $email
             ]);
+
+            // Agregar dashboardUrl al response para compatibilidad
+            $response['dashboardUrl'] = $dashboardUrl;
 
             // Retornar los datos del usuario
             return $response;

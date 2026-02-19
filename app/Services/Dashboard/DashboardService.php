@@ -44,6 +44,11 @@ class DashboardService
             $responseArchivados = $this->apiService->get('/contactos/count?estado=archivado', [
                 'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
             ]);
+            
+            // ✅ CATEGORÍAS (NUEVO) - Agregar aquí
+            $categorias = $this->apiService->get('/categorias', [
+                'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+            ]);
 
             // ✅ Pedidos por Estado (NUEVOS)
             $responseCotizacion = $this->apiService->get('/pedidos/count?estadoId=1', [
@@ -116,6 +121,9 @@ class DashboardService
                 'totalContactosAtendidos' => $atendidos,
                 'totalContactosArchivados' => $archivados,
                 'totalContactos' => $pendientes + $atendidos + $archivados,
+
+                // Categorias
+                'totalCategorias' => count($categorias ?? []),
                 
                 // Pedidos por Estado
                 'pedidosCotizacionPendiente' => $cotizacion,
@@ -144,48 +152,6 @@ class DashboardService
     }
 
     /**
-     * Obtiene estadísticas del dashboard de diseñador
-     * 
-     * @return array
-     */
-    public function getDesignerStats(): array
-    {
-        try {
-            // TODO: Implementar cuando tengas los endpoints específicos del diseñador
-            Log::warning('DashboardService: getDesignerStats no implementado aún');
-            return $this->getDefaultDesignerStats();
-
-        } catch (\Exception $e) {
-            Log::error('DashboardService: Error obteniendo designer stats', [
-                'error' => $e->getMessage()
-            ]);
-            
-            return $this->getDefaultDesignerStats();
-        }
-    }
-
-    /**
-     * Obtiene estadísticas del dashboard de usuario
-     * 
-     * @return array
-     */
-    public function getUserStats(): array
-    {
-        try {
-            // TODO: Implementar cuando tengas los endpoints específicos del usuario
-            Log::warning('DashboardService: getUserStats no implementado aún');
-            return $this->getDefaultUserStats();
-
-        } catch (\Exception $e) {
-            Log::error('DashboardService: Error obteniendo user stats', [
-                'error' => $e->getMessage()
-            ]);
-            
-            return $this->getDefaultUserStats();
-        }
-    }
-
-    /**
      * Valores por defecto para admin (cuando el API falla)
      * 
      * @return array
@@ -203,6 +169,9 @@ class DashboardService
             'totalContactosAtendidos' => 0,
             'totalContactosArchivados' => 0,
             'totalContactos' => 0,
+
+            // Categorías
+            'totalCategorias' => 0,
             
             // Pedidos por Estado
             'pedidosCotizacionPendiente' => 0,
@@ -219,35 +188,6 @@ class DashboardService
             // Totales
             'totalPedidosActivos' => 0,
             'totalPedidos' => 0,
-        ];
-    }
-
-    /**
-     * Valores por defecto para diseñador (cuando el API falla)
-     * 
-     * @return array
-     */
-    private function getDefaultDesignerStats(): array
-    {
-        return [
-            'disenosActivos' => 0,
-            'rendersPendientes' => 0,
-            'comunicacionesPendientes' => 0,
-            'pedidosAsignados' => 0
-        ];
-    }
-
-    /**
-     * Valores por defecto para usuario (cuando el API falla)
-     * 
-     * @return array
-     */
-    private function getDefaultUserStats(): array
-    {
-        return [
-            'misPedidosActivos' => 0,
-            'misPersonalizaciones' => 0,
-            'pedidosCompletados' => 0
         ];
     }
 }

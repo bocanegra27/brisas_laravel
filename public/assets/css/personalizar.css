@@ -7,7 +7,7 @@
 .personalizar-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  padding: 2rem 0;
+  padding: 0.2rem 0 4rem 0;
 }
 
 /* ===== HEADER DE PERSONALIZACIÓN ===== */
@@ -45,21 +45,23 @@
 .preview-image-container {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* Aspect ratio 1:1 */
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  height: 450px; /* Altura fija para que la caja sea consistente */
+  background: radial-gradient(circle, #ffffff 0%, #f8fafc 100%);
   border-radius: var(--radius);
   overflow: hidden;
+  display: flex;       /* Activamos Flexbox */
+  align-items: center;    /* Centrado vertical */
+  justify-content: center; /* Centrado horizontal */
 }
 
 .preview-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 1rem;
+  max-width: 90%;      /* Evita que toque los bordes */
+  max-height: 90%;     /* Evita que toque los bordes */
+  width: auto;         /* Mantiene proporción */
+  height: auto;        /* Mantiene proporción */
+  object-fit: contain; /* Ajuste inteligente */
   transition: opacity 0.3s ease;
+  display: block;
 }
 
 .loading-spinner {
@@ -494,4 +496,42 @@
 
 .alert i {
   font-size: 1.125rem;
+}
+
+/* Botón base: limpio y blanco */
+.option-btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important; /* Borde suave */
+    border-radius: 12px !important;
+    padding: 1.25rem 0.75rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Efecto hover */
+.option-btn:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* BOTÓN SELECCIONADO (Estilo Admin) */
+.option-btn.active {
+    border-color: #e5e7eb !important; /* Mantiene el borde suave */
+    color: #009688 !important; /* Texto en esmeralda */
+}
+
+/* La línea esmeralda superior (el detalle que te gusta) */
+.option-btn.active::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important; /* Grosor de la línea */
+    background: #009688 !important; /* Tu color esmeralda */
+    transform: scaleX(1) !important; /* Siempre visible cuando está activo */
 }

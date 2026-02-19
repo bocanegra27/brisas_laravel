@@ -3,6 +3,20 @@
    Estilos base y tipografía
    ============================================ */
 
+/* ===== FOUC PREVENTION ===== */
+.js-loading main,
+.js-loading .header-minimal,
+.js-loading .container-fluid {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+
+.js-loaded main,
+.js-loaded .header-minimal,
+.js-loaded .container-fluid {
+  opacity: 1;
+}
+
 /* ===== IMPORTAR FUENTES ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
 

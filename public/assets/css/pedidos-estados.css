@@ -1,0 +1,130 @@
+/* ============================================
+   PEDIDOS ESTADOS - BRISAS GEMS
+   Colores llamativos para badges de estado en la tabla
+   Misma paleta que gestionar.blade.php
+   ============================================ */
+
+.badge-estado {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+/* ===== BADGES DE ESTADO ===== */
+.badge-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+/* Estados especificos */
+.badge-estado.badge-pendiente {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-estado.badge-confirmado {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badge-estado.badge-diseno {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.badge-estado.badge-aprobado {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.badge-estado.badge-produccion {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0891b2;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.badge-estado.badge-calidad {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-estado.badge-listo {
+  background: rgba(34, 197, 94, 0.15);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-estado.badge-camino {
+  background: rgba(251, 146, 60, 0.1);
+  color: #ea580c;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.badge-estado.badge-entregado {
+  background: rgba(34, 197, 94, 0.2);
+  color: #14532d;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.badge-estado.badge-cancelado {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.badge-estado.badge-secondary {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.estado-color.badge-pendiente { color: #d97706; }
+.estado-color.badge-confirmado { color: #16a34a; }
+.estado-color.badge-diseno { color: #8b5cf6; }
+.estado-color.badge-aprobado { color: #3b82f6; }
+.estado-color.badge-produccion { color: #0891b2; }
+.estado-color.badge-calidad { color: #059669; }
+.estado-color.badge-listo { color: #15803d; }
+.estado-color.badge-camino { color: #ea580c; }
+.estado-color.badge-entregado { color: #14532d; }
+.estado-color.badge-cancelado { color: #dc2626; }
+.estado-color.badge-secondary { color: #6b7280; }
+
+.pill-stat i.estado-color {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Hover sutil */
+.badge-estado:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .badge-estado {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
