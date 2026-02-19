@@ -692,16 +692,39 @@
                                 <strong>{{ $pedido['pedCodigo'] ?? 'N/A' }}</strong>
                             </td>
                             <td>
-                                {{ $pedido['pedFechaCreacion'] ?? 'N/A' }}
+                                @php
+                                    $fechaRaw = $pedido['pedFechaCreacion'] ?? ($pedido['ped_fecha_creacion'] ?? null);
+                                    $fechaFormateada = 'N/A';
+                                    if (!empty($fechaRaw)) {
+                                        try {
+                                            $fechaFormateada = \Illuminate\Support\Carbon::parse($fechaRaw)->format('d/m/Y H:i');
+                                        } catch (\Exception $e) {
+                                            $fechaFormateada = $fechaRaw;
+                                        }
+                                    }
+                                @endphp
+                                {{ $fechaFormateada }}
                             </td>
                             <td>
-                                @if(isset($pedido['estadoNombre']))
-                                    <span class="estado-badge estado-{{ Str::slug($pedido['estadoNombre'], '_') }}">
-                                        {{ $pedido['estadoNombre'] }}
-                                    </span>
-                                @else
-                                    <span class="estado-badge estado-desconocido">N/A</span>
-                                @endif
+                                @php
+                                    $estadoCrudo = $pedido['estadoNombre'] ?? ($pedido['estado']['estNombre'] ?? 'desconocido');
+                                    $estadoLimpio = $estadoMapeo[$estadoCrudo] ?? $estadoCrudo;
+                                    $estadoId = (int) ($pedido['estado']['estId'] ?? ($pedido['estId'] ?? ($pedido['est_id'] ?? 1)));
+                                    $badgeClass = match($estadoId) {
+                                        1 => 'badge-pendiente',
+                                        2 => 'badge-confirmado',
+                                        3 => 'badge-diseno',
+                                        4 => 'badge-aprobado',
+                                        5 => 'badge-produccion',
+                                        6 => 'badge-calidad',
+                                        7 => 'badge-listo',
+                                        8 => 'badge-camino',
+                                        9 => 'badge-entregado',
+                                        10 => 'badge-cancelado',
+                                        default => 'badge-secondary'
+                                    };
+                                @endphp
+                                <span class="badge-estado {{ $badgeClass }}">{{ $estadoLimpio }}</span>
                             </td>
                             <td>
                                 <span class="text-truncate d-block" style="max-width: 200px;" 
