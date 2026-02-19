@@ -265,6 +265,96 @@
             box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
         }
         
+        /* Estados de pedidos - Colores sólidos como los iconos */
+        .badge-estado {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            border: 1px solid;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Estados con colores sólidos de iconos */
+        .badge-estado.badge-pendiente {
+            color: #d97706;
+            border-color: rgba(217, 119, 6, 0.2);
+            background: rgba(217, 119, 6, 0.05);
+        }
+        
+        .badge-estado.badge-confirmado {
+            color: #16a34a;
+            border-color: rgba(22, 163, 74, 0.2);
+            background: rgba(22, 163, 74, 0.05);
+        }
+        
+        .badge-estado.badge-diseno {
+            color: #8b5cf6;
+            border-color: rgba(139, 92, 246, 0.2);
+            background: rgba(139, 92, 246, 0.05);
+        }
+        
+        .badge-estado.badge-aprobado {
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .badge-estado.badge-produccion {
+            color: #0891b2;
+            border-color: rgba(8, 145, 178, 0.2);
+            background: rgba(8, 145, 178, 0.05);
+        }
+        
+        .badge-estado.badge-calidad {
+            color: #059669;
+            border-color: rgba(5, 150, 105, 0.2);
+            background: rgba(5, 150, 105, 0.05);
+        }
+        
+        .badge-estado.badge-listo {
+            color: #15803d;
+            border-color: rgba(21, 128, 61, 0.2);
+            background: rgba(21, 128, 61, 0.05);
+        }
+        
+        .badge-estado.badge-camino {
+            color: #ea580c;
+            border-color: rgba(234, 88, 12, 0.2);
+            background: rgba(234, 88, 12, 0.05);
+        }
+        
+        .badge-estado.badge-entregado {
+            color: #14532d;
+            border-color: rgba(20, 83, 45, 0.2);
+            background: rgba(20, 83, 45, 0.05);
+        }
+        
+        .badge-estado.badge-cancelado {
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, 0.2);
+            background: rgba(220, 38, 38, 0.05);
+        }
+        
+        .badge-estado.badge-secondary {
+            color: #6b7280;
+            border-color: rgba(107, 114, 128, 0.2);
+            background: rgba(107, 114, 128, 0.05);
+        }
+        
+        /* Hover sutil */
+        .badge-estado:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
         /* Mejoras para la información básica */
         .pedido-detalle {
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
@@ -281,132 +371,6 @@
             letter-spacing: 0.5px;
         }
         
-        /* Estados de pedidos más coloridos y atractivos */
-        .estado-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .estado-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .estado-badge:hover::before {
-            left: 100%;
-        }
-        
-        .estado-badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        
-        /* Estados específicos con colores vibrantes */
-        .estado-cotizacion_pendiente {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: white;
-            border: 1px solid #f59e0b;
-        }
-        
-        .estado-pago_diseno_pendiente {
-            background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-            color: white;
-            border: 1px solid #f97316;
-        }
-        
-        .estado-diseno_en_proceso {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            color: white;
-            border: 1px solid #3b82f6;
-        }
-        
-        .estado-diseno_aprobado {
-            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-            color: white;
-            border: 1px solid #10b981;
-        }
-        
-        .estado-tallado_produccion {
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-            color: white;
-            border: 1px solid #8b5cf6;
-        }
-        
-        .estado-engaste {
-            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
-            color: white;
-            border: 1px solid #ec4899;
-        }
-        
-        .estado-pulido {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-            color: white;
-            border: 1px solid #f59e0b;
-        }
-        
-        .estado-inspeccion_calidad {
-            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-            color: white;
-            border: 1px solid #0891b2;
-        }
-        
-        .estado-finalizado_listo_entrega {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            border: 1px solid #059669;
-            animation: pulse-success 2s infinite;
-        }
-        
-        .estado-cancelado {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            border: 1px solid #dc2626;
-        }
-        
-        .estado-desconocido {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-            color: white;
-            border: 1px solid #4b5563;
-        }
-        
-        @keyframes pulse-success {
-            0%, 100% {
-                box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
-            }
-            50% {
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.6);
-            }
-        }
-        
-        /* Indicador de estado activo en línea de tiempo */
-        .timeline-item.active .timeline-marker {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
-            animation: pulse-marker 2s infinite;
-        }
-        
-        @keyframes pulse-marker {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
         model-viewer {
             width: 100%;
             height: 350px;
@@ -866,6 +830,42 @@ function contactarSoporte(pedidoId) {
     });
 }
 
+// Función para mapear nombres de estado a clases CSS del sistema pedidos-estados.css
+function getEstadoBadgeClass(estadoNombre) {
+    if (!estadoNombre || estadoNombre === 'N/A') return 'badge-secondary';
+    
+    const estado = estadoNombre.toLowerCase();
+    
+    // Mapeo exacto a las clases del archivo pedidos-estados.css
+    if (estado.includes('cotizacion') || estado.includes('cotización')) {
+        return 'badge-pendiente';
+    } else if (estado.includes('pago') && estado.includes('diseno')) {
+        return 'badge-camino';
+    } else if (estado.includes('diseno') && estado.includes('proceso')) {
+        return 'badge-diseno';
+    } else if (estado.includes('diseno') && estado.includes('aprob')) {
+        return 'badge-aprobado';
+    } else if (estado.includes('tallado') || estado.includes('produccion')) {
+        return 'badge-produccion';
+    } else if (estado.includes('engaste')) {
+        return 'badge-calidad';
+    } else if (estado.includes('pulido')) {
+        return 'badge-pendiente'; // Usa el mismo color que pendiente (amarillo)
+    } else if (estado.includes('inspeccion') || estado.includes('calidad')) {
+        return 'badge-calidad';
+    } else if (estado.includes('finalizado') || estado.includes('listo')) {
+        return 'badge-listo';
+    } else if (estado.includes('entregado')) {
+        return 'badge-entregado';
+    } else if (estado.includes('cancelado')) {
+        return 'badge-cancelado';
+    } else if (estado.includes('confirmado')) {
+        return 'badge-confirmado';
+    }
+    
+    return 'badge-secondary';
+}
+
 function renderDetalles(pedido) {
     console.log('=== INICIO RENDER DETALLES ===');
     console.log('Pedido completo:', pedido);
@@ -1120,7 +1120,7 @@ function renderDetalles(pedido) {
                 <div class="col-md-4">
                     <h6 class="small text-muted mb-1">Estado</h6>
                     <div class="mt-2">
-                        <span class="estado-badge estado-${pedido.estadoNombre ? pedido.estadoNombre.toLowerCase().replace(/\s+/g, '_') : 'desconocido'}">
+                        <span class="badge-estado ${getEstadoBadgeClass(pedido.estadoNombre || 'N/A')}">
                             ${pedido.estadoNombre || 'N/A'}
                         </span>
                     </div>
