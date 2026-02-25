@@ -29,7 +29,7 @@ class LoginTest extends TestCase
                 'userName'     => 'Test User',
                 'email'        => 'test@brisasgems.com',
                 'userId'       => 1,
-                'dashboardUrl' => '/user/dashboard'
+                'dashboardUrl' => '/user/pedidos'
             ]);
         });
 
@@ -39,7 +39,7 @@ class LoginTest extends TestCase
                              'password' => 'password123',
                          ]);
 
-        $response->assertRedirect('/user/dashboard');
+        $response->assertRedirect('/user/pedidos');
     }
 
     /**
