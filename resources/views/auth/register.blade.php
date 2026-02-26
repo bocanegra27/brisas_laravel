@@ -28,10 +28,9 @@
                             </div>
                         @endif
 
-                        <form id="registroForm" onsubmit="handleRegistration(event)">
-                            @csrf
-
-                            <input type="hidden" id="anonymousTokenInput" name="anonymousToken"> 
+                            <form id="registroForm" method="POST" action="{{ route('register.handle') }}">
+                                @csrf
+                                <input type="hidden" id="anonymousTokenInput" name="anonymousToken">    
 
                             {{-- Información Personal --}}
                             <div class="row">
@@ -184,83 +183,12 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const STORAGE_SESION_TOKEN = 'anonymous_token';
-        const API_BASE_URL = '{{ config("services.spring_api.url") }}'; // Usa la config de Laravel
-
         document.addEventListener('DOMContentLoaded', function() {
-            const token = localStorage.getItem(STORAGE_SESION_TOKEN);
-            if (token) {
-                document.getElementById('anonymousTokenInput').value = token;
-                console.log('✅ Token de sesión cargado para conversión:', token.substring(0, 8) + '...');
-            }
-        });
-
-        async function handleRegistration(event) {
-            event.preventDefault(); // Detener el envío de Laravel por defecto
-            
-            const registerButton = document.getElementById('registerButton');
-            const token = document.getElementById('anonymousTokenInput').value;
-
-            // 1. Recolectar datos del formulario
-            const formData = {
-                nombre: document.getElementById('nombre').value,
-                correo: document.getElementById('correo').value,
-                telefono: document.getElementById('telefono').value,
-                tipdocId: parseInt(document.getElementById('tipdocId').value),
-                docnum: document.getElementById('docnum').value,
-                password: document.getElementById('password').value,
-                rolId: 1 
-            };
-            
-            // Si hay errores de validación, detenemos el proceso
-            if (!formData.nombre || !formData.correo || !formData.password || !formData.tipdocId || !formData.docnum) {
-                alert('Por favor, rellene todos los campos requeridos (*).');
-                return;
-            }
-
-            registerButton.disabled = true;
-            registerButton.textContent = 'Registrando...';
-            
-            try {
-                let url = API_BASE_URL;
-                let finalMessage = '';
-
-                // 2. Determinar el Endpoint: Conversión o Registro Normal
-                if (token) {
-                    url += `/usuarios/registro/convertir/${token}`;
-                    finalMessage = 'Cuenta creada y la trazabilidad histórica fue vinculada con éxito.';
-                } else {
-                    url += '/usuarios/crear'; 
-                    finalMessage = 'Cuenta creada con éxito.';
-                }
-                
-                // 3. Llamar a la API
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Error HTTP ${response.status}`);
-                }
-
-                // 4. Éxito: Limpiar Local Storage y Redirigir
-                if (token) {
-                    localStorage.removeItem(STORAGE_SESION_TOKEN);
-                }
-                
-                alert(finalMessage);
-                window.location.href = '{{ route('login') }}'; 
-                
-            } catch (error) {
-                // Mostrar los errores
-                alert('Fallo en el registro: ' + error.message);
-                registerButton.disabled = false;
-                registerButton.textContent = 'Registrarse';
-            }
+        const token = localStorage.getItem('anonymous_sesion_token');
+        if (token) {
+            document.getElementById('anonymousTokenInput').value = token;
         }
+    });
     </script>
 </body>
 </html>
