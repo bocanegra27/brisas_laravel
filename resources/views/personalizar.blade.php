@@ -213,7 +213,37 @@
         slugsSeleccionados: []
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        @if(!session()->has('user_id'))
+            const STORAGE_TOKEN = 'anonymous_sesion_token';
+            const STORAGE_ID    = 'anonymous_sesion_id';
+            const inputSesion   = document.getElementById('input-sesion-anonima');
+
+            try {
+                let sesToken = localStorage.getItem(STORAGE_TOKEN);
+                let sesId    = localStorage.getItem(STORAGE_ID);
+
+                if (!sesToken || !sesId) {
+                    const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', { method: 'POST' });
+                    const data = await res.json();
+
+                    sesToken = data.sesToken;
+                    sesId    = data.sesId;
+
+                    localStorage.setItem(STORAGE_TOKEN, sesToken);
+                    localStorage.setItem(STORAGE_ID, String(sesId));
+                }
+
+                if (inputSesion) {
+                    inputSesion.value = sesId;
+                }
+
+            } catch (e) {
+                console.warn('No se pudo crear/recuperar sesión anónima:', e);
+            }
+        @endif
+
         recalcularEstado();
     });
 
