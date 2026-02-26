@@ -34,7 +34,7 @@ class ContactoController extends Controller
         // Si viene personalizacionId, obtener detalles
         if ($personalizacionId) {
             try {
-                $response = $this->apiService->get("/personalizaciones/{$personalizacionId}/detalles");
+                $response = $this->apiService->get("/personalizaciones/{$personalizacionId}");
                 
                 if ($response !== null) {
                     $resumen = $this->construirResumen($response);
