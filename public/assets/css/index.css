@@ -1,18 +1,274 @@
-/* index.css - estilos para el landing */
+/* ============================================
+   index.css — Brisas Gems Landing Page
+   ============================================ */
+main, .content-wrapper {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* ===== PARTE 2: VIDEO HERO ===== */
+.hero-video-section {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  min-height: 450px;
+  overflow: hidden;
+  background: #000;
+}
+
+.hero-video-section .hero-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+
+/* ===== PARTE 4: TÍTULO Y SUBTÍTULO ===== */
+.intro-text-section {
+  padding: 5rem 1.5rem 4rem;
+  background: #fff;
+}
+
+.intro-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #222;
+}
+
+.intro-subtitle {
+  font-size: 1.15rem;
+  color: #555;
+  margin-bottom: 0;
+  font-style: italic;
+}
+
+
+/* ===== PARTE 5: TARJETAS DE INFORMACIÓN ===== */
+.cards-section {
+  padding: 2rem 10rem 7rem;
+  background: #fff;
+}
+
+.info-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 1.2rem 2rem;
+  height: auto;
+  overflow-y: visible;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.info-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+}
+
+.info-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+  color: #222;
+  font-style: oblique;
+}
+
+.info-card-text {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+
+/* ===== PARTE 6: SECCIÓN CONTACTO ===== */
+.contact-section {
+  background: rgba(240, 244, 242, 0.878);
+  padding: 2.5rem 1.5rem 2.5rem;
+  width: 100%;
+}
+
+.contact-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.contact-subtitle {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 3rem;
+}
+
+.contact-photos-row {
+  margin-bottom: 1rem;
+}
+
+.contact-photo-wrap {
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.contact-photo {
+  width: 400px;
+  height: 450px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.contact-photo-wrap:hover .contact-photo {
+  transform: scale(1.03);
+}
+
+.btn-contact-cta {
+  display: inline-block;
+  background: #2c5f4a;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.75rem 2.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+  border: none;
+}
+
+.btn-contact-cta:hover {
+  background: #1e4233;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+
+/* ===== PARTE 7: SECCIÓN PERSONALIZACIÓN ===== */
+.personalize-section {
+  padding: 5rem 1.5rem 7rem;
+  background: #fff;
+}
+
+.personalize-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 3rem;
+}
+
+.personalize-row {
+  margin-bottom: 3rem;
+  align-items: stretch;
+}
+
+.personalize-row:last-child {
+  margin-bottom: 0;
+}
+
+.personalize-img {
+  width: 100%;
+  border-radius: 0;
+  object-fit: cover;
+  height: 100%;
+  min-height: 320px;
+  max-height: 380px;
+  box-shadow: none;
+  display: block;
+}
+
+.personalize-img-wrap {
+  height: 100%;
+}
+
+.personalize-info-box {
+background: rgba(240, 244, 242, 0.878);
+  border-radius: 20px;
+  padding: 2.5rem 2.2rem;
+  height: 100%;
+  display: flex;
+  box-shadow: 0 4px 16px rgba(101, 101, 101, 0.012); 
+  flex-direction: column;
+  justify-content: center;
+}
+
+.personalize-info-box h4 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.85rem;
+}
+
+.personalize-info-box p {
+  font-size: 0.97rem;
+  color: #444;
+  line-height: 1.8;
+  margin-bottom: 0;
+}
+
+
+/* ===== PARTE 8: CTA + CARRUSEL + HISTORIA ===== */
+.carousel-section {
+  padding: 2rem 1.5rem 4rem;
+  background: rgba(240, 244, 242, 0.878);
+}
+
+.carousel-cta-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1.2rem;
+  padding: 2rem 1.5rem 2rem;
+}
+
+.btn-personalize-cta {
+  display: inline-block;
+  background: #2c5f4a;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.75rem 2.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+  border: none;
+  margin-bottom: 3rem;
+}
+
+.btn-personalize-cta:hover {
+  background: #1e4233;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Carrusel centrado al 70% */
+.carousel-wrapper {
+  width: 90%;
+  margin: 0 auto 3rem;
+}
+
 .carrusel {
   position: relative;
-  height: 70vh;
-  min-height: 500px;
+  width: 100%;
+  height: 380px;
   overflow: hidden;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .carrusel .slide {
   position: absolute;
-  top: 0; 
+  top: 0;
   left: 0;
-  width: 100%; 
-  height: 70vh;
-  min-height: 500px;
+  width: 100%;
+  height: 100%;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -25,22 +281,66 @@
   z-index: 1;
 }
 
-.cta-hero {
-  position: absolute;
-  bottom: 40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  max-width: 600px;
-  color: rgb(248, 248, 248);
-  background: rgba(194, 214, 207, 0.878);
-  padding: 1.5rem 2rem;
-  border-radius: 20px;
-  z-index: 10;
+/* Párrafo historia joyería */
+.history-text {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.history-text p {
+  font-size: 1.05rem;
+  color: #555;
+  line-height: 1.85;
   text-align: center;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 
-.modulo-section h3 {
-  margin-bottom: 1rem;
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+  .intro-title {
+    font-size: 1.7rem;
+  }
+
+  .intro-subtitle {
+    font-size: 1rem;
+  }
+
+  .contact-title,
+  .personalize-title,
+  .carousel-cta-title {
+    font-size: 1.8rem;
+  }
+
+  .contact-photo {
+    height: 220px;
+  }
+
+  .carousel-wrapper {
+    width: 90%;
+  }
+
+  .carrusel {
+    height: 260px;
+  }
+
+  .personalize-img {
+    min-height: 220px;
+    max-height: 260px;
+  }
+}
+
+@media (max-width: 576px) {
+  .intro-title {
+    font-size: 1.5rem;
+  }
+
+  .carousel-wrapper {
+    width: 100%;
+  }
+
+  
 }
