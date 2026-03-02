@@ -8,6 +8,38 @@
 
 @section('content')
 
+@if(session('success'))
+<div class="container mt-4">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+@endif
+
+@if(session('error'))
+<div class="container mt-4">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+@endif
+  <!-- Hero / Video -->
+<section class="carrusel">
+  <video autoplay muted loop playsinline class="hero-video">
+    <source src="{{ asset('assets/video/hero.mp4') }}" type="video/mp4">
+  </video>
+
+  <div class="cta-hero text-center">
+    <h1>Diseña tu joya soñada</h1>
+    <p>Personaliza paso a paso con Brisas Gems</p>
+    <a class="btn btn-light" href="{{ url('/personalizar') }}">Comenzar personalización</a>
+  </div>
+</section>
+
   <!-- ===== PARTE 2: VIDEO HERO ===== -->
   <section class="hero-video-section">
     <video autoplay muted loop playsinline class="hero-video">
