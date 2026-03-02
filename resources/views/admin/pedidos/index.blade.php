@@ -59,11 +59,18 @@
                         @endforeach
                     </div>
                 </div>
-                <div>
-                    <span class="role-badge">
-                        <i class="bi bi-shield-check"></i>
-                        Administrador
-                    </span>
+                <div class="d-flex flex-column align-items-end gap-2">
+                    @if(Session::get('user_role') === 'ROLE_ADMINISTRADOR')
+                    <button
+                        type="button"
+                        class="btn btn-dark d-inline-flex align-items-center gap-2"
+                        style="border-radius: 999px; padding: 0.4rem 1.1rem; font-size: 0.85rem; font-weight: 600;"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalCrearPedido">
+                        <i class="bi bi-plus-lg" style="font-size: 0.8rem;"></i>
+                        Nuevo Pedido
+                    </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -118,6 +125,140 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL: CREAR PEDIDO --}}
+@if(Session::get('user_role') === 'ROLE_ADMINISTRADOR')
+<div class="modal fade" id="modalCrearPedido" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-gem me-2" style="color: #009688;"></i>Nuevo Pedido
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Estado inicial</label>
+                    <select id="cpEstado" class="form-select">
+                        @foreach($estados as $estado)
+                            <option value="{{ $estado['id'] }}" {{ $estado['id'] == 1 ? 'selected' : '' }}>
+                                {{ $estado['nombre'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo de cliente</label>
+                    <div class="d-flex gap-2">
+                        <input type="radio" class="btn-check" name="cpTipoCliente" id="cpTipoRegistrado" value="registrado" checked>
+                        <label class="btn btn-sm btn-outline-secondary flex-fill text-center" for="cpTipoRegistrado">
+                            <i class="bi bi-person-check me-1"></i>Registrado
+                        </label>
+                        <input type="radio" class="btn-check" name="cpTipoCliente" id="cpTipoExterno" value="externo">
+                        <label class="btn btn-sm btn-outline-secondary flex-fill text-center" for="cpTipoExterno">
+                            <i class="bi bi-telephone me-1"></i>Externo
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Cliente registrado: select directo con la lista ya cargada --}}
+                <div id="bloqueRegistrado" class="mb-3">
+                    <label class="form-label">Cliente</label>
+                    <select id="cpUsuIdCliente" class="form-select">
+                        <option value="">Seleccionar cliente...</option>
+                        @foreach($clientes ?? [] as $cliente)
+                            <option value="{{ $cliente['id'] }}">
+                                {{ $cliente['nombre'] }} — {{ $cliente['correo'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Cliente externo: texto libre --}}
+                <div id="bloqueExterno" class="mb-3" style="display:none;">
+                    <label class="form-label">Nombre y teléfono</label>
+                    <input type="text" id="cpIdentificador" class="form-control"
+                           placeholder="Ej: Laura Martinez - 3101234567">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">
+                        Diseñador asignado <span class="text-muted fw-normal small">(opcional)</span>
+                    </label>
+                    <select id="cpEmpleado" class="form-select">
+                        <option value="">Sin asignar</option>
+                        @foreach($disenadores ?? [] as $d)
+                            <option value="{{ $d['usuId'] ?? $d['id'] }}">
+                                {{ $d['usuNombre'] ?? $d['nombre'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-0">
+                    <label class="form-label">
+                        Comentarios <span class="text-muted fw-normal small">(opcional)</span>
+                    </label>
+                    <textarea id="cpComentarios" class="form-control" rows="2"
+                              placeholder="Notas internas..."></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-dark fw-semibold" onclick="submitCrearPedido()">
+                    <i class="bi bi-plus-lg me-1"></i>Crear Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+
+{{-- MODAL: ASIGNAR CLIENTE --}}
+@if(Session::get('user_role') === 'ROLE_ADMINISTRADOR')
+<div class="modal fade" id="modalAsignarCliente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-plus me-2" style="color: #009688;"></i>Asignar Cliente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3">
+                    Pedido: <strong id="acCodigoPedido"></strong>
+                </p>
+
+                <div class="mb-3">
+                    <label class="form-label">Cliente registrado</label>
+                    <select id="acUsuIdCliente" class="form-select">
+                        <option value="">Seleccionar cliente...</option>
+                        @foreach($clientes ?? [] as $cliente)
+                            <option value="{{ $cliente['id'] }}">
+                                {{ $cliente['nombre'] }} — {{ $cliente['correo'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <input type="hidden" id="acPedidoId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-dark fw-semibold" onclick="confirmarAsignarCliente()">
+                    <i class="bi bi-person-check me-1"></i>Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @push('scripts')
@@ -321,6 +462,116 @@ function asignarDisenador() {
         console.error('Error:', error);
         Swal.fire('Error', 'Ocurrió un error al asignar el diseñador', 'error');
     });
+}
+
+// ==================================================
+// MODAL CREAR PEDIDO
+// ==================================================
+
+document.querySelectorAll('input[name="cpTipoCliente"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const esRegistrado = this.value === 'registrado';
+        document.getElementById('bloqueRegistrado').style.display = esRegistrado ? 'block' : 'none';
+        document.getElementById('bloqueExterno').style.display    = esRegistrado ? 'none'  : 'block';
+        if (esRegistrado) {
+            document.getElementById('cpIdentificador').value = '';
+        } else {
+            document.getElementById('cpUsuIdCliente').value = '';
+        }
+    });
+});
+
+function submitCrearPedido() {
+    const tipo        = document.querySelector('input[name="cpTipoCliente"]:checked').value;
+    const estId       = document.getElementById('cpEstado').value;
+    const empleadoId  = document.getElementById('cpEmpleado').value;
+    const comentarios = document.getElementById('cpComentarios').value.trim();
+
+    const payload = { estId: parseInt(estId) };
+
+    if (tipo === 'registrado') {
+        const clienteId = document.getElementById('cpUsuIdCliente').value;
+        if (!clienteId) {
+            Swal.fire({ icon: 'warning', title: 'Falta el cliente', text: 'Selecciona un cliente de la lista.', confirmButtonColor: '#009688' });
+            return;
+        }
+        payload.usuIdCliente = parseInt(clienteId);
+    } else {
+        const identificador = document.getElementById('cpIdentificador').value.trim();
+        if (!identificador) {
+            Swal.fire({ icon: 'warning', title: 'Falta el identificador', text: 'Escribe el nombre y teléfono del cliente.', confirmButtonColor: '#009688' });
+            return;
+        }
+        payload.pedIdentificadorCliente = identificador;
+    }
+
+    if (empleadoId) payload.usuIdEmpleado = parseInt(empleadoId);
+    if (comentarios) payload.pedComentarios = comentarios;
+
+    Swal.fire({ title: 'Creando pedido...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+
+    fetch('/admin/pedidos/crear-manual', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({ icon: 'success', title: 'Pedido creado', text: 'Código: ' + (data.pedido?.pedCodigo ?? ''), confirmButtonColor: '#009688' })
+            .then(() => location.reload());
+        } else {
+            throw new Error(data.message || 'Error al crear el pedido.');
+        }
+    })
+    .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonColor: '#ef4444' }));
+}
+
+// ==================================================
+// MODAL ASIGNAR CLIENTE
+// ==================================================
+
+function abrirModalAsignarCliente(pedidoId, codigo) {
+    document.getElementById('acPedidoId').value = pedidoId;
+    document.getElementById('acCodigoPedido').textContent = codigo;
+    document.getElementById('acUsuIdCliente').value = '';
+    new bootstrap.Modal(document.getElementById('modalAsignarCliente')).show();
+}
+
+function confirmarAsignarCliente() {
+    const pedidoId   = document.getElementById('acPedidoId').value;
+    const clienteId  = document.getElementById('acUsuIdCliente').value;
+
+    if (!clienteId) {
+        Swal.fire({ icon: 'warning', title: 'Selecciona un cliente', confirmButtonColor: '#009688' });
+        return;
+    }
+
+    Swal.fire({ title: 'Asignando...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
+
+    fetch(`/admin/pedidos/${pedidoId}/asignar-cliente`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ usuIdCliente: parseInt(clienteId) })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({ icon: 'success', title: 'Cliente asignado', confirmButtonColor: '#009688' })
+            .then(() => location.reload());
+        } else {
+            throw new Error(data.message || 'Error al asignar.');
+        }
+    })
+    .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonColor: '#ef4444' }));
 }
 </script>
 @endpush
