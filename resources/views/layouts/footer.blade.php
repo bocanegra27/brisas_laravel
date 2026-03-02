@@ -166,7 +166,7 @@
                 © {{ date('Y') }} Brisas Gems - Todos los derechos reservados
             </p>
             <p class="footer-minimal__credits">
-                Desarrollado con 💎 por <a href="https://www.sena.edu.co/" target="_blank" rel="noopener">SENA CEET</a> - Ficha 2996176 ADSO
+                Desarrollado por <a href="https://www.sena.edu.co/" target="_blank" rel="noopener">SENA CEET</a> - Ficha 2996176 ADSO
             </p>
         </div>
 
