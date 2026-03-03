@@ -27,18 +27,7 @@
     </div>
 </div>
 @endif
-  <!-- Hero / Video -->
-<section class="carrusel">
-  <video autoplay muted loop playsinline class="hero-video">
-    <source src="{{ asset('assets/video/hero.mp4') }}" type="video/mp4">
-  </video>
 
-  <div class="cta-hero text-center">
-    <h1>Diseña tu joya soñada</h1>
-    <p>Personaliza paso a paso con Brisas Gems</p>
-    <a class="btn btn-light" href="{{ url('/personalizar') }}">Comenzar personalización</a>
-  </div>
-</section>
 
   <!-- ===== PARTE 2: VIDEO HERO ===== -->
   <section class="hero-video-section">
@@ -159,7 +148,7 @@ Porque lo verdaderamente especial no sigue tendencias, crea su propio camino.</p
     <!-- Carrusel centrado al 50% -->
     <div class="carousel-wrapper">
       <div class="carrusel" id="mainCarousel">
- <div class="slide active" style="background-image: url('{{ asset('assets/img/index/carrusel1.png') }}');"></div>
+<div class="slide active" style="background-image: url('{{ asset('assets/img/index/carrusel1.png') }}');"></div>
 <div class="slide" style="background-image: url('{{ asset('assets/img/index/carrusel2.png') }}');"></div>
 <div class="slide" style="background-image: url('{{ asset('assets/img/index/carrusel3.png') }}');"></div>
       </div>
