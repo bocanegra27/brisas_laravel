@@ -197,7 +197,7 @@
                         </div>
                     @endforeach
 
-                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold text-uppercase mt-4">Guardar Diseño</button>
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold text-uppercase mt-4">Contactar para personalizar.</button>
                 </form>
             </div>
         </div>
