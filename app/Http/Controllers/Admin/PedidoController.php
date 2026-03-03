@@ -113,6 +113,11 @@ public function index(Request $request)
         ]);
         
         $disenadores = is_array($disenadoresResponse) ? $disenadoresResponse : [];
+
+        $clientesResponse = $this->apiService->get('/usuarios/clientes', [
+            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+        ]);
+        $clientes = is_array($clientesResponse) ? $clientesResponse : [];
         // ----------------------------------------------------
         
         // Obtener estadisticas
@@ -133,6 +138,7 @@ public function index(Request $request)
             'stats' => $stats,
             'estados' => $estados,
             'disenadores' => $disenadores,
+            'clientes' => $clientes,
             'estadoMapeo' => $estadoMapeo,
             'filtros' => [
                 'estadoId' => $estadoId,
@@ -922,5 +928,43 @@ private function enriquecerPedido(array $pedido): array
                 'message' => 'Error técnico: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function crearManual(Request $request)
+    {
+        $data = [];
+
+        if ($request->filled('estId'))       $data['estId']       = (int) $request->estId;
+        if ($request->filled('usuIdCliente')) $data['usuIdCliente'] = (int) $request->usuIdCliente;
+        if ($request->filled('usuIdEmpleado')) $data['usuIdEmpleado'] = (int) $request->usuIdEmpleado;
+        if ($request->filled('pedComentarios')) $data['pedComentarios'] = $request->pedComentarios;
+        if ($request->filled('pedIdentificadorCliente')) $data['pedIdentificadorCliente'] = $request->pedIdentificadorCliente;
+
+        $response = $this->apiService->post('/pedidos/json-manual', $data, [
+            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+        ]);
+
+        if ($response && isset($response['pedId'])) {
+            return response()->json(['success' => true, 'pedido' => $response], 201);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Error al crear el pedido.'], 500);
+    }
+
+    public function asignarCliente(Request $request, $id)
+    {
+        $request->validate(['usuIdCliente' => 'required|integer']);
+
+        $response = $this->apiService->patch("/pedidos/{$id}/asignar-cliente", [
+            'usuIdCliente' => (int) $request->usuIdCliente
+        ], [
+            'headers' => ['Authorization' => 'Bearer ' . Session::get('jwt_token')]
+        ]);
+
+        if ($response) {
+            return response()->json(['success' => true, 'pedido' => $response]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Error al asignar el cliente.'], 500);
     }
 }

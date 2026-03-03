@@ -42,7 +42,7 @@
                     @elseif (!empty($pedido['pedIdentificadorCliente']))
                         <span class="text-muted">{{ $pedido['pedIdentificadorCliente'] }}</span>
                     @else
-                        <span class="text-muted">Desconocido</span>
+                        <span class="text-muted small">Sin cliente</span>
                     @endif
                 </td>
                 @endif
@@ -93,6 +93,14 @@
                             </button>
                             <button type="button" class="btn-action btn-asignar btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalAsignarDisenador" data-pedidoid="{{ $pedido['pedId'] }}" data-actualdisenadorid="{{ $pedido['usuIdEmpleado'] ?? '' }}" data-actualdisenadornombre="{{ $pedido['nombreEmpleado'] ?? '' }}" title="{{ ($pedido['usuIdEmpleado'] ?? null) ? 'Reasignar Diseñador' : 'Asignar Diseñador' }}">
                                 <i class="bi bi-person-plus"></i>
+                            </button>
+                             <button type="button"
+                                    class="btn-action btn btn-sm btn-warning"
+                                    onclick="abrirModalAsignarCliente({{ $pedido['pedId'] }}, '{{ addslashes($pedido['pedCodigo']) }}')"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Asignar cliente">
+                                <i class="bi bi-person-badge"></i>
                             </button>
                         @elseif(Session::get('user_role') === 'ROLE_DISEÑADOR')
                             {{-- Diseñador: solo Gestionar --}}

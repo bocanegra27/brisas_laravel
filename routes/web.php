@@ -119,32 +119,33 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
     
     // MÓDULO: PEDIDOS
     Route::controller(PedidoController::class)->prefix('pedidos')->group(function () {
-        Route::get('/', 'index')->name('admin.pedidos.index');
-        Route::get('/{id}/gestionar', 'gestionar')->name('admin.pedidos.gestionar');
 
-        // Acciones específicas
-        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje'); 
+        // Rutas SIN parámetro primero
+        Route::get('/', 'index')->name('admin.pedidos.index');
+        Route::post('/', 'store')->name('admin.pedidos.store');
+        Route::post('/crear-manual', 'crearManual')->name('admin.pedidos.crear-manual');
+        Route::post('/desde-mensaje/{mensajeId}', 'crearDesdeMensaje')->name('admin.pedidos.crear-desde-mensaje');
+
+        // Rutas CON parámetro {id} después
+        Route::get('/{id}/gestionar', 'gestionar')->name('admin.pedidos.gestionar');
+        Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
+        Route::get('/{id}', 'show')->name('admin.pedidos.ver');
+
         Route::patch('/{id}/asignar-empleado', 'asignarEmpleado')->name('admin.pedidos.asignarEmpleado');
-        Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
-        
-        // Manejo de estados
+        Route::patch('/{id}/asignar-cliente', 'asignarCliente')->name('admin.pedidos.asignarCliente');
+        Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.pedidos.cambiar-estado');
         Route::patch('/{id}/estado-historial', 'actualizarEstadoConHistorial')->name('admin.pedidos.actualizarEstado');
         Route::post('/{id}/estado-historial', 'actualizarEstadoConHistorial');
-        Route::patch('/{id}/estado', 'cambiarEstado')->name('admin.pedidos.cambiar-estado');
-        
-        Route::get('/{id}/historial', 'obtenerHistorial')->name('admin.pedidos.historial');
+        Route::post('/{id}/subir-diseno', 'subirDiseno')->name('admin.pedidos.subir-diseno');
         Route::post('/{id}/subir-producto-final', 'subirProductoFinal')->name('admin.pedidos.subir-producto-final');
 
-        // CRUD Básico
-        Route::post('/', 'store')->name('admin.pedidos.store');
-        Route::get('/{id}', 'show')->name('admin.pedidos.ver');
         Route::put('/{id}', 'update')->name('admin.pedidos.update');
         Route::delete('/{id}', 'destroy')->name('admin.pedidos.destroy');
 
-        // Proxy de archivos internos (Admin)
+        // Proxy al final porque su regex .* es muy amplio
         Route::get('/ver-archivo/{path}', 'verArchivo')
-             ->where('path', '.*')
-             ->name('admin.pedidos.ver-archivo');
+            ->where('path', '.*')
+            ->name('admin.pedidos.ver-archivo');
     });
 
     // MÓDULO: GESTIÓN DE PERSONALIZACIÓN (CATÁLOGO)
