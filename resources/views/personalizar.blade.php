@@ -210,12 +210,38 @@
     const VISTAS_POSIBLES = ['superior', 'frontal', 'perfil'];
 
     document.addEventListener('DOMContentLoaded', async () => {
-        // ... (Aquí dejas tu código de sesión anónima igualito que lo tenías) ...
 
-        // 1. Primero calculamos qué slugs están seleccionados por defecto
+        @if(!session()->has('user_id'))
+            const STORAGE_TOKEN = 'anonymous_sesion_token';
+            const STORAGE_ID    = 'anonymous_sesion_id';
+            const inputSesion   = document.getElementById('input-sesion-anonima');
+
+            try {
+                let sesToken = localStorage.getItem(STORAGE_TOKEN);
+                let sesId    = localStorage.getItem(STORAGE_ID);
+
+                if (!sesToken || !sesId) {
+                    const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    const data = await res.json();
+                    sesToken = data.sesToken;
+                    sesId    = String(data.sesId);
+                    localStorage.setItem(STORAGE_TOKEN, sesToken);
+                    localStorage.setItem(STORAGE_ID, sesId);
+                }
+
+                if (inputSesion) {
+                    inputSesion.value = sesId;
+                }
+            } catch (e) {
+                console.warn('No se pudo crear/recuperar sesion anonima:', e);
+            }
+        @endif
+
         calcularSlugs();
-        
-        // 2. Detectamos automáticamente qué vistas existen en el servidor
         await autoDetectarVistas();
     });
 
