@@ -321,7 +321,7 @@ textarea.form-control {
                                     class="form-control @error('nombre') is-invalid @enderror" 
                                     id="nombre" 
                                     name="nombre" 
-                                    value="{{ old('nombre') }}"
+                                    value="{{ old('nombre', $usuario['nombre'] ?? '') }}"
                                     placeholder="Ej: Juan Pérez"
                                     required>
                                 @error('nombre')
@@ -337,7 +337,7 @@ textarea.form-control {
                                     class="form-control @error('correo') is-invalid @enderror" 
                                     id="correo" 
                                     name="correo" 
-                                    value="{{ old('correo') }}"
+                                    value="{{ old('correo', $usuario['correo'] ?? '') }}"
                                     placeholder="Ej: juan@example.com"
                                     required>
                                 @error('correo')
@@ -353,7 +353,7 @@ textarea.form-control {
                                     class="form-control @error('telefono') is-invalid @enderror" 
                                     id="telefono" 
                                     name="telefono" 
-                                    value="{{ old('telefono') }}"
+                                    value="{{ old('telefono', $usuario['telefono'] ?? '') }}"
                                     placeholder="Ej: 3001234567"
                                     required>
                                 @error('telefono')

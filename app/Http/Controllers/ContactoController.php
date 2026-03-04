@@ -30,6 +30,36 @@ class ContactoController extends Controller
     {
         $personalizacionId = $request->query('personalizacionId');
         $resumen = null;
+        $usuario = null; // Variable para almacenar los datos del usuario
+
+        // VERIFICAR SI HAY USUARIO LOGUEADO
+        if (session()->has('user_id')) {
+            $usuarioId = session('user_id');
+            
+            // OPCIÓN A: Si guardaste el nombre y correo en la sesión al hacer login
+            /*
+            $usuario = [
+                'nombre' => session('user_nombre', ''),
+                'correo' => session('user_correo', ''),
+                'telefono' => session('user_telefono', '')
+            ];
+            */
+
+            // OPCIÓN B: Si necesitas consultar al API de Spring Boot (Recomendado si no están en sesión)
+            try {
+                // Ajusta la ruta '/usuarios/' según cómo esté en tu backend
+                $datosApi = $this->apiService->get("/usuarios/{$usuarioId}");
+                if ($datosApi) {
+                    $usuario = [
+                        'nombre' => $datosApi['nombre'] ?? '',
+                        'correo' => $datosApi['correo'] ?? '',
+                        'telefono' => $datosApi['telefono'] ?? ''
+                    ];
+                }
+            } catch (\Exception $e) {
+                Log::error('ContactoController: Error al obtener datos del perfil', ['error' => $e->getMessage()]);
+            }
+        }
 
         // Si viene personalizacionId, obtener detalles
         if ($personalizacionId) {
@@ -47,9 +77,11 @@ class ContactoController extends Controller
             }
         }
 
+        // ENVIAMOS EL USUARIO A LA VISTA
         return view('contacto', [
             'personalizacionId' => $personalizacionId,
-            'resumen' => $resumen
+            'resumen' => $resumen,
+            'usuario' => $usuario 
         ]);
     }
 
