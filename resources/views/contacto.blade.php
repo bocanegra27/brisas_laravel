@@ -471,31 +471,39 @@ textarea.form-control {
 (function() {
     'use strict';
     
-    const STORAGE_SESION_ID = 'anonymous_sesion_id'; // Clave para obtener el ID numérico
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        // Verificar si hay usuario autenticado
+    document.addEventListener('DOMContentLoaded', async function() {
         @if(session()->has('user_id'))
-            console.log('✅ Usuario autenticado - NO se cargará sesionId en contacto');
-            return; 
+            return;
         @endif
-        
-        // Solo cargar sesionId si NO está autenticado
-        const sesionId = localStorage.getItem(STORAGE_SESION_ID);
-        
-        if (sesionId) {
-            // Asumo que tu formulario de contacto tiene un input oculto con name="sesionId"
-            const inputSesionId = document.getElementById('input-sesion-id'); 
-            if (inputSesionId) {
-                inputSesionId.value = sesionId;
-                console.log('✅ sesionId cargado en contacto:', sesionId);
+
+        const STORAGE_TOKEN = 'anonymous_sesion_token';
+        const STORAGE_ID    = 'anonymous_sesion_id';
+        const inputSesionId = document.getElementById('input-sesion-id');
+
+        try {
+            let sesToken = localStorage.getItem(STORAGE_TOKEN);
+            let sesId    = localStorage.getItem(STORAGE_ID);
+
+            if (!sesToken || !sesId) {
+                const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                sesToken = data.sesToken;
+                sesId    = String(data.sesId);
+                localStorage.setItem(STORAGE_TOKEN, sesToken);
+                localStorage.setItem(STORAGE_ID, sesId);
             }
-        } else {
-            console.log('⚠️ No se encontró sesionId en localStorage');
-            // Nota: Aquí se podría llamar a obtenerOCrearSesion() si es crítico que el contacto tenga un ID de sesión.
+
+            if (inputSesionId) {
+                inputSesionId.value = sesId;
+            }
+        } catch (e) {
+            console.warn('No se pudo crear/recuperar sesion anonima:', e);
         }
     });
-    
 })();
 </script>
 @endpush
