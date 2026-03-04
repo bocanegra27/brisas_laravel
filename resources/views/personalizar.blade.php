@@ -155,14 +155,7 @@
                 </div>
                             
                             {{-- Controles de Vista --}}
-                            <div class="d-flex justify-content-center gap-2 py-3 bg-white border-top">
-                                <button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('anterior')"><i class="bi bi-chevron-left"></i></button>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn view-btn active" data-vista="superior" onclick="setVista('superior')">Superior</button>
-                                    <button type="button" class="btn view-btn" data-vista="frontal" onclick="setVista('frontal')">Frontal</button>
-                                    <button type="button" class="btn view-btn" data-vista="perfil" onclick="setVista('perfil')">Perfil</button>
-                                </div>
-                                <button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('siguiente')"><i class="bi bi-chevron-right"></i></button>
+                            <div class="d-flex justify-content-center gap-2 py-3 bg-white border-top" id="contenedor-botones-vista" style="min-height: 60px;">
                             </div>
                         </div>
                     </div>
@@ -209,63 +202,25 @@
 <script>
     // ESTADO GLOBAL ÚNICO
     let estado = {
-        vista: 'superior',
-        slugsSeleccionados: []
+        vista: 'frontal', // Valor temporal, se ajustará automáticamente
+        slugsSeleccionados: [],
+        vistasDisponibles: [] // Aquí guardaremos las vistas que sí existen
     };
 
+    const VISTAS_POSIBLES = ['superior', 'frontal', 'perfil'];
+
     document.addEventListener('DOMContentLoaded', async () => {
+        // ... (Aquí dejas tu código de sesión anónima igualito que lo tenías) ...
 
-        @if(!session()->has('user_id'))
-            const STORAGE_TOKEN = 'anonymous_sesion_token';
-            const STORAGE_ID    = 'anonymous_sesion_id';
-            const inputSesion   = document.getElementById('input-sesion-anonima');
-
-            try {
-                let sesToken = localStorage.getItem(STORAGE_TOKEN);
-                let sesId    = localStorage.getItem(STORAGE_ID);
-
-                if (!sesToken || !sesId) {
-                    const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', { method: 'POST' });
-                    const data = await res.json();
-
-                    sesToken = data.sesToken;
-                    sesId    = data.sesId;
-
-                    localStorage.setItem(STORAGE_TOKEN, sesToken);
-                    localStorage.setItem(STORAGE_ID, String(sesId));
-                }
-
-                if (inputSesion) {
-                    inputSesion.value = sesId;
-                }
-
-            } catch (e) {
-                console.warn('No se pudo crear/recuperar sesión anónima:', e);
-            }
-        @endif
-
-        recalcularEstado();
+        // 1. Primero calculamos qué slugs están seleccionados por defecto
+        calcularSlugs();
+        
+        // 2. Detectamos automáticamente qué vistas existen en el servidor
+        await autoDetectarVistas();
     });
 
-    function seleccionarValor(boton) {
-        const grupo = boton.closest('.option-group');
-        grupo.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
-        boton.classList.add('active');
-
-        // ESTA PARTE ES CRÍTICA: Actualizar el input hidden que lee PHP
-        const opcId = boton.dataset.opcionId;
-        const inputOculto = document.getElementById('input-opcion-' + opcId);
-        
-        if (inputOculto) {
-            inputOculto.value = boton.dataset.valorId;
-        } else {
-            console.error("No se encontró el input input-opcion-" + opcId);
-        }
-
-        recalcularEstado();
-    }
-
-    function recalcularEstado() {
+    // Separé esta lógica de recalcularEstado para poder usarla antes de cargar las imágenes
+    function calcularSlugs() {
         estado.slugsSeleccionados = [];
         const exclusiones = ['talla', 'tamaño'];
 
@@ -278,23 +233,124 @@
                 if (activo) estado.slugsSeleccionados.push(activo.dataset.valorSlug);
             }
         });
+    }
+
+    function seleccionarValor(boton) {
+        const grupo = boton.closest('.option-group');
+        grupo.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+        boton.classList.add('active');
+
+        const opcId = boton.dataset.opcionId;
+        const inputOculto = document.getElementById('input-opcion-' + opcId);
+        
+        if (inputOculto) {
+            inputOculto.value = boton.dataset.valorId;
+        }
+
+        recalcularEstado();
+    }
+
+    function recalcularEstado() {
+        calcularSlugs();
         actualizarImagen();
+    }
+
+    // MAGIA: Función que sondea el servidor de Spring Boot para ver qué archivos existen
+    async function autoDetectarVistas() {
+        const catSlug = document.getElementById('data-categoria').dataset.slug;
+        const baseUrl = `http://localhost:8080/uploads/personalizacion/${catSlug}`;
+        const rutaOpciones = estado.slugsSeleccionados.join('/');
+
+        estado.vistasDisponibles = [];
+
+        // Creamos promesas para probar cada imagen al mismo tiempo (más rápido)
+        const promesas = VISTAS_POSIBLES.map(vistaNombre => {
+            return new Promise(resolve => {
+                const imgTemp = new Image();
+                imgTemp.onload = () => {
+                    // Si carga bien, la vista existe
+                    estado.vistasDisponibles.push(vistaNombre);
+                    resolve();
+                };
+                imgTemp.onerror = () => {
+                    // Si da error (404), la ignoramos
+                    resolve();
+                };
+                // OJO: Asumo que usas .jpg como en tu código frontend. 
+                // Si en Spring Boot estás guardando .png, cambia la extensión aquí.
+                imgTemp.src = `${baseUrl}/${rutaOpciones}/${vistaNombre}.jpg`;
+            });
+        });
+
+        // Esperamos a que termine de sondear todas
+        await Promise.all(promesas);
+
+        // Ordenamos el array para que siempre quede: superior -> frontal -> perfil
+        estado.vistasDisponibles.sort((a, b) => VISTAS_POSIBLES.indexOf(a) - VISTAS_POSIBLES.indexOf(b));
+
+        // Si no encontró ninguna (error de ruta), ponemos frontal por defecto para que no explote
+        if (estado.vistasDisponibles.length === 0) {
+            estado.vistasDisponibles = ['frontal'];
+        }
+
+        // Seleccionamos la primera vista disponible como la principal
+        estado.vista = estado.vistasDisponibles[0];
+
+        // Construimos los botones y pintamos la imagen
+        renderizarBotones();
+        actualizarImagen();
+    }
+
+    function renderizarBotones() {
+        const contenedor = document.getElementById('contenedor-botones-vista');
+        contenedor.innerHTML = ''; // Limpiamos
+
+        // Si solo hay 1 vista, no pintamos nada (o podrías pintar solo el texto)
+        if (estado.vistasDisponibles.length <= 1) return;
+
+        let html = '';
+        
+        // Flecha izquierda
+        html += `<button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('anterior')"><i class="bi bi-chevron-left"></i></button>`;
+        
+        // Botones del centro
+        html += `<div class="btn-group" role="group">`;
+        estado.vistasDisponibles.forEach(vista => {
+            const capitalizada = vista.charAt(0).toUpperCase() + vista.slice(1);
+            const claseActiva = vista === estado.vista ? 'active' : '';
+            html += `<button type="button" class="btn view-btn ${claseActiva}" data-vista="${vista}" onclick="setVista('${vista}')">${capitalizada}</button>`;
+        });
+        html += `</div>`;
+
+        // Flecha derecha
+        html += `<button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('siguiente')"><i class="bi bi-chevron-right"></i></button>`;
+
+        contenedor.innerHTML = html;
     }
 
     function setVista(v) {
         estado.vista = v;
-        document.querySelectorAll('[data-vista]').forEach(b => b.classList.toggle('active', b.dataset.vista === v));
+        // Actualizamos la clase active de los botones dinámicos
+        document.querySelectorAll('[data-vista]').forEach(b => {
+            b.classList.toggle('active', b.dataset.vista === v);
+        });
         actualizarImagen();
     }
 
     function cambiarVista(dir) {
-        const vistas = ['superior', 'frontal', 'perfil'];
-        let i = vistas.indexOf(estado.vista);
-        i = (dir === 'siguiente') ? (i + 1) % 3 : (i - 1 + 3) % 3;
-        setVista(vistas[i]);
+        if (estado.vistasDisponibles.length <= 1) return;
+
+        let i = estado.vistasDisponibles.indexOf(estado.vista);
+        if (dir === 'siguiente') {
+            i = (i + 1) % estado.vistasDisponibles.length;
+        } else {
+            i = (i - 1 + estado.vistasDisponibles.length) % estado.vistasDisponibles.length;
+        }
+        setVista(estado.vistasDisponibles[i]);
     }
 
     function actualizarImagen() {
+        // ... (Tu código de actualizarImagen queda exactamente igual) ...
         const img = document.getElementById('vista-principal');
         const loader = document.getElementById('loading-preview');
         const error = document.getElementById('error-imagen');
@@ -303,8 +359,6 @@
         const baseUrl = `http://localhost:8080/uploads/personalizacion/${catSlug}`;
         const rutaOpciones = estado.slugsSeleccionados.join('/');
         const urlFinal = `${baseUrl}/${rutaOpciones}/${estado.vista}.jpg`;
-
-        console.log("Cargando:", urlFinal);
 
         loader.style.display = 'block';
         img.style.opacity = '0.3';
