@@ -54,30 +54,53 @@
     padding: 3rem;
 }
 
-/* Resumen de personalización */
+/* ============================================
+   RESUMEN DE PERSONALIZACIÓN (ESTILO SOBRIO/LISTA)
+   ============================================ */
 .resumen-box {
-    background: linear-gradient(135deg, rgba(0, 150, 136, 0.05) 0%, rgba(233, 30, 99, 0.05) 100%);
-    border: 2px dashed #009688;
-    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #009688; /* La única línea de color del contenedor */
+    border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .resumen-box h5 {
     font-family: 'Playfair Display', serif;
     font-weight: 700;
-    color: #009688;
+    color: #0f172a;
     margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
-.resumen-content {
-    white-space: pre-line;
-    color: #1e293b;
-    line-height: 1.8;
+.resumen-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.resumen-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #f1f5f9; /* Línea separadora muy sutil entre datos */
     font-size: 0.95rem;
+}
+
+.resumen-item:last-child {
+    border-bottom: none; /* Quitamos la línea al último elemento */
+    padding-bottom: 0;
+}
+
+.item-label {
+    color: #64748b;
+    font-weight: 600;
+    min-width: 140px; /* Ancho fijo para que los valores queden perfectamente alineados */
+}
+
+.item-value {
+    color: #0f172a;
+    font-weight: 600;
 }
 
 /* Labels */
@@ -291,17 +314,47 @@ textarea.form-control {
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="form-card animate-in animate-delay-2">
-                    <div class="card-body">
+<div class="card-body">
                         
-                        <!-- Resumen de personalización (si existe) -->
                         @if($resumen)
-                        <div class="resumen-box mb-4 p-3 rounded" style="background-color: #f8f9fa; border-left: 4px solid #009688;">
-                            <h5 class="text-primary mb-3">
-                                <i class="bi bi-file-text me-2"></i>Resumen de tu Diseño
-                            </h5>
-                            {{-- 'e()' escapa el HTML, 'nl2br' convierte saltos de línea en <br> --}}
-                            <div class="resumen-content text-muted" style="font-family: monospace; white-space: pre-wrap;">
-                                {{ $resumen }}
+                        <div class="resumen-box">
+                            <h5>Resumen de tu Diseño</h5>
+                            
+                            @php
+                                // Parsea el bloque de texto gigante en líneas individuales
+                                $lineas = explode("\n", $resumen);
+                                $detalles = [];
+                                $categoria = '';
+                                
+                                foreach($lineas as $linea) {
+                                    $linea = trim($linea);
+                                    if (str_starts_with($linea, 'CATEGORÍA:')) {
+                                        $categoria = trim(str_replace('CATEGORÍA:', '', $linea));
+                                    } elseif (str_starts_with($linea, '•')) {
+                                        $detalles[] = trim(str_replace('•', '', $linea));
+                                    }
+                                }
+                            @endphp
+
+                            <div class="resumen-list mt-3">
+                                @if($categoria)
+                                <div class="resumen-item">
+                                    <span class="item-label">Categoría:</span>
+                                    <span class="item-value">{{ ucfirst(strtolower($categoria)) }}</span>
+                                </div>
+                                @endif
+
+                                @foreach($detalles as $detalle)
+                                    @php 
+                                        $partes = explode(':', $detalle, 2); 
+                                        $opcion = $partes[0] ?? '';
+                                        $valor = $partes[1] ?? '';
+                                    @endphp
+                                    <div class="resumen-item">
+                                        <span class="item-label">{{ trim($opcion) }}:</span>
+                                        <span class="item-value">{{ trim($valor) }}</span>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                         @endif
@@ -321,7 +374,7 @@ textarea.form-control {
                                     class="form-control @error('nombre') is-invalid @enderror" 
                                     id="nombre" 
                                     name="nombre" 
-                                    value="{{ old('nombre') }}"
+                                    value="{{ old('nombre', $usuario['nombre'] ?? '') }}"
                                     placeholder="Ej: Juan Pérez"
                                     required>
                                 @error('nombre')
@@ -337,7 +390,7 @@ textarea.form-control {
                                     class="form-control @error('correo') is-invalid @enderror" 
                                     id="correo" 
                                     name="correo" 
-                                    value="{{ old('correo') }}"
+                                    value="{{ old('correo', $usuario['correo'] ?? '') }}"
                                     placeholder="Ej: juan@example.com"
                                     required>
                                 @error('correo')
@@ -353,7 +406,7 @@ textarea.form-control {
                                     class="form-control @error('telefono') is-invalid @enderror" 
                                     id="telefono" 
                                     name="telefono" 
-                                    value="{{ old('telefono') }}"
+                                    value="{{ old('telefono', $usuario['telefono'] ?? '') }}"
                                     placeholder="Ej: 3001234567"
                                     required>
                                 @error('telefono')
@@ -418,31 +471,39 @@ textarea.form-control {
 (function() {
     'use strict';
     
-    const STORAGE_SESION_ID = 'anonymous_sesion_id'; // Clave para obtener el ID numérico
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        // Verificar si hay usuario autenticado
+    document.addEventListener('DOMContentLoaded', async function() {
         @if(session()->has('user_id'))
-            console.log('✅ Usuario autenticado - NO se cargará sesionId en contacto');
-            return; 
+            return;
         @endif
-        
-        // Solo cargar sesionId si NO está autenticado
-        const sesionId = localStorage.getItem(STORAGE_SESION_ID);
-        
-        if (sesionId) {
-            // Asumo que tu formulario de contacto tiene un input oculto con name="sesionId"
-            const inputSesionId = document.getElementById('input-sesion-id'); 
-            if (inputSesionId) {
-                inputSesionId.value = sesionId;
-                console.log('✅ sesionId cargado en contacto:', sesionId);
+
+        const STORAGE_TOKEN = 'anonymous_sesion_token';
+        const STORAGE_ID    = 'anonymous_sesion_id';
+        const inputSesionId = document.getElementById('input-sesion-id');
+
+        try {
+            let sesToken = localStorage.getItem(STORAGE_TOKEN);
+            let sesId    = localStorage.getItem(STORAGE_ID);
+
+            if (!sesToken || !sesId) {
+                const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                sesToken = data.sesToken;
+                sesId    = String(data.sesId);
+                localStorage.setItem(STORAGE_TOKEN, sesToken);
+                localStorage.setItem(STORAGE_ID, sesId);
             }
-        } else {
-            console.log('⚠️ No se encontró sesionId en localStorage');
-            // Nota: Aquí se podría llamar a obtenerOCrearSesion() si es crítico que el contacto tenga un ID de sesión.
+
+            if (inputSesionId) {
+                inputSesionId.value = sesId;
+            }
+        } catch (e) {
+            console.warn('No se pudo crear/recuperar sesion anonima:', e);
         }
     });
-    
 })();
 </script>
 @endpush
