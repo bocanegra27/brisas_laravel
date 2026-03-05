@@ -146,13 +146,19 @@ Porque lo verdaderamente especial no sigue tendencias, crea su propio camino.</p
     
 
     <!-- Carrusel centrado al 50% -->
-    <div class="carousel-wrapper">
-      <div class="carrusel" id="mainCarousel">
-<div class="slide active" style="background-image: url('{{ asset('assets/img/index/carrusel1.png') }}');"></div>
-<div class="slide" style="background-image: url('{{ asset('assets/img/index/carrusel2.png') }}');"></div>
-<div class="slide" style="background-image: url('{{ asset('assets/img/index/carrusel3.png') }}');"></div>
-      </div>
+<style>
+    .slide-1 { background-image: url("{{ asset('assets/img/index/carrusel1.png') }}"); }
+    .slide-2 { background-image: url("{{ asset('assets/img/index/carrusel2.png') }}"); }
+    .slide-3 { background-image: url("{{ asset('assets/img/index/carrusel3.png') }}"); }
+</style>
+
+<div class="carousel-wrapper">
+    <div class="carrusel" id="mainCarousel">
+        <div class="slide active slide-1"></div>
+        <div class="slide slide-2"></div>
+        <div class="slide slide-3"></div>
     </div>
+</div>
 
     <!-- Historia joyería colombiana -->
     <div class="history-text">
