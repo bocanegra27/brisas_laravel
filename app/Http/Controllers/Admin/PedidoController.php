@@ -809,7 +809,17 @@ private function enriquecerPedido(array $pedido): array
 
     public function verArchivo($path)
     {
-        $baseUrl = "http://localhost:8080/"; 
+        // 1. Confiamos 100% en la configuración central, sin respaldos locales en el controlador
+        $apiUrl = config('services.spring_api.url');
+        
+        if (!$apiUrl) {
+            Log::error("Brisas: La URL de Spring Boot no está configurada en services.php o el .env");
+            abort(500, 'Error de configuración del servidor.');
+        }
+
+        // Limpiamos '/api' para acceder a archivos estáticos
+        $baseUrl = str_replace('/api', '', $apiUrl) . '/'; 
+        
         $url = $baseUrl . $path;
 
         try {
@@ -818,10 +828,10 @@ private function enriquecerPedido(array $pedido): array
             if ($response->successful()) {
                 return response($response->body(), 200)
                     ->header('Content-Type', $response->header('Content-Type'))
-                    ->header('Cache-Control', 'public, max-age=86400'); // 🔥 AÑADIR ESTA LÍNEA
+                    ->header('Cache-Control', 'public, max-age=86400');
             }
         } catch (\Exception $e) {
-            Log::error("Error al conectar con Spring Boot para archivo: " . $e->getMessage());
+            Log::error("Error al conectar con Spring Boot para archivo en Brisas: " . $e->getMessage());
         }
 
         abort(404, 'La imagen no existe en el servidor de joyería (Spring Boot).');

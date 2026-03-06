@@ -41,7 +41,7 @@
                         
                         {{-- Ícono / Placeholder --}}
                         @if(!empty($valor['imagen']))
-                            <img src="http://localhost:8080/assets/img/personalizacion/{{ $catSlug }}/opciones/{{ $opcId }}/{{ $valor['imagen'] }}" 
+                            <img src="{{ str_replace('/api', '', config('services.spring_api.url')) }}/assets/img/personalizacion/{{ $catSlug }}/opciones/{{ $opcId }}/{{ $valor['imagen'] }}"
                                  class="mb-3 rounded-circle border p-1" style="width: 60px; height: 60px; object-fit: cover;">
                         @else
                             <div class="avatar-placeholder bg-primary-subtle text-primary rounded-circle mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 60px; height: 60px;">
@@ -179,16 +179,14 @@
 
 @push('scripts')
 <script>
+    const SERVER_BASE_URL = "{{ str_replace('/api', '', config('services.spring_api.url')) }}";
     const modalVistas = document.getElementById('modalVistas');
     
-    // Función auxiliar para verificar si una imagen existe
     function verificarImagen(url, cardId, iconId) {
         const img = new Image();
-        // Agregamos timestamp para evitar caché y ver el estado real recién subido
         img.src = url + '?t=' + new Date().getTime();
         
         img.onload = function() {
-            // SI EXISTE: Poner verde
             const card = document.getElementById(cardId);
             const icon = document.getElementById(iconId);
             
@@ -200,14 +198,12 @@
         };
         
         img.onerror = function() {
-            // SI NO EXISTE: Resetear a estado normal
             const card = document.getElementById(cardId);
             const icon = document.getElementById(iconId);
             
             card.classList.remove('border-success', 'bg-success-subtle');
             card.classList.add('border');
             
-            // Restaurar íconos originales (simple lógica de reset)
             if(iconId.includes('superior')) icon.className = 'bi bi-arrow-up-circle me-1';
             if(iconId.includes('frontal')) icon.className = 'bi bi-circle me-1';
             if(iconId.includes('perfil')) icon.className = 'bi bi-arrow-right-circle me-1';
@@ -220,21 +216,16 @@
             const id = button.getAttribute('data-valor-id');
             const nombre = button.getAttribute('data-valor-nombre');
             
-            // Datos para construir la URL
             const catSlug = button.getAttribute('data-cat-slug');
             const opcId = button.getAttribute('data-opc-id');
 
-            // 1. Setear Textos e Inputs
             document.getElementById('lblValorNombre').textContent = nombre;
             document.getElementById('inputValorIdSuperior').value = id;
             document.getElementById('inputValorIdFrontal').value = id;
             document.getElementById('inputValorIdPerfil').value = id;
 
-            // 2. Construir URLs base de las imágenes
-            // Formato: /assets/img/personalizacion/{slug}/opciones/{opcId}/{valId}_{tipo}.png
-            const baseUrl = `http://localhost:8080/assets/img/personalizacion/${catSlug}/opciones/${opcId}/`;
+            const baseUrl = `${SERVER_BASE_URL}/assets/img/personalizacion/${catSlug}/opciones/${opcId}/`;
 
-            // 3. Verificar cada vista visualmente
             verificarImagen(`${baseUrl}${id}_superior.png`, 'card-superior', 'icon-superior');
             verificarImagen(`${baseUrl}${id}_frontal.png`, 'card-frontal', 'icon-frontal');
             verificarImagen(`${baseUrl}${id}_perfil.png`, 'card-perfil', 'icon-perfil');
