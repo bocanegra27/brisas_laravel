@@ -780,18 +780,22 @@ class PedidoController extends Controller
         }
     }
 
-/**
+    /**
      * Ver archivo desde Spring Boot (render, imagen, etc.)
      * GET /designer/pedidos/ver-archivo/{path}
      */
     public function verArchivo(Request $request, $path)
     {
         // 1. Obtenemos la URL base EXCLUSIVAMENTE desde la configuración
-        // Ya no hay "localhost" quemado aquí.
         $apiUrl = config('services.spring_api.url');
         
-        // Usamos str_replace para quitar el '/api' y quedarnos con la raíz del servidor
-        $baseUrl = str_finish(str_replace('/api', '', $apiUrl), '/'); 
+        if (!$apiUrl) {
+            Log::error("Brisas: La URL de Spring Boot no está configurada en services.php o el .env");
+            abort(500, 'Error de configuración del servidor.');
+        }
+
+        // CORRECCIÓN: Usamos PHP nativo en lugar del helper str_finish que ya no existe en Laravel 12
+        $baseUrl = str_replace('/api', '', $apiUrl) . '/'; 
         
         $url = $baseUrl . $path;
 
@@ -805,8 +809,9 @@ class PedidoController extends Controller
             }
         } catch (\Exception $e) {
             Log::error("Error al obtener archivo en Brisas: " . $e->getMessage());
-            abort(404, 'Archivo no encontrado en el servidor de Spring Boot.');
         }
+        
+        abort(404, 'Archivo no encontrado en el servidor de Spring Boot.');
     }
 
     /**
