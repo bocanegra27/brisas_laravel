@@ -485,7 +485,10 @@ textarea.form-control {
             let sesId    = localStorage.getItem(STORAGE_ID);
 
             if (!sesToken || !sesId) {
-                const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', {
+                // Inyectamos la URL centralizada desde Laravel hacia JavaScript
+                const apiUrl = "{{ config('services.spring_api.url') }}/sesiones-anonimas";
+                
+                const res  = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({})

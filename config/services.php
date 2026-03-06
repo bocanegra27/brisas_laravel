@@ -45,7 +45,7 @@ return [
     |
     */
     'spring_api' => [
-        'url' => env('SPRING_API_URL', 'http://localhost:8080/api'),
+        'url' => env('SPRING_API_URL', ''),
         'timeout' => env('SPRING_API_TIMEOUT', 30),
     ],
 
