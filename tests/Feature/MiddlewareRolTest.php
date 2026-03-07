@@ -60,19 +60,35 @@ class MiddlewareRolTest extends TestCase
     // =====================================================
     public function test_usuario_con_rol_admin_puede_acceder_a_admin_pedidos(): void
     {
+        $this->withoutExceptionHandling(); 
+
         $this->mock(AuthService::class, function ($mock) {
             $mock->shouldReceive('check')->andReturn(true);
         });
 
-        // Mockeamos ApiService para que el controlador no llame a Spring Boot
+        // Mockeamos ApiService para que responda correctamente a cada endpoint
         $this->mock(ApiService::class, function ($mock) {
-            // El controlador llama a /pedidos, /pedidos/count y /usuarios/empleados
-            $mock->shouldReceive('get')->andReturn([
-                'content'       => [],
-                'totalElements' => 0,
-                'totalPages'    => 0,
-                'pageable'      => ['pageNumber' => 0, 'pageSize' => 10]
-            ]);
+            $mock->shouldReceive('get')->andReturnUsing(function ($endpoint) {
+                // Si pide los empleados/diseñadores, devolvemos un array vacío válido
+                if (str_contains($endpoint, '/usuarios/empleados')) {
+                    return []; 
+                }
+                // Si pide los clientes, devolvemos un array vacío válido
+                if (str_contains($endpoint, '/usuarios/clientes')) {
+                    return [];
+                }
+                // Si pide conteo de pedidos
+                if (str_contains($endpoint, '/pedidos/count')) {
+                    return ['count' => 0];
+                }
+                // Por defecto (la lista principal de pedidos), devolvemos la paginación vacía
+                return [
+                    'content'       => [],
+                    'totalElements' => 0,
+                    'totalPages'    => 0,
+                    'pageable'      => ['pageNumber' => 0, 'pageSize' => 10]
+                ];
+            });
         });
 
         $response = $this->withSession([

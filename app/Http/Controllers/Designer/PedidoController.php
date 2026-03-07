@@ -643,7 +643,9 @@ class PedidoController extends Controller
             
             // Llamada al endpoint de Spring Boot para obtener el historial
             $endpoint = "/pedidos/{$pedidoId}/historial";
-            $fullUrl = config('services.spring_api.url', 'http://localhost:8080/api') . $endpoint;
+            
+            // Corrección: Leer la configuración centralizada sin valor de respaldo estático
+            $fullUrl = config('services.spring_api.url') . $endpoint;
             Log::info('Endpoint completo:', ['url' => $fullUrl]);
             
             $response = $this->apiService->get($endpoint, [
@@ -784,7 +786,17 @@ class PedidoController extends Controller
      */
     public function verArchivo(Request $request, $path)
     {
-        $baseUrl = "http://localhost:8080/"; 
+        // 1. Obtenemos la URL base EXCLUSIVAMENTE desde la configuración
+        $apiUrl = config('services.spring_api.url');
+        
+        if (!$apiUrl) {
+            Log::error("Brisas: La URL de Spring Boot no está configurada en services.php o el .env");
+            abort(500, 'Error de configuración del servidor.');
+        }
+
+        // CORRECCIÓN: Usamos PHP nativo en lugar del helper str_finish que ya no existe en Laravel 12
+        $baseUrl = str_replace('/api', '', $apiUrl) . '/'; 
+        
         $url = $baseUrl . $path;
 
         try {
@@ -796,9 +808,10 @@ class PedidoController extends Controller
                     ->header('Cache-Control', 'public, max-age=86400');
             }
         } catch (\Exception $e) {
-            Log::error("Error al obtener archivo: " . $e->getMessage());
-            abort(404, 'Archivo no encontrado');
+            Log::error("Error al obtener archivo en Brisas: " . $e->getMessage());
         }
+        
+        abort(404, 'Archivo no encontrado en el servidor de Spring Boot.');
     }
 
     /**

@@ -57,8 +57,8 @@ function actualizarVisualizador() {
     const catSlug = document.querySelector('h1').dataset.catSlug; // Lo sacaremos del HTML
     const opcId = botonActivo.dataset.opcionId;
 
-    // Construimos la ruta hacia tu Spring Boot
-    const nuevaUrl = `http://localhost:8080/assets/img/personalizacion/${catSlug}/opciones/${opcId}/${ultimoValorId}_${configuracionActual.vistaActiva}.png`;
+    // Construimos la ruta dinámica inyectando la configuración de Laravel
+    const nuevaUrl = `{{ str_replace('/api', '', config('services.spring_api.url')) }}/assets/img/personalizacion/${catSlug}/opciones/${opcId}/${ultimoValorId}_${configuracionActual.vistaActiva}.png`;
 
     // Cambiar la imagen
     imgPrincipal.src = nuevaUrl;

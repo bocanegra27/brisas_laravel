@@ -384,4 +384,26 @@ class UserPedidoController extends Controller
             'desconocido' => 'Estado Desconocido'
         ];
     }
+
+    /**
+     * Ver archivo desde Spring Boot para el Usuario
+     * GET /user/pedidos/ver-archivo/{path}
+     */
+    public function verArchivo($path)
+    {
+        $apiUrl = config('services.spring_api.url');
+        $baseUrl = str_replace('/api', '', $apiUrl) . '/'; 
+        $url = $baseUrl . $path;
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::get($url);
+            if ($response->successful()) {
+                return response($response->body(), 200)
+                    ->header('Content-Type', $response->header('Content-Type'));
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Error puente usuario: " . $e->getMessage());
+        }
+        abort(404);
+    }
 }

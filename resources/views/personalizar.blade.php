@@ -200,6 +200,14 @@
 
 @push('scripts')
 <script>
+    // ============================================
+    // VARIABLES GLOBALES INYECTADAS DESDE LARAVEL
+    // ============================================
+    // Toma la URL del .env
+    const API_BASE_URL = "{{ config('services.spring_api.url') }}";
+    // Le quita el '/api' para acceder a la carpeta de imágenes
+    const SERVER_BASE_URL = "{{ str_replace('/api', '', config('services.spring_api.url')) }}";
+
     // ESTADO GLOBAL ÚNICO
     let estado = {
         vista: 'frontal', // Valor temporal, se ajustará automáticamente
@@ -221,7 +229,8 @@
                 let sesId    = localStorage.getItem(STORAGE_ID);
 
                 if (!sesToken || !sesId) {
-                    const res  = await fetch('http://localhost:8080/api/sesiones-anonimas', {
+                    // Usar la variable inyectada para la API
+                    const res  = await fetch(`${API_BASE_URL}/sesiones-anonimas`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({})
@@ -245,7 +254,6 @@
         await autoDetectarVistas();
     });
 
-    // Separé esta lógica de recalcularEstado para poder usarla antes de cargar las imágenes
     function calcularSlugs() {
         estado.slugsSeleccionados = [];
         const exclusiones = ['talla', 'tamaño'];
@@ -281,65 +289,54 @@
         actualizarImagen();
     }
 
-    // MAGIA: Función que sondea el servidor de Spring Boot para ver qué archivos existen
+    // Función que sondea el servidor para ver qué archivos existen
     async function autoDetectarVistas() {
         const catSlug = document.getElementById('data-categoria').dataset.slug;
-        const baseUrl = `http://localhost:8080/uploads/personalizacion/${catSlug}`;
+        
+        // Usar SERVER_BASE_URL dinámico en lugar de localhost
+        const baseUrl = `${SERVER_BASE_URL}/uploads/personalizacion/${catSlug}`;
         const rutaOpciones = estado.slugsSeleccionados.join('/');
 
         estado.vistasDisponibles = [];
 
-        // Creamos promesas para probar cada imagen al mismo tiempo (más rápido)
         const promesas = VISTAS_POSIBLES.map(vistaNombre => {
             return new Promise(resolve => {
                 const imgTemp = new Image();
                 imgTemp.onload = () => {
-                    // Si carga bien, la vista existe
                     estado.vistasDisponibles.push(vistaNombre);
                     resolve();
                 };
                 imgTemp.onerror = () => {
-                    // Si da error (404), la ignoramos
                     resolve();
                 };
-                // OJO: Asumo que usas .jpg como en tu código frontend. 
-                // Si en Spring Boot estás guardando .png, cambia la extensión aquí.
                 imgTemp.src = `${baseUrl}/${rutaOpciones}/${vistaNombre}.jpg`;
             });
         });
 
-        // Esperamos a que termine de sondear todas
         await Promise.all(promesas);
 
-        // Ordenamos el array para que siempre quede: superior -> frontal -> perfil
         estado.vistasDisponibles.sort((a, b) => VISTAS_POSIBLES.indexOf(a) - VISTAS_POSIBLES.indexOf(b));
 
-        // Si no encontró ninguna (error de ruta), ponemos frontal por defecto para que no explote
         if (estado.vistasDisponibles.length === 0) {
             estado.vistasDisponibles = ['frontal'];
         }
 
-        // Seleccionamos la primera vista disponible como la principal
         estado.vista = estado.vistasDisponibles[0];
 
-        // Construimos los botones y pintamos la imagen
         renderizarBotones();
         actualizarImagen();
     }
 
     function renderizarBotones() {
         const contenedor = document.getElementById('contenedor-botones-vista');
-        contenedor.innerHTML = ''; // Limpiamos
+        contenedor.innerHTML = ''; 
 
-        // Si solo hay 1 vista, no pintamos nada (o podrías pintar solo el texto)
         if (estado.vistasDisponibles.length <= 1) return;
 
         let html = '';
         
-        // Flecha izquierda
         html += `<button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('anterior')"><i class="bi bi-chevron-left"></i></button>`;
         
-        // Botones del centro
         html += `<div class="btn-group" role="group">`;
         estado.vistasDisponibles.forEach(vista => {
             const capitalizada = vista.charAt(0).toUpperCase() + vista.slice(1);
@@ -348,7 +345,6 @@
         });
         html += `</div>`;
 
-        // Flecha derecha
         html += `<button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('siguiente')"><i class="bi bi-chevron-right"></i></button>`;
 
         contenedor.innerHTML = html;
@@ -356,7 +352,6 @@
 
     function setVista(v) {
         estado.vista = v;
-        // Actualizamos la clase active de los botones dinámicos
         document.querySelectorAll('[data-vista]').forEach(b => {
             b.classList.toggle('active', b.dataset.vista === v);
         });
@@ -376,13 +371,14 @@
     }
 
     function actualizarImagen() {
-        // ... (Tu código de actualizarImagen queda exactamente igual) ...
         const img = document.getElementById('vista-principal');
         const loader = document.getElementById('loading-preview');
         const error = document.getElementById('error-imagen');
         
         const catSlug = document.getElementById('data-categoria').dataset.slug;
-        const baseUrl = `http://localhost:8080/uploads/personalizacion/${catSlug}`;
+        
+        // Usar SERVER_BASE_URL dinámico
+        const baseUrl = `${SERVER_BASE_URL}/uploads/personalizacion/${catSlug}`;
         const rutaOpciones = estado.slugsSeleccionados.join('/');
         const urlFinal = `${baseUrl}/${rutaOpciones}/${estado.vista}.jpg`;
 

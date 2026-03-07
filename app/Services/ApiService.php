@@ -16,7 +16,14 @@ class ApiService
 
     public function __construct()
     {
-        $this->baseUrl = config('services.spring_api.url', 'http://localhost:8080/api');
+        // 1. Lee la URL estrictamente desde la configuración central
+        $this->baseUrl = config('services.spring_api.url');
+        
+        // 2. Programación defensiva: Si nadie configuró la URL, detenemos todo y avisamos.
+        if (empty($this->baseUrl)) {
+            Log::error('ApiService: La URL de Spring Boot (SPRING_API_URL) no está definida en el entorno.');
+            throw new \Exception('Error Crítico: El servicio de la API no está configurado.');
+        }
     }
 
     /**

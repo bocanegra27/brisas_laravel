@@ -196,6 +196,11 @@ Route::middleware(['auth.custom', 'role:user', 'no.back'])->prefix('user')->grou
     Route::get('/pedidos', [UserPedidoController::class, 'index'])->name('user.pedidos.index');
     Route::get('/pedidos/{id}', [UserPedidoController::class, 'show'])->name('user.pedidos.show');
     Route::get('/pedidos/{id}/detalles', [UserPedidoController::class, 'detalles'])->name('user.pedidos.detalles');
+
+    // NUEVA RUTA PARA QUE EL CLIENTE VEA SUS FOTOS
+    Route::get('/pedidos/ver-archivo/{path}', [UserPedidoController::class, 'verArchivo'])
+         ->where('path', '.*')
+         ->name('user.pedidos.ver-archivo');
 });
 
 // ============================================
