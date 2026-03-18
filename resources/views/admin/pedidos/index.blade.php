@@ -269,6 +269,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const estadosDisponibles = @json($estados);
     const disenadoresDisponibles = @json($disenadores);
+    const codigoInput     = document.getElementById('filterCodigo');
+    const estadoSelect    = document.getElementById('filterEstado');
+    const clienteSelect   = document.getElementById('filterCliente');
+    const disenadorSelect = document.getElementById('filterDisenador');
+
+    let debounceTimer;
+    if (codigoInput) {
+        codigoInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(aplicarFiltros, 500);
+        });
+    }
+    if (estadoSelect)    estadoSelect.addEventListener('change', aplicarFiltros);
+    if (clienteSelect)   clienteSelect.addEventListener('change', aplicarFiltros);
+    if (disenadorSelect) disenadorSelect.addEventListener('change', aplicarFiltros);
     
     // Inicializar tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -572,6 +587,37 @@ function confirmarAsignarCliente() {
         }
     })
     .catch(err => Swal.fire({ icon: 'error', title: 'Error', text: err.message, confirmButtonColor: '#ef4444' }));
+}
+
+function aplicarFiltros() {
+    const codigo       = document.getElementById('filterCodigo')?.value.trim() ?? '';
+    const estadoId     = document.getElementById('filterEstado')?.value ?? '';
+    const clienteEl    = document.getElementById('filterCliente');
+    const disenadorEl  = document.getElementById('filterDisenador');
+    const usuIdCliente  = clienteEl   ? clienteEl.value   : '';
+    const usuIdEmpleado = disenadorEl ? disenadorEl.value : '';
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (codigo)        params.set('codigo', codigo);
+    else               params.delete('codigo');
+
+    if (estadoId)      params.set('estadoId', estadoId);
+    else               params.delete('estadoId');
+
+    if (usuIdCliente)  params.set('usuIdCliente', usuIdCliente);
+    else               params.delete('usuIdCliente');
+
+    if (usuIdEmpleado) params.set('usuIdEmpleado', usuIdEmpleado);
+    else               params.delete('usuIdEmpleado');
+
+    params.delete('page');
+
+    window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+function limpiarFiltros() {
+    window.location.href = window.location.pathname;
 }
 </script>
 @endpush

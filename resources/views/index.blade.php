@@ -46,21 +46,21 @@
   <section class="cards-section container-fluid">
     <div class="row justify-content-center g-4">
 
-      <div class="col-md-4 col-sm-6">
+      <div class="col-md-4 col-10 col-sm-8 mx-auto mx-md-0">
         <div class="info-card">
           <h4 class="info-card-title">Diseño Personalizado</h4>
           <p class="info-card-text">Diseña tu joya desde cero eligiendo cada detalle: el tipo de metal, la gema, la forma, el grabado y la talla. Nuestro configurador en tiempo real te permite visualizar el resultado antes de confirmar tu pedido, garantizando que la pieza sea exactamente como la imaginaste.</p>
         </div>
       </div>
 
-      <div class="col-md-4 col-sm-6">
+      <div class="col-md-4 col-10 col-sm-8 mx-auto mx-md-0">
         <div class="info-card">
           <h4 class="info-card-title">Calidad Garantizada</h4>
           <p class="info-card-text">Cada joya que sale de nuestro taller es elaborada por artesanos colombianos con décadas de experiencia. Usamos exclusivamente materiales certificados: oro de 18k, plata 925 y gemas naturales con trazabilidad garantizada. Tu satisfacción respaldada por nuestra garantía de por vida.</p>
         </div>
       </div>
 
-      <div class="col-md-4 col-sm-6">
+      <div class="col-md-4 col-10 col-sm-8 mx-auto mx-md-0">
         <div class="info-card">
           <h4 class="info-card-title">Seguimiento en Tiempo Real</h4>
           <p class="info-card-text">Desde el momento en que confirmas tu pedido hasta que llega a tus manos, podrás monitorear cada etapa del proceso: diseño, fabricación, control de calidad y envío. Recibirás notificaciones en cada paso para que siempre estés informado sobre el estado de tu joya.</p>
