@@ -61,20 +61,19 @@ async function verDetalleMejorado(mensajeId, tienePersonalizacion) {
  * Genera HTML para el detalle del mensaje
  */
 function generarHTMLDetalle(mensaje, personalizacion) {
-    // Nota: La variable 'html' es local a esta función.
     const tipoClienteBadge = obtenerBadgeTipoCliente(mensaje.tipoCliente);
     const estadoBadge = obtenerBadgeEstado(mensaje.estado);
     
     let html = `
         <div class="detalle-mensaje-mejorado">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
                 <div>
                     <h6 class="text-muted mb-2">ID: #${mensaje.id}</h6>
                     <small class="text-muted">
                         ${new Date(mensaje.fechaEnvio).toLocaleString('es-CO')}
                     </small>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 flex-wrap">
                     ${tipoClienteBadge}
                     ${estadoBadge}
                     ${mensaje.tienePersonalizacion ? '<span class="badge bg-info"><i class="bi bi-gem me-1"></i> Con diseño</span>' : ''}
@@ -119,26 +118,12 @@ function generarHTMLDetalle(mensaje, personalizacion) {
             </div>
     `;
     
-    // Si tiene personalización, mostrarla inline
     if (personalizacion) {
-        // La función generarHTMLPersonalizacion (que debe estar definida en tu código)
-        // ya tiene la lógica de corrección para los campos.
         html += generarHTMLPersonalizacion(personalizacion);
     }
     
-    // Notas internas y Botones de acción
-    //  CORRECCIÓN DE SINTAXIS: Se utiliza 'html +=' para continuar el string literal.
     html += `
-            <div class="info-section mb-4">
-                <h6 class="fw-bold mb-3">
-                    <i class="bi bi-sticky-fill me-2 text-primary"></i>Notas Internas
-                </h6>
-                <div class="notas-box p-3 bg-light rounded">
-                    ${mensaje.notas || '<em class="text-muted">Sin notas</em>'}
-                </div>
-            </div>
-            
-            <div class="d-flex justify-content-end gap-2">
+            <div class="d-flex justify-content-end gap-2 flex-wrap mt-3">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Cerrar
                 </button>
@@ -150,7 +135,7 @@ function generarHTMLDetalle(mensaje, personalizacion) {
                 </button>
             </div>
         </div>
-    `; // Cierre de la plantilla literal final
+    `;
     
     return html;
 }
