@@ -36,6 +36,8 @@ public function index(Request $request)
         $size = $request->get('size', 10);
         $estadoId = $request->get('estadoId');
         $codigo = $request->get('codigo');
+        $usuIdCliente  = $request->get('usuIdCliente');
+        $usuIdEmpleado = $request->get('usuIdEmpleado');
 
         // Construir query params
         $params = [
@@ -49,6 +51,12 @@ public function index(Request $request)
 
         if ($codigo !== null && $codigo !== '') {
             $params['codigo'] = $codigo;
+        }
+        if ($usuIdCliente !== null && $usuIdCliente !== '') {
+            $params['usuIdCliente'] = $usuIdCliente;
+        }
+        if ($usuIdEmpleado !== null && $usuIdEmpleado !== '') {
+            $params['usuIdEmpleado'] = $usuIdEmpleado;
         }
 
         // Construir URL con query params
@@ -142,7 +150,9 @@ public function index(Request $request)
             'estadoMapeo' => $estadoMapeo,
             'filtros' => [
                 'estadoId' => $estadoId,
-                'codigo' => $codigo
+                'codigo' => $codigo,
+                'usuIdCliente'  => $usuIdCliente,
+                'usuIdEmpleado' => $usuIdEmpleado,
             ]
         ];
 
