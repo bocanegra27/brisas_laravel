@@ -55,6 +55,18 @@ main, .content-wrapper {
   background: #fff;
 }
 
+@media (max-width: 1200px) {
+  .cards-section {
+    padding: 2rem 3rem 5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-section {
+    padding: 2rem 1.5rem 4rem;
+  }
+}
+
 .info-card {
   background: #fff;
   border: 1px solid #ddd;

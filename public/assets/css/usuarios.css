@@ -388,7 +388,7 @@
   position: relative;
 }
 
-.input-icon i {
+.input-icon > i {
   position: absolute;
   left: 1.25rem;
   top: 50%;
@@ -447,10 +447,16 @@
   cursor: pointer;
   z-index: 2;
   transition: color 0.3s ease;
+  padding: 0;
+  line-height: 1;
 }
 
 .toggle-password:hover {
   color: #009688;
+}
+
+.input-icon:has(.toggle-password) .form-control {
+  padding-right: 3rem;
 }
 
 /* ===== ESTADO TOGGLE ===== */
@@ -690,4 +696,17 @@
   color: var(--dash-text-primary);
   font-weight: 700;
   font-size: 1rem;
+}
+
+@media (max-width: 576px) {
+  .d-flex.gap-3.justify-content-end {
+    flex-direction: column;
+  }
+  
+  .d-flex.gap-3.justify-content-end .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
 }
