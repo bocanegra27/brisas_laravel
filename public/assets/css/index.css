@@ -354,6 +354,19 @@ background: rgba(240, 244, 242, 0.878);
     width: 100%;
   }
 
-  
-  
+  .contact-title-link,
+.contact-subtitle-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: opacity 0.2s ease;
+}
+
+.contact-title-link:hover {
+    opacity: 0.75;
+}
+
+.contact-subtitle-link:hover {
+    opacity: 0.6;
+}
 }

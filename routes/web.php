@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UsuariosController;
 use App\Http\Controllers\Admin\MensajesController;
 use App\Http\Controllers\Admin\PedidoController;
+use App\Http\Controllers\Admin\ReporteController;
 use App\Http\Controllers\PersonalizarController;
 use App\Http\Controllers\ImagenProxyController;
 use App\Http\Controllers\ContactoController;
@@ -168,6 +169,10 @@ Route::middleware(['auth.custom', 'role:admin', 'no.back'])->prefix('admin')->gr
             Route::post('/valores/vistas', 'subirVista')->name('admin.personalizacion.valores.subirVista');
         });
     });
+
+    // MODULO: REPORTES
+    Route::get('/reportes', [ReporteController::class, 'index'])
+    ->name('admin.reportes.index');
 });
 
 // ============================================
