@@ -44,7 +44,14 @@ class ApiService
             $request = Http::timeout(30)
                 ->withHeaders(['Content-Type' => 'application/json']);
 
-            // Agregar Authorization header si está en las opciones
+            // Agregar token JWT automaticamente si existe en sesion
+            if (session()->has('jwt_token')) {
+                $request = $request->withHeaders([
+                    'Authorization' => 'Bearer ' . session('jwt_token')
+                ]);
+            }
+
+            // Permitir sobreescribir o agregar headers adicionales desde opciones
             if (isset($options['headers']['Authorization'])) {
                 $request = $request->withHeaders([
                     'Authorization' => $options['headers']['Authorization']

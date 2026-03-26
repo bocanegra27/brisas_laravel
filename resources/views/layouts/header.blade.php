@@ -92,13 +92,18 @@
                 Pedidos
                 </a>
 
-                                <a href="{{ route('admin.personalizacion.categorias.index') }}" 
+                <a href="{{ route('admin.personalizacion.categorias.index') }}" 
                 class="header-minimal__nav-link {{ Str::contains($currentRoute, 'personalizacion') ? 'header-minimal__nav-link--active' : '' }}">
                 Gestión Joyas
                 </a>
 
                 <a href="{{ url('/personalizar') }}" target="_blank" class="header-minimal__nav-link fw-bold" style="color: var(--header-primary);">
                 <i class="bi me-1"></i> Vista Publica
+                </a>
+
+                <a href="{{ route('admin.reportes.index') }}" 
+                class="header-minimal__nav-link {{ Str::startsWith($currentRoute, 'admin/reportes') ? 'header-minimal__nav-link--active' : '' }}">
+                Reportes
                 </a>
 
             @elseif($isDesigner)
