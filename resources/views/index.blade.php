@@ -73,8 +73,12 @@
   <!-- ===== PARTE 6: SECCIÓN CONTACTO (FONDO GRIS) ===== -->
   <section class="contact-section">
     <div class="container text-center">
-      <h2 class="contact-title">¿LISTO PARA CREAR TU JOYA?</h2>
-      <p class="contact-subtitle">Nuestro equipo está aquí para guiarte en cada paso del proceso.</p>
+      <a href="{{ route('personalizar.index') }}" class="contact-title-link">
+    <h2 class="contact-title">¿LISTO PARA CREAR TU JOYA? <i class="bi bi-arrow-right-short"></i></h2>
+    </a>
+    <a href="{{ route('contacto.create') }}" class="contact-subtitle-link">
+        <p class="contact-subtitle">Nuestro equipo está aquí para guiarte en cada paso del proceso.</p>
+    </a>
 
       <div class="row justify-content-center g-4 contact-photos-row">
         <div class="col-md-3 col-sm-6">
