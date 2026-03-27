@@ -4,11 +4,17 @@
    ============================================ */
 
 :root {
-  --dash-primary: #009688;
-  --dash-primary-dark: #00796b;
-  --dash-text: #1e293b;
-  --dash-muted: #64748b;
+  --bs-primary: #009688;
+  --bs-primary-rgb: 0, 150, 136;
+  --bs-primary-bg-subtle: rgba(0, 150, 136, 0.1);
+  --bs-primary-border-subtle: rgba(0, 150, 136, 0.3);
+  --bs-primary-text-emphasis: #00796b;
+  --bs-link-color: #009688;
+  --bs-link-hover-color: #00796b;
+  --bs-primary-button-bg: #009688;
+  --bs-btn-outline-primary-color: #009688;
 }
+
 
 /* ===== HEADER PRINCIPAL ===== */
 .dashboard-header {
@@ -65,6 +71,19 @@
   flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
+}
+
+
+.btn-outline-primary {
+  --bs-btn-color: #009688;
+  --bs-btn-border-color: #009688;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #009688;
+  --bs-btn-hover-border-color: #009688;
+  --bs-btn-focus-shadow-rgb: 0, 150, 136;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #00796b;
+  --bs-btn-active-border-color: #00796b;
 }
 
 .pill-stat {
@@ -142,4 +161,6 @@
   .pill-stat {
     justify-content: space-between;
   }
+
+  
 }

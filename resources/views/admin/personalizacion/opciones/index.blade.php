@@ -2,91 +2,119 @@
 
 @section('title', 'Gestión de Opciones')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/dashboard-shared.css') }}">
+@endpush
+
 @section('content')
-<div class="container-fluid py-5">
-    {{-- Header con Stats Pills --}}
-    <div class="dashboard-header animate-in">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h1><i class="bi bi-list-check me-3"></i>Gestión de Opciones</h1>
-                <div class="d-flex align-items-center gap-2 mt-2">
-                    <a href="{{ route('admin.personalizacion.categorias.index') }}" class="text-decoration-none text-muted small">
-                        <i class="bi bi-arrow-left"></i> Volver a Categorías
+<div class="dashboard-container">
+    <div class="container-fluid py-5">
+
+        {{-- Header --}}
+        <div class="dashboard-header animate-in">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1><i class="bi bi-list-check me-3"></i>Gestión de Opciones</h1>
+                    <div class="stats-pills mt-3">
+                        <div class="pill-stat">
+                            <i class="bi bi-sliders text-primary"></i>
+                            <span class="pill-label">Total:</span>
+                            <strong class="pill-value">{{ count($opciones) }}</strong>
+                        </div>
+                        <div class="pill-stat">
+                            <i class="bi bi-collection-fill" style="color: var(--dash-primary)"></i>
+                            <span class="pill-label">Categoría:</span>
+                            <strong class="pill-value">{{ $categoria['nombre'] ?? 'Categoría' }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ route('admin.personalizacion.categorias.index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Volver a Categorías
                     </a>
-                    <span class="text-muted">|</span>
-                    <span class="text-muted">Opciones para <span class="text-primary">{{ $categoria['nombre'] ?? 'Categoría' }}</span></span>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearOpcion">
+                        <i class="bi bi-plus-lg me-2"></i>Nueva Opción
+                    </button>
                 </div>
-                <p class="text-muted mb-0">Define qué características puede personalizar el cliente (Ej: Material, Talla).</p>
             </div>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearOpcion">
-                <i class="bi bi-plus-lg me-2"></i>Nueva Opción
-            </button>
         </div>
-    </div>
 
-    {{-- Feedback --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+        {{-- Feedback --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show animate-in" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show animate-in" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
 
-    {{-- Grid de Opciones --}}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-        @forelse($opciones as $opcion)
-            <div class="col">
-                <div class="card h-100 shadow-sm border-0 card-hover-effect">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex align-items-start justify-content-between mb-3">
-                            <div class="icon-square bg-light text-success rounded-3 p-3">
-                                <i class="bi bi-sliders fs-4"></i>
+        {{-- Card contenedor del grid --}}
+        <div class="card animate-in animate-delay-5 border-0 shadow-sm">
+            <div class="card-header">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0"><i class="bi bi-grid-fill me-2"></i>Lista de Opciones</h5>
+                    <small class="text-muted">Define qué características puede personalizar el cliente (Ej: Material, Talla).</small>
+                </div>
+            </div>
+            <div class="card-body p-4">
+
+                {{-- Grid de Opciones --}}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    @forelse($opciones as $opcion)
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-0 card-hover-effect">
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex align-items-start justify-content-between mb-3">
+                                        <div class="icon-square bg-light text-success rounded-3 p-3">
+                                            <i class="bi bi-sliders fs-4"></i>
+                                        </div>
+                                        <span class="badge bg-light text-muted border">ID: {{ $opcion['id'] }}</span>
+                                    </div>
+
+                                    <h5 class="card-title fw-bold text-dark">{{ $opcion['nombre'] }}</h5>
+                                    <p class="text-muted small mb-4">
+                                        Pertenece a: <strong>{{ $categoria['nombre'] }}</strong>
+                                    </p>
+
+                                    <div class="mt-auto d-flex gap-2">
+                                        <a href="{{ route('admin.personalizacion.valores.index', ['opcId' => $opcion['id']]) }}"
+                                           class="btn btn-outline-primary flex-grow-1">
+                                            <i class="bi bi-images me-1"></i> Ver Valores
+                                        </a>
+
+                                        <form action="{{ route('admin.personalizacion.opciones.eliminar', $opcion['id']) }}" method="POST"
+                                              onsubmit="return confirm('¿Borrar esta opción? Se borrarán también sus imágenes (valores).');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger" title="Eliminar Opción">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="badge bg-light text-muted border">ID: {{ $opcion['id'] }}</span>
                         </div>
-                        
-                        <h5 class="card-title fw-bold text-dark">{{ $opcion['nombre'] }}</h5>
-                        <p class="text-muted small mb-4">
-                            Pertenece a: <strong>{{ $categoria['nombre'] }}</strong>
-                        </p>
-
-                        <div class="mt-auto d-flex gap-2">
-                            {{-- Botón Gestionar Valores (Nivel 3) --}}
-                            <a href="{{ route('admin.personalizacion.valores.index', ['opcId' => $opcion['id']]) }}" 
-                               class="btn btn-outline-primary flex-grow-1">
-                                <i class="bi bi-images me-1"></i> Ver Valores
-                            </a>
-
-                            {{-- Botón Eliminar --}}
-                            <form action="{{ route('admin.personalizacion.opciones.eliminar', $opcion['id']) }}" method="POST"
-                                  onsubmit="return confirm('¿Borrar esta opción? Se borrarán también sus imágenes (valores).');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger" title="Eliminar Opción">
-                                    <i class="bi bi-trash-fill"></i>
-                                </button>
-                            </form>
+                    @empty
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-center" role="alert">
+                                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                                <div>
+                                    Esta categoría aún no tiene opciones configuradas.
+                                    <strong>¡Crea una (ej: "Tipo de Cierre") para empezar!</strong>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    @endforelse
                 </div>
+
             </div>
-        @empty
-            <div class="col-12">
-                <div class="alert alert-warning d-flex align-items-center" role="alert">
-                    <i class="bi bi-exclamation-circle fs-4 me-3"></i>
-                    <div>
-                        Esta categoría aún no tiene opciones configuradas.
-                        <strong>¡Crea una (ej: "Tipo de Cierre") para empezar!</strong>
-                    </div>
-                </div>
-            </div>
-        @endforelse
+        </div>
+
     </div>
 </div>
 
@@ -100,9 +128,7 @@
             </div>
             <form action="{{ route('admin.personalizacion.opciones.store') }}" method="POST">
                 @csrf
-                {{-- Enviamos el ID de la categoría oculto --}}
                 <input type="hidden" name="catId" value="{{ $catId }}">
-                
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label class="form-label fw-bold">Categoría Padre</label>
@@ -110,7 +136,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="nombreOpcion" class="form-label fw-bold">Nombre de la Opción</label>
-                        <input type="text" class="form-control" id="nombreOpcion" name="nombre" 
+                        <input type="text" class="form-control" id="nombreOpcion" name="nombre"
                                placeholder="Ej: Tipo de Cierre, Color de Correa..." required autofocus>
                     </div>
                 </div>
@@ -129,7 +155,7 @@
     }
     .card-hover-effect:hover {
         transform: translateY(-5px);
-        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
     }
     .icon-square {
         width: 48px;
@@ -139,4 +165,5 @@
         justify-content: center;
     }
 </style>
+
 @endsection
