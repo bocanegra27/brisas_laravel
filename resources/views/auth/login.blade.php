@@ -188,9 +188,11 @@
                     </span>
                 </div>
 
+                {{-- 
                 <div class="d-flex justify-content-end mb-4">
                     <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
-                </div>
+                </div> 
+                --}}
 
                 <div class="d-grid">
                     <button type="submit" class="btn btn-primary btn-lg">
