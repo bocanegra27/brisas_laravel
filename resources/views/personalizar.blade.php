@@ -40,14 +40,32 @@
         border-top: 3px solid var(--color-primary) !important;
     }
 
-    /* 4. BOTÓN GUARDAR (Visible y Elegante) */
-    .btn-primary {
-        background: var(--color-primary) !important;
-        border: none !important;
+    /* 4. BOTÓN GUARDAR (Estilo Elegante Brisas Gems) */
+    .btn-guardar-diseno {
+        background-color: transparent !important;
+        color: #009688 !important;
+        border: 2px solid #009688 !important;
         border-radius: 50px !important;
         padding: 1rem !important;
         font-weight: 700 !important;
-        box-shadow: 0 4px 12px rgba(0, 150, 136, 0.2) !important;
+        text-transform: none;
+        letter-spacing: 1px;
+        transition: all 0.3s ease !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-guardar-diseno:hover {
+        background-color: #009688 !important;
+        color: #ffffff !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 150, 136, 0.3) !important;
+    }
+
+    .btn-guardar-diseno i {
+        font-size: 1.2rem;
     }
 
     /* Botón base: fondo blanco, borde muy suave y sin negrilla */
@@ -110,6 +128,55 @@
     .option-btn {
         color: #475569 !important; /* Gris medio-oscuro para mejor lectura */
     }
+
+        .preview-sticky-wrapper {
+        position: sticky;
+        top: 70px;
+        z-index: 10;
+    }
+
+    @media (max-width: 991px) {
+        .preview-sticky-wrapper {
+            position: sticky;
+            top: 60px;
+            z-index: 100;
+            background: white;
+            padding-bottom: 8px;
+        }
+
+        .preview-container {
+            min-height: 220px !important;
+        }
+
+        #vista-principal {
+            max-height: 180px !important;
+        }
+
+        #contenedor-botones-vista {
+            padding-top: 4px !important;
+            padding-bottom: 4px !important;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .preview-mobile-fixed {
+            position: sticky;
+            top: 60px;
+            z-index: 100;
+            background: white;
+            text-align: center;
+            padding: 8px 16px;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            margin: 0 12px 12px 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .col-lg-7 {
+            display: none;
+        }
+    }
 </style>
 @endpush
 
@@ -133,10 +200,22 @@
             </div>
         </div>
 
+        <div class="preview-mobile-fixed d-lg-none">
+            <div class="d-flex justify-content-center align-items-center" style="min-height: 160px; position: relative;">
+                <div id="loading-preview-mobile" class="spinner-border text-primary position-absolute" role="status" style="display:none;"></div>
+                <img id="vista-principal-mobile" src="" alt="Vista previa"
+                    style="max-height: 140px; width: auto; object-fit: contain; opacity: 0; transition: opacity 0.3s;">
+                <div id="error-imagen-mobile" class="text-center text-danger position-absolute" style="display:none;">
+                    <i class="bi bi-card-image fs-3"></i>
+                </div>
+            </div>
+            <div id="contenedor-botones-vista-mobile" class="d-flex justify-content-center gap-2 pb-1"></div>
+        </div>
+
         <div class="row g-5">
             {{-- IZQUIERDA: VISUALIZADOR --}}
             <div class="col-lg-7">
-                <div class="sticky-top" style="top: 20px; z-index: 10;">
+                <div class="preview-sticky-wrapper" style="top: 20px; z-index: 10;">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body p-0">
                     <div class="preview-container d-flex justify-content-center align-items-center" 
@@ -190,7 +269,9 @@
                         </div>
                     @endforeach
 
-                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold text-uppercase mt-4">Guardar Diseño</button>
+                    <button type="submit" class="btn btn-guardar-diseno w-100 mt-4" id="btn-submit-diseno">
+                        <span>Habla con un Experto</span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -348,6 +429,9 @@
         html += `<button class="btn btn-outline-dark rounded-circle btn-sm" onclick="cambiarVista('siguiente')"><i class="bi bi-chevron-right"></i></button>`;
 
         contenedor.innerHTML = html;
+
+        const contenedorMobile = document.getElementById('contenedor-botones-vista-mobile');
+        if (contenedorMobile) contenedorMobile.innerHTML = contenedor.innerHTML;
     }
 
     function setVista(v) {
@@ -356,6 +440,9 @@
             b.classList.toggle('active', b.dataset.vista === v);
         });
         actualizarImagen();
+        document.querySelectorAll('[data-vista]').forEach(b => {
+        b.classList.toggle('active', b.dataset.vista === v);
+});
     }
 
     function cambiarVista(dir) {
@@ -391,11 +478,16 @@
             img.src = urlFinal;
             img.style.opacity = '1';
             loader.style.display = 'none';
+            // Sincronizar mobile
+            const imgMobile = document.getElementById('vista-principal-mobile');
+            if (imgMobile) { imgMobile.src = urlFinal; imgMobile.style.opacity = '1'; }
         };
         preload.onerror = () => {
             loader.style.display = 'none';
             img.style.opacity = '0';
             error.style.display = 'block';
+            const imgMobile = document.getElementById('vista-principal-mobile');
+            if (imgMobile) imgMobile.style.opacity = '0';
         };
         preload.src = urlFinal;
     }
