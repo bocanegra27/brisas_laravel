@@ -227,5 +227,10 @@
             eyeIcon.classList.add('bi-eye-slash');
         }
     });
+
+    @if(session('success'))
+    localStorage.removeItem('anonymous_sesion_token');
+    localStorage.removeItem('anonymous_sesion_id');
+    @endif
 </script>
 @endpush

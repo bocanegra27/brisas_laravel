@@ -221,10 +221,15 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const token = localStorage.getItem('anonymous_sesion_token');
-        if (token) {
-            document.getElementById('anonymousTokenInput').value = token;
-        }
+    const token = localStorage.getItem('anonymous_sesion_token');
+    if (token) {
+        document.getElementById('anonymousTokenInput').value = token;
+    }
+
+    @if(session('success'))
+        localStorage.removeItem('anonymous_sesion_token');
+        localStorage.removeItem('anonymous_sesion_id');
+    @endif
     });
 </script>
 @endpush
