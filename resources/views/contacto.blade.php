@@ -211,35 +211,36 @@ textarea.form-control {
     border-left: 4px solid #ef4444;
 }
 
-/* Botón enviar */
+/* Botón enviar - Estilo Elegante Brisas Gems */
 .btn-enviar {
-    background: linear-gradient(135deg, #009688 0%, #00796b 100%);
-    color: white;
-    font-weight: 600;
+    background-color: transparent !important;
+    color: #009688 !important;
+    border: 2px solid #009688 !important;
+    font-weight: 700 !important;
     padding: 1rem 3rem;
     border-radius: 50px;
-    border: none;
     font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(0, 150, 136, 0.3);
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease !important;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    text-transform: none !important; /* Mantiene minúsculas */
 }
 
 .btn-enviar:hover {
+    background-color: #009688 !important;
+    color: white !important;
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 150, 136, 0.4);
+    box-shadow: 0 8px 20px rgba(0, 150, 136, 0.3);
 }
 
-.btn-enviar:active {
-    transform: translateY(-1px);
+.btn-enviar i {
+    transition: transform 0.3s ease;
 }
 
-.btn-enviar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.btn-enviar:hover i {
+    transform: translateX(4px) translateY(-2px); /* Efecto de despegue al icono de avión */
 }
 
 /* Animaciones */
@@ -438,9 +439,9 @@ textarea.form-control {
                                         name="terminos"
                                         {{ old('terminos') ? 'checked' : '' }}
                                         required>
-                                    <label class="form-check-label" for="terminos">
-                                        Acepto los <a href="#" target="_blank">términos y condiciones</a> y la <a href="#" target="_blank">política de privacidad</a>
-                                    </label>
+                                        <label class="form-check-label" for="terminos">
+                                            Acepto los términos y condiciones y la política de privacidad
+                                        </label>
                                     @error('terminos')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror

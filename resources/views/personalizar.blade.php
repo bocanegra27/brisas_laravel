@@ -40,14 +40,32 @@
         border-top: 3px solid var(--color-primary) !important;
     }
 
-    /* 4. BOTÓN GUARDAR (Visible y Elegante) */
-    .btn-primary {
-        background: var(--color-primary) !important;
-        border: none !important;
+    /* 4. BOTÓN GUARDAR (Estilo Elegante Brisas Gems) */
+    .btn-guardar-diseno {
+        background-color: transparent !important;
+        color: #009688 !important;
+        border: 2px solid #009688 !important;
         border-radius: 50px !important;
         padding: 1rem !important;
         font-weight: 700 !important;
-        box-shadow: 0 4px 12px rgba(0, 150, 136, 0.2) !important;
+        text-transform: none;
+        letter-spacing: 1px;
+        transition: all 0.3s ease !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-guardar-diseno:hover {
+        background-color: #009688 !important;
+        color: #ffffff !important;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 150, 136, 0.3) !important;
+    }
+
+    .btn-guardar-diseno i {
+        font-size: 1.2rem;
     }
 
     /* Botón base: fondo blanco, borde muy suave y sin negrilla */
@@ -251,7 +269,9 @@
                         </div>
                     @endforeach
 
-                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold text-uppercase mt-4">Guardar Diseño</button>
+                    <button type="submit" class="btn btn-guardar-diseno w-100 mt-4" id="btn-submit-diseno">
+                        <span>Habla con un Experto</span>
+                    </button>
                 </form>
             </div>
         </div>

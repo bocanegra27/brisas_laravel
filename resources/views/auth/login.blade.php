@@ -1,127 +1,157 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Brisas Gems</title>
-    <link rel="icon" href="{{ asset('assets/img/icons/icono.png') }}" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
+@extends('layouts.app')
+
+@section('title', 'Iniciar Sesion - Brisas Gems')
+
+@push('styles')
+<style>
+
+    :root {
+    --primary-color: #108174;
     
-    <style>
-        :root {
-            --primary-color: #009688;
-            --primary-hover: #00796b;
-            --bg-color: #f8f9fa;
-        }
-        
-        body {
-            background-color: var(--bg-color);
-            background-image: radial-gradient(#0096881a 1px, transparent 1px);
-            background-size: 20px 20px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+}
+    body {
+        background-color: #f8f9fa;
+        background-image: radial-gradient(#0096881a 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
 
-        .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            width: 100%;
-            max-width: 400px;
-            transition: transform 0.3s ease;
-        }
+    .login-wrapper {
+        min-height: calc(100vh - 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
 
-        .login-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            padding: 30px 20px;
-            text-align: center;
-            color: white;
-        }
+    .login-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 100%;
+        max-width: 400px;
+        transition: transform 0.3s ease;
+    }
 
-        .login-header h2 {
-            font-weight: 700;
-            margin: 0;
-            font-size: 1.8rem;
-        }
-        
-        .login-header p {
-            margin: 5px 0 0;
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
+    .login-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        padding: 30px 20px;
+        text-align: center;
+        color: black;
+    }
 
-        .login-body {
-            padding: 40px 30px;
-        }
+    .login-header h2 {
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.8rem;
+    }
+    
+    .login-header p {
+        margin: 5px 0 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
 
-        .form-floating > label {
-            color: #6c757d;
-        }
+    .login-header__logo-container {
+    width: 100%;               /* Asegura que ocupe todo el ancho para centrar */
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+    }
 
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
-        }
+    .login-header__logo-img {
+        height: 100px;              /* Ajusta el tamaño a tu gusto */
+        width: auto;
+        display: block;            /* Evita espacios fantasmas debajo de la imagen */
+        margin: 0 auto;            /* Refuerzo de centrado */
+    }
 
-        .btn-primary {
-            background-color: var(--primary-color);
-            border: none;
-            padding: 12px;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
+    .login-body {
+        padding: 40px 30px;
+    }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 150, 136, 0.3);
-        }
+    .form-floating > label {
+        color: #6c757d;
+    }
 
-        .password-toggle {
-            cursor: pointer;
-            color: #6c757d;
-            z-index: 10;
-        }
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.25);
+    }
 
-        .forgot-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
+    .btn-primary {
+        background-color: transparent; /* Fondo transparente inicialmente */
+        color: var(--primary-color);   /* Color de letra igual al del header */
+        border: 2px solid var(--primary-color); /* Borde con el color primario */
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        .forgot-link:hover {
-            color: var(--primary-hover);
-            text-decoration: underline;
-        }
+    .btn-primary:hover {
+        background-color: var(--primary-color); /* Se llena de color al pasar el mouse */
+        color: #ffffff;                         /* La letra cambia a blanco */
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 150, 136, 0.3);
+        border-color: var(--primary-color);
+    }
 
-        .register-text {
-            font-size: 0.9rem;
-            text-align: center;
-            margin-top: 20px;
-            color: #6c757d;
-        }
-    </style>
-</head>
-<body>
+    /* Para asegurar que el icono también cambie de color */
+    .btn-primary i {
+        transition: transform 0.3s ease;
+    }
 
+    .btn-primary:hover i {
+        transform: translateX(3px); /* Efecto de movimiento en la flechita */
+    }
+
+    .password-toggle {
+        cursor: pointer;
+        color: #6c757d;
+        z-index: 10;
+    }
+
+    .forgot-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+
+    .forgot-link:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+    }
+
+    .register-text {
+        font-size: 0.9rem;
+        text-align: center;
+        margin-top: 20px;
+        color: #6c757d;
+    }
+</style>
+@endpush
+@section('content')
+<div class="login-wrapper">
     <div class="login-card">
         <div class="login-header">
-            <i class="bi bi-gem mb-2" style="font-size: 2rem;"></i>
-            <h2>Brisas Gems</h2>
+            <div class="login-header__logo-container">
+                <img src="{{ asset('assets/img/logo/logo_120.png') }}" 
+                    alt="Brisas Gems Logo" 
+                    class="login-header__logo-img">
+            </div>
+            {{-- Si quieres el nombre en texto, puedes descomentar la línea de abajo --}}
+            <h2 class="mt-2">Brisas Gems</h2>
             <p>Bienvenido de nuevo</p>
         </div>
 
         <div class="login-body">
-            {{-- Alertas --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <small>{{ session('success') }}</small>
@@ -143,13 +173,11 @@
             <form action="{{ route('login.handle') }}" method="POST">
                 @csrf
                 
-                {{-- Email --}}
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" value="{{ old('email') }}" required autofocus>
                     <label for="email"><i class="bi bi-envelope me-2"></i>Correo electrónico</label>
                 </div>
 
-                {{-- Password con Ojo --}}
                 <div class="input-group mb-3 position-relative">
                     <div class="form-floating flex-grow-1">
                         <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
@@ -161,7 +189,6 @@
                 </div>
 
                 <div class="d-flex justify-content-end mb-4">
-                    {{-- Este enlace ya funcionará porque completamos el Paso 1 --}}
                     <a href="{{ route('password.request') }}" class="forgot-link">¿Olvidaste tu contraseña?</a>
                 </div>
 
@@ -177,28 +204,26 @@
             </div>
         </div>
     </div>
+</div>
+@endsection
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Lógica del Ojo para ver contraseña
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-        const eyeIcon = document.querySelector('#eyeIcon');
+@push('scripts')
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+    const eyeIcon = document.querySelector('#eyeIcon');
 
-        togglePassword.addEventListener('click', function (e) {
-            // Alternar tipo de input
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            
-            // Alternar icono
-            if (type === 'text') {
-                eyeIcon.classList.remove('bi-eye-slash');
-                eyeIcon.classList.add('bi-eye');
-            } else {
-                eyeIcon.classList.remove('bi-eye');
-                eyeIcon.classList.add('bi-eye-slash');
-            }
-        });
-    </script>
-</body>
-</html>
+    togglePassword.addEventListener('click', function (e) {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+
+        if (type === 'text') {
+            eyeIcon.classList.remove('bi-eye-slash');
+            eyeIcon.classList.add('bi-eye');
+        } else {
+            eyeIcon.classList.remove('bi-eye');
+            eyeIcon.classList.add('bi-eye-slash');
+        }
+    });
+</script>
+@endpush
